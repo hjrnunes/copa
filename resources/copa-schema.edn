@@ -1,0 +1,76 @@
+{:copa/schema
+ {:txes [[
+          ;; recipe
+
+          ;name
+          {:db/id                 #db/id[:db.part/db]
+           :db/ident              :recipe/name
+           :db/valueType          :db.type/string
+           :db/cardinality        :db.cardinality/one
+           :db/fulltext           true
+           :db/doc                "A recipe's name"
+           :db.install/_attribute :db.part/db}
+
+          ;instructions
+          {:db/id                 #db/id[:db.part/db]
+           :db/ident              :recipe/instructions
+           :db/valueType          :db.type/string
+           :db/cardinality        :db.cardinality/one
+           :db/fulltext           true
+           :db/doc                "A recipe's actual instructions"
+           :db.install/_attribute :db.part/db}
+
+          ;category
+          {:db/id                 #db/id[:db.part/db]
+           :db/ident              :recipe/category
+           :db/valueType          :db.type/string
+           :db/cardinality        :db.cardinality/many
+           :db/fulltext           true
+           :db/doc                "All recipe categories"
+           :db.install/_attribute :db.part/db}
+
+          ;ingredients
+          {:db/id                 #db/id[:db.part/db]
+           :db/ident              :recipe/ingredients
+           :db/valueType          :db.type/ref
+           :db/cardinality        :db.cardinality/many
+           :db/doc                "A recipe's ingredients"
+           :db.install/_attribute :db.part/db}
+
+
+          ;; ingredient
+
+          ;name
+          {:db/id                 #db/id[:db.part/db]
+           :db/ident              :ingredient/name
+           :db/valueType          :db.type/string
+           :db/cardinality        :db.cardinality/one
+           :db/fulltext           true
+           :db/doc                "An ingredient's name"
+           :db.install/_attribute :db.part/db}
+
+          ;category
+          {:db/id                 #db/id[:db.part/db]
+           :db/ident              :ingredient/category
+           :db/valueType          :db.type/string
+           :db/cardinality        :db.cardinality/many
+           :db/fulltext           true
+           :db/doc                "All ingredient categories"
+           :db.install/_attribute :db.part/db}
+
+          ]]}
+
+ :copa/seed
+ {:txes [[
+          {:db/id               #db/id[:db.part/user -100]
+           :recipe/name         "Example Recipe"
+           :recipe/instructions "Pegar nas coisas, botar na panela, chegar-lhe o lume e cozinhar."}
+
+          {:db/id               #db/id[:db.part/user -200]
+           :ingredient/name     "Celery"
+           :recipe/_ingredients #db/id[:db.part/user -100]}
+
+          {:db/id               #db/id[:db.part/user -201]
+           :ingredient/name     "Codfish"
+           :recipe/_ingredients #db/id[:db.part/user -100]}
+          ]]}}
