@@ -1,6 +1,6 @@
 {:copa/schema
  {:txes [[
-          ;; recipe
+          ;; recipe ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
           ;name
           {:db/id                 #db/id[:db.part/db]
@@ -11,13 +11,31 @@
            :db/doc                "A recipe's name"
            :db.install/_attribute :db.part/db}
 
-          ;instructions
+          ;description
           {:db/id                 #db/id[:db.part/db]
-           :db/ident              :recipe/instructions
+           :db/ident              :recipe/description
            :db/valueType          :db.type/string
            :db/cardinality        :db.cardinality/one
            :db/fulltext           true
-           :db/doc                "A recipe's actual instructions"
+           :db/doc                "A recipe's description"
+           :db.install/_attribute :db.part/db}
+
+          ;portions
+          {:db/id                 #db/id[:db.part/db]
+           :db/ident              :recipe/portions
+           :db/valueType          :db.type/long
+           :db/cardinality        :db.cardinality/one
+           :db/fulltext           true
+           :db/doc                "A recipe's serving portions"
+           :db.install/_attribute :db.part/db}
+
+          ;preparation
+          {:db/id                 #db/id[:db.part/db]
+           :db/ident              :recipe/preparation
+           :db/valueType          :db.type/string
+           :db/cardinality        :db.cardinality/one
+           :db/fulltext           true
+           :db/doc                "A recipe's actual preparation"
            :db.install/_attribute :db.part/db}
 
           ;category
@@ -29,16 +47,42 @@
            :db/doc                "All recipe categories"
            :db.install/_attribute :db.part/db}
 
-          ;ingredients
+          ;measurements
           {:db/id                 #db/id[:db.part/db]
-           :db/ident              :recipe/ingredients
+           :db/ident              :recipe/measurements
+           :db/isComponent        true
            :db/valueType          :db.type/ref
            :db/cardinality        :db.cardinality/many
-           :db/doc                "A recipe's ingredients"
+           :db/doc                "A recipe's measurements"
            :db.install/_attribute :db.part/db}
 
+          ;; measurement ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-          ;; ingredient
+          ;ingredient
+          {:db/id                 #db/id[:db.part/db]
+           :db/ident              :measurement/ingredient
+           :db/valueType          :db.type/ref
+           :db/cardinality        :db.cardinality/one
+           :db/doc                "A ration's ingredient"
+           :db.install/_attribute :db.part/db}
+
+          ;quantity
+          {:db/id                 #db/id[:db.part/db]
+           :db/ident              :measurement/quantity
+           :db/valueType          :db.type/double
+           :db/cardinality        :db.cardinality/one
+           :db/doc                "A ration's quantity"
+           :db.install/_attribute :db.part/db}
+
+          ;unit
+          {:db/id                 #db/id[:db.part/db]
+           :db/ident              :measurement/unit
+           :db/valueType          :db.type/string
+           :db/cardinality        :db.cardinality/one
+           :db/doc                "A ration's quantity unit"
+           :db.install/_attribute :db.part/db}
+
+          ;; ingredient ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
           ;name
           {:db/id                 #db/id[:db.part/db]
@@ -62,15 +106,38 @@
 
  :copa/seed
  {:txes [[
-          {:db/id               #db/id[:db.part/user -100]
-           :recipe/name         "Example Recipe"
-           :recipe/instructions "Pegar nas coisas, botar na panela, chegar-lhe o lume e cozinhar."}
+          {:db/id              #db/id[:db.part/user -100]
+           :recipe/name        "Example Recipe"
+           :recipe/description "Uma receita à maneira."
+           :recipe/portions    4
+           :recipe/preparation "Pegar nas coisas, botar na panela, chegar-lhe o lume e cozinhar."
+           ;:recipe/measurements [[:measurement/ingredient #db/id[:db.part/user -200]
+           ;                       :measurement/quantity 1
+           ;                       :measurement/unit "cup"]
+           ;                      [:measurement/ingredient #db/id[:db.part/user -201]
+           ;                       :measurement/quantity 250
+           ;                       :measurement/unit "ml"]]
+           }
 
-          {:db/id               #db/id[:db.part/user -200]
-           :ingredient/name     "Celery"
-           :recipe/_ingredients #db/id[:db.part/user -100]}
+          {:db/id           #db/id[:db.part/user -200]
+           :ingredient/name "Milk"}
 
-          {:db/id               #db/id[:db.part/user -201]
-           :ingredient/name     "Codfish"
-           :recipe/_ingredients #db/id[:db.part/user -100]}
+          {:db/id           #db/id[:db.part/user -201]
+           :ingredient/name "Flour"}
+
+          {:db/id                  #db/id[:db.part/user -300]
+           :measurement/ingredient #db/id[:db.part/user -200]
+           :measurement/quantity   1.0
+           :measurement/unit       "cup"
+           :recipe/_measurements   #db/id[:db.part/user -100]}
+
+          {:db/id                  #db/id[:db.part/user -301]
+           :measurement/ingredient #db/id[:db.part/user -201]
+           :measurement/quantity   250.0
+           :measurement/unit       "ml"
+           :recipe/_measurements   #db/id[:db.part/user -100]}
+
+          ;{:db/id               #db/id[:db.part/user -201]
+          ; :ingredient/name     "Codfish"
+          ; :recipe/_ingredients #db/id[:db.part/user -100]}
           ]]}}
