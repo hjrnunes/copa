@@ -110,14 +110,7 @@
            :recipe/name        "Example Recipe"
            :recipe/description "Uma receita à maneira."
            :recipe/portions    4
-           :recipe/preparation "Pegar nas coisas, botar na panela, chegar-lhe o lume e cozinhar."
-           ;:recipe/measurements [[:measurement/ingredient #db/id[:db.part/user -200]
-           ;                       :measurement/quantity 1
-           ;                       :measurement/unit "cup"]
-           ;                      [:measurement/ingredient #db/id[:db.part/user -201]
-           ;                       :measurement/quantity 250
-           ;                       :measurement/unit "ml"]]
-           }
+           :recipe/preparation "Pegar nas coisas, botar na panela, chegar-lhe o lume e cozinhar."}
 
           {:db/id           #db/id[:db.part/user -200]
            :ingredient/name "Milk"}
@@ -136,8 +129,4 @@
            :measurement/quantity   250.0
            :measurement/unit       "ml"
            :recipe/_measurements   #db/id[:db.part/user -100]}
-
-          ;{:db/id               #db/id[:db.part/user -201]
-          ; :ingredient/name     "Codfish"
-          ; :recipe/_ingredients #db/id[:db.part/user -100]}
           ]]}}
