@@ -8,6 +8,7 @@
            :db/valueType          :db.type/string
            :db/cardinality        :db.cardinality/one
            :db/fulltext           true
+           :db/unique             :db.unique/identity
            :db/doc                "A recipe's name"
            :db.install/_attribute :db.part/db}
 
@@ -40,7 +41,7 @@
 
           ;category
           {:db/id                 #db/id[:db.part/db]
-           :db/ident              :recipe/category
+           :db/ident              :recipe/categories
            :db/valueType          :db.type/string
            :db/cardinality        :db.cardinality/many
            :db/fulltext           true
@@ -63,7 +64,7 @@
            :db/ident              :measurement/ingredient
            :db/valueType          :db.type/ref
            :db/cardinality        :db.cardinality/one
-           :db/doc                "A ration's ingredient"
+           :db/doc                "A measurement's ingredient"
            :db.install/_attribute :db.part/db}
 
           ;quantity
@@ -71,7 +72,7 @@
            :db/ident              :measurement/quantity
            :db/valueType          :db.type/double
            :db/cardinality        :db.cardinality/one
-           :db/doc                "A ration's quantity"
+           :db/doc                "A measurement's quantity"
            :db.install/_attribute :db.part/db}
 
           ;unit
@@ -79,7 +80,7 @@
            :db/ident              :measurement/unit
            :db/valueType          :db.type/string
            :db/cardinality        :db.cardinality/one
-           :db/doc                "A ration's quantity unit"
+           :db/doc                "A measurement's unit"
            :db.install/_attribute :db.part/db}
 
           ;; ingredient ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -90,6 +91,7 @@
            :db/valueType          :db.type/string
            :db/cardinality        :db.cardinality/one
            :db/fulltext           true
+           :db/unique             :db.unique/identity
            :db/doc                "An ingredient's name"
            :db.install/_attribute :db.part/db}
 

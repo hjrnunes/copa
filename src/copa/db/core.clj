@@ -8,15 +8,6 @@
 
 (def uri "datomic:mem://copa")
 
-;(defn init-db []
-;  (info "Init db")
-;  (d/create-database uri)
-;  (let [conn (d/connect uri)
-;        norms-map (c/read-resource "copa-schema.edn")]
-;    (c/ensure-conforms conn norms-map [:copa/schema
-;                                       :copa/seed])
-;    conn))
-
 (defn init-db [dburi]
   {:pre [dburi]}
   (if (d/create-database dburi)
@@ -33,14 +24,7 @@
 (defstate db
           :start (init-db uri))
 
-
-(defprotocol DatabaseReference
-  (as-db [_]))
-
-(extend-protocol DatabaseReference
-  datomic.db.Db
-  (as-db [db] db)
-  datomic.Connection
-  (as-db [conn] (d/db conn))
-  String
-  (as-db [dburi] (as-db (d/connect dburi))))
+(defn conn?
+  "Check type is a Datomic connection. Useful for pre and post conditions."
+  [conn]
+  (instance? datomic.Connection conn))

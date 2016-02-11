@@ -38,6 +38,13 @@
                  ;[com.taoensso/timbre "4.2.1"]
                  [com.datomic/datomic-free "0.9.5302"
                   :exclusions [org.slf4j/log4j-over-slf4j]]
+
+                 [juxt/datomic-extras "1.0.3"
+                  :exclusions [org.slf4j/slf4j-nop
+                               org.slf4j/jul-to-slf4j
+                               org.slf4j/jcl-over-slf4j
+                               org.slf4j/log4j-over-slf4j]]
+
                  [io.rkn/conformity "0.4.0"]]
 
   :min-lein-version "2.0.0"
