@@ -20,42 +20,40 @@
 
 (defn pull-all [db atrib]
   (let [db (as-db db)]
-    (q '[:find (pull ?e [*])
-         :in $ ?atrib
-         :where [?e ?atrib _]]
-       db atrib)))
-
-;(defn pull-all-recipes [db]
-;  (pull-all db :recipe/name))
+    (map first
+         (q '[:find (pull ?e [*])
+              :in $ ?atrib
+              :where [?e ?atrib _]]
+            db atrib))))
 
 (defn pull-all-ingredients [db]
   (pull-all db :ingredient/name))
 
 (defn pull-all-recipes [db]
   (let [db (as-db db)]
-    (q '[:find (pull ?e [* {:recipe/measurements [* {:measurement/ingredient [*]}]}])
-         :where [?e :recipe/name _]]
-       db)))
-
-;(defn get-ingredient-by-name [db name]
-;  (let [db (as-db db)]
-;    (q '[:find (pull ?e [*])
-;         :in $ ?name
-;         :where [?e :ingredient/name ?name]]
-;       db name)))
+    (map first
+         (q '[:find (pull ?e [* {:recipe/measurements [* {:measurement/ingredient [*]}]}])
+              :where [?e :recipe/name _]]
+            db))))
 
 (defn pull-by-atribute [db atrib value]
   (let [db (as-db db)]
-    (q '[:find (pull ?e [*])
-         :in $ ?atrib ?value
-         :where [?e ?atrib ?value]]
-       db atrib value)))
+    (ffirst
+      (q '[:find (pull ?e [*])
+           :in $ ?atrib ?value
+           :where [?e ?atrib ?value]]
+         db atrib value))))
 
 (defn pull-ingredient-by-name [db name]
   (pull-by-atribute db :ingredient/name name))
 
 (defn pull-recipe-by-name [db name]
-  (pull-by-atribute db :recipe/name name))
+  (let [db (as-db db)]
+    (ffirst
+      (q '[:find (pull ?e [* {:recipe/measurements [* {:measurement/ingredient [*]}]}])
+           :in $ ?value
+           :where [?e :recipe/name ?value]]
+         db name))))
 
 (defn find-ingredients [db ingredient-names]
   (let [db (as-db db)]

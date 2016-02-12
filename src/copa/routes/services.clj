@@ -18,6 +18,9 @@
 (defn get-ingredient-by-name [name]
   (ok (q/pull-ingredient-by-name db name)))
 
+(defn create-recipe [params]
+  (println params))
+
 (defapi service-routes
         (ring.swagger.ui/swagger-ui
           "/swagger-ui")
@@ -31,6 +34,12 @@
                         ;:return [schemas/Recipe]
                         :summary "Get all recipes"
                         (get-all-recipes))
+
+                  (POST* "/recipes" []
+                         ;:return schemas/Recipe
+                         :body [body schemas/Recipe]
+                         :summary "Create new recipe"
+                         (create-recipe body))
 
                   (GET* "/recipe" []
                         :query-params [name :- s/Str]
