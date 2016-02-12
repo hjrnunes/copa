@@ -18,18 +18,44 @@
                  (partial d/resolve-tempid db-after tempids)) temps)
       (d/entity db-after (d/resolve-tempid db-after tempids temps)))))
 
-(defn get-all-recipes [db]
+(defn pull-all [db atrib]
   (let [db (as-db db)]
     (q '[:find (pull ?e [*])
+         :in $ ?atrib
+         :where [?e ?atrib _]]
+       db atrib)))
+
+;(defn pull-all-recipes [db]
+;  (pull-all db :recipe/name))
+
+(defn pull-all-ingredients [db]
+  (pull-all db :ingredient/name))
+
+(defn pull-all-recipes [db]
+  (let [db (as-db db)]
+    (q '[:find (pull ?e [* {:recipe/measurements [* {:measurement/ingredient [*]}]}])
          :where [?e :recipe/name _]]
        db)))
 
-(defn get-ingredient-by-name [db name]
+;(defn get-ingredient-by-name [db name]
+;  (let [db (as-db db)]
+;    (q '[:find (pull ?e [*])
+;         :in $ ?name
+;         :where [?e :ingredient/name ?name]]
+;       db name)))
+
+(defn pull-by-atribute [db atrib value]
   (let [db (as-db db)]
     (q '[:find (pull ?e [*])
-         :in $ ?name
-         :where [?e :ingredient/name ?name]]
-       db name)))
+         :in $ ?atrib ?value
+         :where [?e ?atrib ?value]]
+       db atrib value)))
+
+(defn pull-ingredient-by-name [db name]
+  (pull-by-atribute db :ingredient/name name))
+
+(defn pull-recipe-by-name [db name]
+  (pull-by-atribute db :recipe/name name))
 
 (defn find-ingredients [db ingredient-names]
   (let [db (as-db db)]
@@ -48,7 +74,6 @@
              :measurement/ingredient
              (if (in? existing-names ingredient)
                ;; if ingredient exists refer to by lookup ref
-               ;(to-ref-id (:db/id (first (get (group-by :ingredient/name existing) ingredient))))
                [:ingredient/name ingredient]
                ;; else just nest create
                {:ingredient/name ingredient}))))))

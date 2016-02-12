@@ -45,7 +45,11 @@
                                org.slf4j/jcl-over-slf4j
                                org.slf4j/log4j-over-slf4j]]
 
-                 [io.rkn/conformity "0.4.0"]]
+                 [io.rkn/conformity "0.4.0"]
+                 [prismatic/plumbing "0.5.2"]
+                 [prismatic/schema "1.0.5"]
+                 ;[slugger "1.0.1"]
+                 ]
 
   :min-lein-version "2.0.0"
   :uberjar-name "copa.jar"

@@ -39,7 +39,7 @@
            :db/doc                "A recipe's actual preparation"
            :db.install/_attribute :db.part/db}
 
-          ;category
+          ;categories
           {:db/id                 #db/id[:db.part/db]
            :db/ident              :recipe/categories
            :db/valueType          :db.type/string
