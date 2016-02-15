@@ -131,4 +131,29 @@
            :measurement/quantity   250.0
            :measurement/unit       "ml"
            :recipe/_measurements   #db/id[:db.part/user -100]}
+
+          ;; outra
+          {:db/id              #db/id[:db.part/user -101]
+           :recipe/name        "Another Example Recipe"
+           :recipe/description "Uma receita à maneira da Madeira!"
+           :recipe/portions    5
+           :recipe/preparation "Pegar nas coisas, botar na panela, chegar-lhe o lume e cozinhar. Na Madeira."}
+
+          {:db/id           #db/id[:db.part/user -202]
+           :ingredient/name "Corn"}
+
+          {:db/id           #db/id[:db.part/user -203]
+           :ingredient/name "Wine"}
+
+          {:db/id                  #db/id[:db.part/user -302]
+           :measurement/ingredient #db/id[:db.part/user -202]
+           :measurement/quantity   1.0
+           :measurement/unit       "oz"
+           :recipe/_measurements   #db/id[:db.part/user -101]}
+
+          {:db/id                  #db/id[:db.part/user -303]
+           :measurement/ingredient #db/id[:db.part/user -203]
+           :measurement/quantity   1.0
+           :measurement/unit       "l"
+           :recipe/_measurements   #db/id[:db.part/user -101]}
           ]]}}

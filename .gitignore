@@ -12,3 +12,5 @@ profiles.clj
 .idea
 *iml
 .nrepl-port
+*DS_Store
+log

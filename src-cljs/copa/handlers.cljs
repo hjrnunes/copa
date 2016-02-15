@@ -2,6 +2,7 @@
   (:require [copa.db :refer [default-value app-schema]]
             [re-frame.core :refer [register-handler dispatch path trim-v after]]
             [schema.core :as s]
+            [plumbing.core :refer [map-vals]]
             [ajax.core :refer [GET POST]]))
 
 ;; -- Middleware --------------------------------------------------------------
@@ -40,12 +41,20 @@
   (fn [db [_ data]]
     (-> db
         (assoc-in [:state :loading] true)
-        (assoc :recipes data))))
+        (assoc :recipes data)
+        (assoc :index (map-vals first
+                                (group-by :db/id data))))))
 
 ;; load data error
 (register-handler
   :load-data-error
-  (fn [_ [data]]
+  (fn [_ [_ data]]
     (println "Error:" data)))
+
+;; select recipe
+(register-handler
+  :select-recipe
+  (fn [db [_ selected]]
+    (assoc-in db [:state :selected-recipe] selected)))
 
 

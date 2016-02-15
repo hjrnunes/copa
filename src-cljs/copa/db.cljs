@@ -22,8 +22,11 @@
 
 (s/defschema app-schema
   {:recipes [Recipe]
-   :state   {(s/optional-key :loading) s/Bool}})
+   :index   {s/Int Recipe}
+   :state   {(s/optional-key :loading)         s/Bool
+             (s/optional-key :selected-recipe) s/Int}})
 
 (def default-value
   {:recipes []
+   :index   {}
    :state   {}})

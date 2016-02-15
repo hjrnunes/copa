@@ -10,3 +10,10 @@
   :recipes
   (fn [db _]
     (reaction (:recipes @db))))
+
+(register-sub
+  :selected-recipe
+  (fn [db _]
+    (let [selected (reaction (get-in @db [:state :selected-recipe]))
+          index (reaction (:index @db))]
+      (reaction (get @index @selected)))))
