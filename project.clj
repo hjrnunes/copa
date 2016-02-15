@@ -49,6 +49,8 @@
                  [prismatic/plumbing "0.5.2"]
                  [prismatic/schema "1.0.5"]
                  ;[slugger "1.0.1"]
+                 [re-frame "0.7.0-alpha-2"]
+                 [re-com "0.8.0"]
                  ]
 
   :min-lein-version "2.0.0"
