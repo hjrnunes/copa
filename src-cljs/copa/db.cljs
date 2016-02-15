@@ -18,3 +18,12 @@
                      (s/optional-key :recipe/categories)  [s/Str]
                      :recipe/measurements                 [Measurement]
                      }))
+
+
+(s/defschema app-schema
+  {:recipes [Recipe]
+   :state   {(s/optional-key :loading) s/Bool}})
+
+(def default-value
+  {:recipes []
+   :state   {}})
