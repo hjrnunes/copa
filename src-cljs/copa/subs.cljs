@@ -31,3 +31,8 @@
   :form-input
   (fn [db [_ form field]]
     (reaction (get-in @db [:state :forms form field]))))
+
+(register-sub
+  :show-new-measurement
+  (fn [db [_ form]]
+    (reaction (get-in @db [:state :forms form :show-new-measurement]))))

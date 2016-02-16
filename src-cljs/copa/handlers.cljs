@@ -72,6 +72,11 @@
   (fn [db [_ form field value]]
     (assoc-in db [:state :forms form field] value)))
 
+(register-handler
+  :show-new-measurement
+  (fn [db [_ form value]]
+    (assoc-in db [:state :forms form :show-new-measurement] value)))
+
 ; update new recipe measurements list
 (defn- build-tmp-measurement [db form]
   (let [tmp-ingredient (get-in db [:state :forms form :tmp.measurement/ingredient])
@@ -88,6 +93,7 @@
     (let [tmp-measurement (build-tmp-measurement db form)
           measurements (get-in db [:state :forms form :recipe/measurements] [])]
       (-> db
+          (assoc-in [:state :forms form :show-new-measurement] false)
           (assoc-in [:state :forms form :tmp.measurement/ingredient] nil)
           (assoc-in [:state :forms form :tmp.measurement/unit] nil)
           (assoc-in [:state :forms form :tmp.measurement/quantity] nil)
@@ -99,23 +105,24 @@
               [:recipe/description description])
             (when-let [portions (get-in db [:state :forms form :recipe/portions])]
               [:recipe/portions (js/parseInt portions)])
-            [:recipe/preparation (get-in db [:state :forms form :recipe/preparation])]]))
+            [:recipe/preparation (get-in db [:state :forms form :recipe/preparation])]
+            [:recipe/measurements (get-in db [:state :forms form :recipe/measurements])]]))
 
 ; create new recipe
 (register-handler
   :create-recipe
   (fn [db [_ form]]
-    (let [recipe (collect-new-recipe-form db form)
-          measurements (get-in db [:state :forms form :recipe/measurements] [])
-          tmp-measurement (build-tmp-measurement db form)
-          full-rec (assoc recipe :recipe/measurements (conj measurements tmp-measurement))]
+    (let [recipe (collect-new-recipe-form db form)]
+      (println recipe)
       (POST (str js/context "/api/recipes")
             {:response-format :json
-             :params          full-rec
+             :params          recipe
              :keywords?       true
              :handler         #(dispatch [:post-new-recipe %1])
              :error-handler   #(dispatch [:load-data-error %1])})
-      (assoc-in db [:state :loading] true))))
+      (-> db
+          (assoc-in [:state :forms form] {})
+          (assoc-in [:state :loading] true)))))
 
 ;; load data error
 (register-handler

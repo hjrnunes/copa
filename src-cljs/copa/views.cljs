@@ -60,25 +60,33 @@
          :on-change #(dispatch [:form-input-changed form key %])]]])))
 
 (defn new-measurement [form-key]
-  [:div
-   [rc/h-box
-    :children [
-               [wired-textbox {:label "Quantity"
-                               :form  form-key
-                               :key   :tmp.measurement/quantity}]
-               [wired-textbox {:label "Unit"
-                               :form  form-key
-                               :key   :tmp.measurement/unit}]
-               [wired-textbox {:label "Ingredient"
-                               :form  form-key
-                               :key   :tmp.measurement/ingredient}]]]
-   [rc/md-circle-icon-button
-    :md-icon-name "zmdi-plus"
-    :tooltip "Add another ingredient"
-    :on-click #(dispatch [:add-new-measurement form-key])]])
+  (let [show (subscribe [:show-new-measurement form-key])]
+    (fn []
+      [:div
+       (when @show
+         [rc/h-box
+          :children [
+                     [wired-textbox {:label "Quantity"
+                                     :form  form-key
+                                     :key   :tmp.measurement/quantity}]
+                     [wired-textbox {:label "Unit"
+                                     :form  form-key
+                                     :key   :tmp.measurement/unit}]
+                     [wired-textbox {:label "Ingredient"
+                                     :form  form-key
+                                     :key   :tmp.measurement/ingredient}]
+                     [rc/button
+                      :label "OK"
+                      :class "btn-primary"
+                      :on-click #(dispatch [:add-new-measurement form-key])]]])
+       [rc/md-circle-icon-button
+        :md-icon-name "zmdi-plus"
+        :tooltip "Add another ingredient"
+        :on-click #(dispatch [:show-new-measurement form-key true])]])))
 
 (defn measurements [form-key]
-  (let [measurements (subscribe [:form-input form-key :recipe/measurements])]
+  (let [measurements (subscribe [:form-input form-key :recipe/measurements])
+        ]
     (fn []
       [:ul.list-group
        (for [[idx measurement] (indexed @measurements)]
