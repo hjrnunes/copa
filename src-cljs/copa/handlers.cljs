@@ -43,18 +43,83 @@
         (assoc-in [:state :loading] true)
         (assoc :recipes data)
         (assoc :index (map-vals first
-                                (group-by :db/id data))))))
+                                (group-by :db/id data)))
+        (assoc-in [:state :loading] false))))
 
 ;; load data error
 (register-handler
   :load-data-error
-  (fn [_ [_ data]]
-    (println "Error:" data)))
+  (fn [db [_ data]]
+    (println "Error:" data)
+    (assoc-in db [:state :loading] false)))
 
 ;; select recipe
 (register-handler
   :select-recipe
   (fn [db [_ selected]]
-    (assoc-in db [:state :selected-recipe] selected)))
+    (-> db
+        (assoc-in [:state :selected-recipe] selected)
+        (assoc-in [:state :active-pane] :recipe-details))))
 
+(register-handler
+  :display-pane
+  (fn [db [_ pane]]
+    (assoc-in db [:state :active-pane] pane)))
 
+;form input handler
+(register-handler
+  :form-input-changed
+  (fn [db [_ form field value]]
+    (assoc-in db [:state :forms form field] value)))
+
+; update new recipe measurements list
+(defn- build-tmp-measurement [db form]
+  (let [tmp-ingredient (get-in db [:state :forms form :tmp.measurement/ingredient])
+        tmp-unit (get-in db [:state :forms form :tmp.measurement/unit])
+        tmp-quantity (get-in db [:state :forms form :tmp.measurement/quantity])]
+    (into {} [[:measurement/ingredient tmp-ingredient]
+              [:measurement/quantity (js/parseInt tmp-quantity)]
+              (when tmp-unit
+                [:measurement/unit tmp-unit])])))
+
+(register-handler
+  :add-new-measurement
+  (fn [db [_ form]]
+    (let [tmp-measurement (build-tmp-measurement db form)
+          measurements (get-in db [:state :forms form :recipe/measurements] [])]
+      (-> db
+          (assoc-in [:state :forms form :tmp.measurement/ingredient] nil)
+          (assoc-in [:state :forms form :tmp.measurement/unit] nil)
+          (assoc-in [:state :forms form :tmp.measurement/quantity] nil)
+          (assoc-in [:state :forms form :recipe/measurements] (conj measurements tmp-measurement))))))
+
+(defn- collect-new-recipe-form [db form]
+  (into {} [[:recipe/name (get-in db [:state :forms form :recipe/name])]
+            (when-let [description (get-in db [:state :forms form :recipe/description])]
+              [:recipe/description description])
+            (when-let [portions (get-in db [:state :forms form :recipe/portions])]
+              [:recipe/portions (js/parseInt portions)])
+            [:recipe/preparation (get-in db [:state :forms form :recipe/preparation])]]))
+
+; create new recipe
+(register-handler
+  :create-recipe
+  (fn [db [_ form]]
+    (let [recipe (collect-new-recipe-form db form)
+          measurements (get-in db [:state :forms form :recipe/measurements] [])
+          tmp-measurement (build-tmp-measurement db form)
+          full-rec (assoc recipe :recipe/measurements (conj measurements tmp-measurement))]
+      (POST (str js/context "/api/recipes")
+            {:response-format :json
+             :params          full-rec
+             :keywords?       true
+             :handler         #(dispatch [:post-new-recipe %1])
+             :error-handler   #(dispatch [:load-data-error %1])})
+      (assoc-in db [:state :loading] true))))
+
+;; load data error
+(register-handler
+  :post-new-recipe
+  (fn [db [_ data]]
+    (println "Result:" data)
+    (assoc-in db [:state :loading] false)))

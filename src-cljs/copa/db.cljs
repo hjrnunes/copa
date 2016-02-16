@@ -24,9 +24,10 @@
   {:recipes [Recipe]
    :index   {s/Int Recipe}
    :state   {(s/optional-key :loading)         s/Bool
-             (s/optional-key :selected-recipe) s/Int}})
+             (s/optional-key :selected-recipe) s/Int
+             (s/optional-key :active-pane)     s/Keyword}})
 
 (def default-value
   {:recipes []
    :index   {}
-   :state   {}})
+   :state   {:active-pane :none}})

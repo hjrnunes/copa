@@ -19,7 +19,8 @@
   (ok (q/pull-ingredient-by-name db name)))
 
 (defn create-recipe [params]
-  (println params))
+  (println params)
+  (ok {:result "YEAH!"}))
 
 (defapi service-routes
         (ring.swagger.ui/swagger-ui

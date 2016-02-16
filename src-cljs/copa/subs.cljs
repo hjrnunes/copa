@@ -6,14 +6,28 @@
 
 ;; -- Subscription handlers and registration  ---------------------------------
 
+; active pane
+(register-sub
+  :active-pane
+  (fn [db _]
+    (reaction (get-in @db [:state :active-pane]))))
+
+; all recipes
 (register-sub
   :recipes
   (fn [db _]
     (reaction (:recipes @db))))
 
+; selected recipe in menu
 (register-sub
   :selected-recipe
   (fn [db _]
     (let [selected (reaction (get-in @db [:state :selected-recipe]))
           index (reaction (:index @db))]
       (reaction (get @index @selected)))))
+
+; form input
+(register-sub
+  :form-input
+  (fn [db [_ form field]]
+    (reaction (get-in @db [:state :forms form field]))))
