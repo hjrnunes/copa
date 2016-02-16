@@ -2,18 +2,24 @@
   (:require [reagent.core :as reagent :refer [atom]]
             [re-frame.core :refer [subscribe dispatch]]
             [re-com.buttons :refer [button]]
-            [re-com.core :refer [title]]))
+            [re-com.core :refer [title]]
+            [clojure.string :refer [join capitalize]]))
+
+(defn compose-measurement [ingredient quantity unit]
+  (if unit
+    [:span [:span.label.label-info quantity] [:span.label.label-warning (capitalize unit)] (join " " [" " "of" (capitalize ingredient)])]
+    [:span (join " " [quantity (capitalize ingredient)])]))
 
 (defn measurement-item []
   (fn [{:keys [db/id measurement/ingredient measurement/quantity measurement/unit]}]
-    [:li.list-group-item quantity unit (:ingredient/name ingredient)]))
+    [:li.list-group-item (compose-measurement (:ingredient/name ingredient) quantity unit)]))
 
 (defn recipe-measurements-list [recipe]
   [:div
    [title :level :level1 :underline? true :label "Ingredients"]
    [:ul.list-group
-      (for [measurement (:recipe/measurements @recipe)]
-        ^{:key (:db/id measurement)} [measurement-item measurement])]])
+    (for [measurement (:recipe/measurements @recipe)]
+      ^{:key (:db/id measurement)} [measurement-item measurement])]])
 
 (defn recipe-preparation []
   (fn [{:keys [recipe/name recipe/description recipe/portions recipe/preparation recipe/categories]}]
@@ -47,7 +53,7 @@
 (defn copa-app []
   (let [recipes (subscribe [:recipes])]
     (fn []
-      [:div.container
+      [:div.container-fluid
        [:div.row
         [:div.col-md-3
          [title :level :level1 :underline? true :label "Recipes"]
