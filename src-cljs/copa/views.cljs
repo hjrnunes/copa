@@ -17,30 +17,27 @@
     [:li.list-group-item (compose-measurement (get ingredient :ingredient/name ingredient) quantity unit)]))
 
 (defn recipe-measurements-list [recipe]
-  [:div
-   [rc/title :level :level1 :underline? true :label "Ingredients"]
-   [:ul.list-group
-    (for [measurement (:recipe/measurements @recipe)]
-      ^{:key (:db/id measurement)} [measurement-item measurement])]])
+  [rc/v-box
+   :children [[rc/title :level :level1 :underline? true :label "Ingredients"]
+              [:ul.list-group
+               (for [measurement (:recipe/measurements @recipe)]
+                 ^{:key (:db/id measurement)} [measurement-item measurement])]]])
 
 (defn recipe-preparation []
   (fn [{:keys [recipe/name recipe/description recipe/portions recipe/preparation recipe/categories]}]
-    [:div.panel.panel-default
-     [:div.panel-body
-      [rc/title :level :level1 :underline? true :label name]
-      [rc/title :level :level4 :label description]
-      preparation]]))
+    [rc/v-box
+     :children [[rc/title :level :level1 :underline? true :label name]
+                [rc/title :level :level4 :label description]
+                [rc/box
+                 :child [rc/p preparation]]]]))
 
 (defn recipe-details []
   (let [recipe (subscribe [:state/selected-recipe])]
     (fn []
       (when @recipe
-        [:div.row
-         [:div.col-md-3
-          [:div
-           [recipe-measurements-list recipe]]]
-         [:div.col-md-9
-          [recipe-preparation @recipe]]]))))
+        [rc/h-box
+         :children [[recipe-measurements-list recipe]
+                    [recipe-preparation @recipe]]]))))
 
 
 ;; recipe creation ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -85,8 +82,7 @@
         :on-click #(dispatch [:form-state/update form-key :show-new-measurement true])]])))
 
 (defn measurements [form-key]
-  (let [measurements (subscribe [:form-state form-key :recipe/measurements])
-        ]
+  (let [measurements (subscribe [:form-state form-key :recipe/measurements])]
     (fn []
       [:ul.list-group
        (for [[idx measurement] (indexed @measurements)]
@@ -96,29 +92,30 @@
 
 (defn new-recipe []
   (let [form-key :new-recipe]
-    [:dev.row
-     [:div.col-md-12
-      [rc/title :level :level1 :underline? true :label "New Recipe"]
-      [wired-textbox {:label "Name"
-                      :form  form-key
-                      :key   :recipe/name}]
-      [wired-textbox {:label    "Description"
-                      :form     form-key
-                      :key      :recipe/description
-                      :textarea true}]
-      [wired-textbox {:label "Portions"
-                      :form  form-key
-                      :key   :recipe/portions}]
-      [wired-textbox {:label    "Preparation"
-                      :form     form-key
-                      :key      :recipe/preparation
-                      :textarea true}]
-      [rc/title :level :level2 :underline? true :label "Ingredients"]
-      [measurements form-key]
-      [rc/button
-       :label "Add recipe!"
-       :class "btn-primary"
-       :on-click #(dispatch [:recipe/create form-key])]]]))
+    [rc/v-box
+     :children [[rc/v-box
+                 :children [[rc/title :level :level1 :underline? true :label "New Recipe"]
+                            [wired-textbox {:label "Name"
+                                            :form  form-key
+                                            :key   :recipe/name}]
+                            [wired-textbox {:label    "Description"
+                                            :form     form-key
+                                            :key      :recipe/description
+                                            :textarea true}]
+                            [wired-textbox {:label "Portions"
+                                            :form  form-key
+                                            :key   :recipe/portions}]
+                            [wired-textbox {:label    "Preparation"
+                                            :form     form-key
+                                            :key      :recipe/preparation
+                                            :textarea true}]]]
+                [rc/v-box
+                 :children [[rc/title :level :level2 :underline? true :label "Ingredients"]
+                            [measurements form-key]
+                            [rc/button
+                             :label "Add recipe!"
+                             :class "btn-primary"
+                             :on-click #(dispatch [:recipe/create form-key])]]]]]))
 
 
 ;; recipe list ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -136,16 +133,15 @@
 (defn recipe-list-menu []
   (let [recipes (subscribe [:data/recipes])]
     (fn []
-      [:div
-       [rc/title :level :level1 :underline? true :label "Recipes"]
-       (when-not (empty? @recipes)
-         [:div
-          [recipe-list recipes]])
-       [:div.pull-right
-        [rc/md-circle-icon-button
-         :md-icon-name "zmdi-plus"
-         :tooltip "Add new recipe"
-         :on-click #(dispatch [:state/update :active-pane :new-recipe])]]])))
+      [rc/v-box
+       :children [[rc/h-box
+                   :children [[rc/title :level :level1 :label "Recipes"]
+                              [rc/md-circle-icon-button
+                               :md-icon-name "zmdi-plus"
+                               :tooltip "Add new recipe"
+                               :on-click #(dispatch [:state/update :active-pane :new-recipe])]]]
+                  (when-not (empty? @recipes)
+                    [recipe-list recipes])]])))
 
 (defn loading-status [loading]
   [:div
@@ -167,13 +163,13 @@
 (defn copa-app []
   (let [active-pane (subscribe [:state :active-pane])]
     (fn []
-      [:div
-       [:div.container-fluid
-        [:div.row
-         [:div.col-md-3
-          [recipe-list-menu]]
-         [:div.col-md-9
-          (when @active-pane
-            [(@active-pane panes)])]]]
-       [:footer.footer
-        [footer]]])))
+      [rc/v-box
+       :children [[rc/h-box
+                   :children [[rc/v-box
+                               :children [[recipe-list-menu]]]
+                              [rc/v-box
+                               :children [(if @active-pane
+                                            [(@active-pane panes)]
+                                            [rc/box
+                                             :child [:div]])]]
+                              ]]]])))
