@@ -20,7 +20,7 @@
 
 (defn create-recipe [params]
   (println params)
-  (ok {:result "YEAH!"}))
+  (ok (q/create-recipe! db params)))
 
 (defapi service-routes
         (ring.swagger.ui/swagger-ui

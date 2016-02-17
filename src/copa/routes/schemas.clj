@@ -8,7 +8,7 @@
 
 (s/defschema Measurement
   (merge BaseEntity {:measurement/ingredient            (describe s/Str "Measurement ingredient")
-                     :measurement/quantity              (describe Long "Measurement quantity")
+                     :measurement/quantity              (describe Double "Measurement quantity")
                      (s/optional-key :measurement/unit) (describe s/Str "Measurement unit")}))
 
 (s/defschema Recipe
