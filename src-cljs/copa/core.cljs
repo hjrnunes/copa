@@ -24,6 +24,6 @@
 ;; -- Entry Point -------------------------------------------------------------
 
 (defn init! []
-  (dispatch-sync [:load-data])
+  (dispatch-sync [:data/load])
   (reagent/render [copa.views/copa-app]
                   (.getElementById js/document "app")))

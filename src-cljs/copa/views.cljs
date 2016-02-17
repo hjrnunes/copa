@@ -32,7 +32,7 @@
       preparation]]))
 
 (defn recipe-details []
-  (let [recipe (subscribe [:selected-recipe])]
+  (let [recipe (subscribe [:state/selected-recipe])]
     (fn []
       (when @recipe
         [:div.row
@@ -47,7 +47,7 @@
 
 (defn wired-textbox [{:keys [label form key textarea]
                       :or   [:textarea false]}]
-  (let [model (subscribe [:form-input form key])]
+  (let [model (subscribe [:form-state form key])]
     (fn []
       [rc/v-box
        :children
@@ -57,10 +57,10 @@
            rc/input-text)
          :model (or @model "")
          :change-on-blur? true
-         :on-change #(dispatch [:form-input-changed form key %])]]])))
+         :on-change #(dispatch [:form-state/update form key %])]]])))
 
 (defn new-measurement [form-key]
-  (let [show (subscribe [:show-new-measurement form-key])]
+  (let [show (subscribe [:form-state form-key :show-new-measurement])]
     (fn []
       [:div
        (when @show
@@ -78,14 +78,14 @@
                      [rc/button
                       :label "OK"
                       :class "btn-primary"
-                      :on-click #(dispatch [:add-new-measurement form-key])]]])
+                      :on-click #(dispatch [:measurement/add form-key])]]])
        [rc/md-circle-icon-button
         :md-icon-name "zmdi-plus"
         :tooltip "Add another ingredient"
-        :on-click #(dispatch [:show-new-measurement form-key true])]])))
+        :on-click #(dispatch [:form-state/update form-key :show-new-measurement true])]])))
 
 (defn measurements [form-key]
-  (let [measurements (subscribe [:form-input form-key :recipe/measurements])
+  (let [measurements (subscribe [:form-state form-key :recipe/measurements])
         ]
     (fn []
       [:ul.list-group
@@ -118,7 +118,7 @@
       [rc/button
        :label "Add recipe!"
        :class "btn-primary"
-       :on-click #(dispatch [:create-recipe form-key])]]]))
+       :on-click #(dispatch [:recipe/create form-key])]]]))
 
 
 ;; recipe list ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -126,7 +126,7 @@
 (defn recipe-list-item []
   (fn [{:keys [db/id recipe/name recipe/description recipe/portions recipe/preparation recipe/categories recipe/measurements]}]
     [:a.list-group-item {:href     "#"
-                         :on-click #(dispatch [:select-recipe id])} name]))
+                         :on-click #(dispatch [:recipe/select id])} name]))
 
 (defn recipe-list [recipes]
   [:div.list-group
@@ -134,7 +134,7 @@
      ^{:key (:db/id recipe)} [recipe-list-item recipe])])
 
 (defn recipe-list-menu []
-  (let [recipes (subscribe [:recipes])]
+  (let [recipes (subscribe [:data/recipes])]
     (fn []
       [:div
        [rc/title :level :level1 :underline? true :label "Recipes"]
@@ -145,7 +145,7 @@
         [rc/md-circle-icon-button
          :md-icon-name "zmdi-plus"
          :tooltip "Add new recipe"
-         :on-click #(dispatch [:display-pane :new-recipe])]]])))
+         :on-click #(dispatch [:state/update :active-pane :new-recipe])]]])))
 
 ;; app ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
@@ -153,7 +153,7 @@
             :new-recipe     new-recipe})
 
 (defn copa-app []
-  (let [active-pane (subscribe [:active-pane])]
+  (let [active-pane (subscribe [:state :active-pane])]
     (fn []
       [:div.container-fluid
        [:div.row

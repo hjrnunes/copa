@@ -6,33 +6,28 @@
 
 ;; -- Subscription handlers and registration  ---------------------------------
 
-; active pane
+;; generic state subscription
 (register-sub
-  :active-pane
-  (fn [db _]
-    (reaction (get-in @db [:state :active-pane]))))
+  :state
+  (fn [db [_ field]]
+    (reaction (get-in @db [:state field]))))
+
+;; generic form state subscription
+(register-sub
+  :form-state
+  (fn [db [_ form field]]
+    (reaction (get-in @db [:state :forms form field]))))
 
 ; all recipes
 (register-sub
-  :recipes
+  :data/recipes
   (fn [db _]
     (reaction (:recipes @db))))
 
 ; selected recipe in menu
 (register-sub
-  :selected-recipe
+  :state/selected-recipe
   (fn [db _]
     (let [selected (reaction (get-in @db [:state :selected-recipe]))
           index (reaction (:index @db))]
       (reaction (get @index @selected)))))
-
-; form input
-(register-sub
-  :form-input
-  (fn [db [_ form field]]
-    (reaction (get-in @db [:state :forms form field]))))
-
-(register-sub
-  :show-new-measurement
-  (fn [db [_ form]]
-    (reaction (get-in @db [:state :forms form :show-new-measurement]))))
