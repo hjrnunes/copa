@@ -147,6 +147,18 @@
          :tooltip "Add new recipe"
          :on-click #(dispatch [:state/update :active-pane :new-recipe])]]])))
 
+(defn loading-status [loading]
+  [:div
+   (if @loading
+     [:span.label.label-warning "Syncing"]
+     [:span.label.label-info "Synced"])])
+
+(defn footer []
+  (let [loading (subscribe [:state :loading])]
+    (fn []
+      [rc/h-box
+       :children [[loading-status loading]]])))
+
 ;; app ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (def panes {:recipe-details recipe-details
@@ -158,9 +170,12 @@
       [:div.container-fluid
        [:div.row
         [:div.col-md-3
-         [recipe-list-menu]
-         ]
+         [recipe-list-menu]]
         [:div.col-md-9
          (when @active-pane
-           [(@active-pane panes)])
-         ]]])))
+           [(@active-pane panes)])]]
+       [:div.row
+        [:div.col-md-12
+         [footer]
+         ]]
+       ])))

@@ -19,8 +19,8 @@
   (ok (q/pull-ingredient-by-name db name)))
 
 (defn create-recipe [params]
-  (println params)
-  (ok (q/create-recipe! db params)))
+  (let [eid (:db/id (q/create-recipe! db params))]
+    (ok (q/pull-recipe db eid))))
 
 (defapi service-routes
         (ring.swagger.ui/swagger-ui

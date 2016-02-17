@@ -47,6 +47,14 @@
 (defn pull-ingredient-by-name [db name]
   (pull-by-atribute db :ingredient/name name))
 
+(defn pull-recipe [db eid]
+  (let [db (as-db db)]
+    (ffirst
+      (q '[:find (pull ?eid [* {:recipe/measurements [* {:measurement/ingredient [*]}]}])
+           :in $ ?eid
+           :where [?eid]]
+         db eid))))
+
 (defn pull-recipe-by-name [db name]
   (let [db (as-db db)]
     (ffirst

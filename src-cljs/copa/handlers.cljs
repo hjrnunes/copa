@@ -127,7 +127,6 @@
   :recipe/post
   (fn [db [_ data]]
     (let [recp-id (:db/id data)]
-      (println "Result:" data)
       (dispatch [:state/update :loading false])
       (dispatch [:recipe/select recp-id])
       (-> db
