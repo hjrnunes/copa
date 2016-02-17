@@ -32,26 +32,27 @@
           :keywords?       true
           :handler         #(dispatch [:data/response %1])
           :error-handler   #(dispatch [:data/error %1])})
-    (assoc-in db [:state :loading] true)))
+    (dispatch [:state/update :loading true])
+    db))
 
 ;; load data response
 (register-handler
   :data/response
   check-schema-mw
   (fn [db [_ data]]
+    (dispatch [:state/update :loading false])
     (-> db
-        (assoc-in [:state :loading] true)
         (assoc :recipes data)
         (assoc :index (map-vals first
-                                (group-by :db/id data)))
-        (assoc-in [:state :loading] false))))
+                                (group-by :db/id data))))))
 
 ;; load data error
 (register-handler
   :data/error
   (fn [db [_ data]]
     (println "Error:" data)
-    (assoc-in db [:state :loading] false)))
+    (dispatch [:state/update :loading false])
+    db))
 
 ;; generic update state handler
 (register-handler
@@ -121,9 +122,14 @@
       (-> db
           (assoc-in [:state :forms form] {})))))
 
-;; load data error
+;; recipe post result
 (register-handler
   :recipe/post
   (fn [db [_ data]]
-    (println "Result:" data)
-    (dispatch [:state/update :loading false])))
+    (let [recp-id (:db/id data)]
+      (println "Result:" data)
+      (dispatch [:state/update :loading false])
+      (dispatch [:recipe/select recp-id])
+      (-> db
+          (update-in [:recipes] conj data)
+          (assoc-in [:index recp-id] data)))))
