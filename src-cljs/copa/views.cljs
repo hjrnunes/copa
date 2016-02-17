@@ -167,15 +167,13 @@
 (defn copa-app []
   (let [active-pane (subscribe [:state :active-pane])]
     (fn []
-      [:div.container-fluid
-       [:div.row
-        [:div.col-md-3
-         [recipe-list-menu]]
-        [:div.col-md-9
-         (when @active-pane
-           [(@active-pane panes)])]]
-       [:div.row
-        [:div.col-md-12
-         [footer]
-         ]]
-       ])))
+      [:div
+       [:div.container-fluid
+        [:div.row
+         [:div.col-md-3
+          [recipe-list-menu]]
+         [:div.col-md-9
+          (when @active-pane
+            [(@active-pane panes)])]]]
+       [:footer.footer
+        [footer]]])))
