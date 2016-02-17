@@ -36,6 +36,7 @@
     (fn []
       (when @recipe
         [rc/h-box
+         :gap "2em"
          :children [[recipe-measurements-list recipe]
                     [recipe-preparation @recipe]]]))))
 
@@ -135,7 +136,10 @@
     (fn []
       [rc/v-box
        :children [[rc/h-box
-                   :children [[rc/title :level :level1 :label "Recipes"]
+                   :gap "1"
+                   :align :center
+                   :children [[rc/box
+                               :child [rc/title :level :level1 :label "Recipes"]]
                               [rc/md-circle-icon-button
                                :md-icon-name "zmdi-plus"
                                :tooltip "Add new recipe"
@@ -165,9 +169,13 @@
     (fn []
       [rc/v-box
        :children [[rc/h-box
+                   :justify :around
+                   :gap "4em"
                    :children [[rc/v-box
+                               :size "2"
                                :children [[recipe-list-menu]]]
                               [rc/v-box
+                               :size "8"
                                :children [(if @active-pane
                                             [(@active-pane panes)]
                                             [rc/box
