@@ -84,18 +84,36 @@
               (when tmp-unit
                 [:measurement/unit tmp-unit])])))
 
+(register-handler
+  :measurement/cancel
+  (fn [db [_ form]]
+    (dispatch [:form-state/update form :show-new-measurement false])
+    (dispatch [:measurement/clear form])
+    db))
+
+(register-handler
+  :measurement/clear
+  (fn [db [_ form]]
+    (-> db
+        (assoc-in [:state :forms form :tmp.measurement/ingredient] nil)
+        (assoc-in [:state :forms form :tmp.measurement/unit] nil)
+        (assoc-in [:state :forms form :tmp.measurement/quantity] nil))))
+
 ;; add new measurement in new recipe form
 (register-handler
   :measurement/add
   (fn [db [_ form]]
     (let [tmp-measurement (build-tmp-measurement db form)
           measurements (get-in db [:state :forms form :recipe/measurements] [])]
-      (dispatch [:form-state/update form :show-new-measurement false])
-      (-> db
-          (assoc-in [:state :forms form :tmp.measurement/ingredient] nil)
-          (assoc-in [:state :forms form :tmp.measurement/unit] nil)
-          (assoc-in [:state :forms form :tmp.measurement/quantity] nil)
-          (assoc-in [:state :forms form :recipe/measurements] (conj measurements tmp-measurement))))))
+      (dispatch [:measurement/clear form])
+      (assoc-in db [:state :forms form :recipe/measurements] (conj measurements tmp-measurement)))))
+
+;; clear recipe
+
+(register-handler
+  :recipe/clear
+  (fn [db [_ form]]
+    (assoc-in db [:state :forms form] {})))
 
 ;; create new recipe
 (defn- collect-new-recipe-form [db form]
@@ -118,9 +136,9 @@
              :keywords?       true
              :handler         #(dispatch [:recipe/post %1])
              :error-handler   #(dispatch [:data/error %1])})
-      (dispatch [:state/update :loading false])
-      (-> db
-          (assoc-in [:state :forms form] {})))))
+      (dispatch [:state/update :loading true])
+      (dispatch [:recipe/clear])
+      db)))
 
 ;; recipe post result
 (register-handler

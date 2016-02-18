@@ -11,33 +11,33 @@
   [rc/h-box
    :gap "0.2em"
    :align :center
-   :children (if unit
-               [[rc/label :label quantity :class "label label-info"]
-                [rc/label :label (capitalize unit) :class "label label-warning"]
-                [rc/label :label (join " " ["of" (capitalize ingredient)])]]
-               [[rc/label :label quantity :class "label label-info"]
-                [rc/label :label (join " " [quantity (capitalize ingredient)])]])])
+   :children [[rc/label :label (capitalize ingredient)]
+              [rc/gap :size "1em"]
+              [rc/label :label quantity :class "label label-info"]
+              (when unit
+                [rc/label :label (capitalize unit) :class "label label-warning"])]])
 
 (defn measurement-item []
   (let [mouse-over? (atom false)]
     (fn [{:keys [db/id measurement/ingredient measurement/quantity measurement/unit]}]
-      [rc/border
-       :l-border "1px solid lightgrey"
-       :child [rc/box
-               :style {:padding          "0.3em"
-                       :background-color (if @mouse-over? "#eee")}
-               :attr {:on-mouse-over (handler-fn (reset! mouse-over? true))
-                      :on-mouse-out  (handler-fn (reset! mouse-over? false))}
-               :child (compose-measurement (get ingredient :ingredient/name ingredient) quantity unit)]])))
+      [rc/box
+       :style {:padding          "0.3em"
+               :background-color (if @mouse-over? "#eee")}
+       :attr {:on-mouse-over (handler-fn (reset! mouse-over? true))
+              :on-mouse-out  (handler-fn (reset! mouse-over? false))}
+       :child (compose-measurement (get ingredient :ingredient/name ingredient) quantity unit)])))
 
 (defn recipe-measurements-list [recipe]
   [rc/v-box
    :children [[rc/box
                :style {:padding "1em"}
                :child [rc/title :level :level3 :label "Ingredients"]]
-              [rc/v-box
-               :children [(for [measurement (:recipe/measurements @recipe)]
-                            ^{:key (:db/id measurement)} [measurement-item measurement])]]]])
+              [rc/border
+               :l-border "1px solid lightgrey"
+               :child [rc/v-box
+                       :style {:margin-left "1em"}
+                       :children [(for [measurement (:recipe/measurements @recipe)]
+                                    ^{:key (:db/id measurement)} [measurement-item measurement])]]]]])
 
 (defn recipe-preparation []
   (fn [{:keys [recipe/name recipe/description recipe/portions recipe/preparation recipe/categories]}]
@@ -73,8 +73,8 @@
 
 ;; recipe creation ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(defn wired-textbox [{:keys [label form key textarea]
-                      :or   [:textarea false]}]
+(defn wired-textbox [{:keys [label form key textarea width]
+                      :or   [:textarea false :width "250px"]}]
   (let [model (subscribe [:form-state form key])]
     (fn []
       [rc/v-box
@@ -83,6 +83,7 @@
         [(if textarea
            rc/input-textarea
            rc/input-text)
+         :width width
          :model (or @model "")
          :change-on-blur? true
          :on-change #(dispatch [:form-state/update form key %])]]])))
@@ -90,63 +91,94 @@
 (defn new-measurement [form-key]
   (let [show (subscribe [:form-state form-key :show-new-measurement])]
     (fn []
-      [:div
-       (when @show
-         [rc/h-box
-          :children [
-                     [wired-textbox {:label "Quantity"
-                                     :form  form-key
-                                     :key   :tmp.measurement/quantity}]
-                     [wired-textbox {:label "Unit"
-                                     :form  form-key
-                                     :key   :tmp.measurement/unit}]
-                     [wired-textbox {:label "Ingredient"
-                                     :form  form-key
-                                     :key   :tmp.measurement/ingredient}]
-                     [rc/button
-                      :label "OK"
-                      :class "btn-primary"
-                      :on-click #(dispatch [:measurement/add form-key])]]])
-       [rc/md-circle-icon-button
-        :md-icon-name "zmdi-plus"
-        :tooltip "Add another ingredient"
-        :on-click #(dispatch [:form-state/update form-key :show-new-measurement true])]])))
+      [rc/v-box
+       :children [(if @show
+                    [rc/h-box
+                     :align :end
+                     :children [[wired-textbox {:label "Quantity"
+                                                :form  form-key
+                                                :key   :tmp.measurement/quantity
+                                                :width "60px"}]
+                                [rc/gap :size "0.5em"]
+                                [wired-textbox {:label "Unit"
+                                                :form  form-key
+                                                :key   :tmp.measurement/unit
+                                                :width "50px"}]
+                                [rc/gap :size "1em"]
+                                [wired-textbox {:label "Ingredient"
+                                                :form  form-key
+                                                :key   :tmp.measurement/ingredient
+                                                :width "150px"}]
+                                [rc/gap :size "0.5em"]
+                                [rc/button
+                                 :label "OK"
+                                 :class "btn-primary"
+                                 :on-click #(dispatch [:measurement/add form-key])]
+                                [rc/gap :size "1px"]
+                                [rc/button
+                                 :label "Cancel"
+                                 :class "btn-secondary"
+                                 :on-click #(dispatch [:measurement/cancel form-key])]]]
+                    [rc/box
+                     :align-self :start
+                     :child [rc/label
+                             :label "add ingredient..."
+                             :class "text-muted"
+                             :on-click #(dispatch [:form-state/update form-key :show-new-measurement true])]])]])))
 
 (defn measurements [form-key]
   (let [measurements (subscribe [:form-state form-key :recipe/measurements])]
     (fn []
-      [:ul.list-group
-       (for [[idx measurement] (indexed @measurements)]
-         ^{:key idx} [measurement-item measurement])
-       [new-measurement form-key]
-       ])))
+      [rc/v-box
+       :gap "1em"
+       :children [[rc/box
+                   :child [rc/title :level :level3 :label "Ingredients"]]
+                  [rc/v-box
+                   :children [(for [[idx measurement] (indexed @measurements)]
+                                ^{:key idx} [measurement-item measurement])]]
+                  [new-measurement form-key]]])))
 
 (defn new-recipe []
   (let [form-key :new-recipe]
     [rc/v-box
-     :children [[rc/v-box
-                 :children [[rc/title :level :level1 :underline? true :label "New Recipe"]
-                            [wired-textbox {:label "Name"
-                                            :form  form-key
-                                            :key   :recipe/name}]
-                            [wired-textbox {:label    "Description"
-                                            :form     form-key
-                                            :key      :recipe/description
-                                            :textarea true}]
-                            [wired-textbox {:label "Portions"
-                                            :form  form-key
-                                            :key   :recipe/portions}]
-                            [wired-textbox {:label    "Preparation"
-                                            :form     form-key
-                                            :key      :recipe/preparation
-                                            :textarea true}]]]
-                [rc/v-box
-                 :children [[rc/title :level :level2 :underline? true :label "Ingredients"]
-                            [measurements form-key]
-                            [rc/button
-                             :label "Add recipe!"
+     :children [[rc/title :level :level1 :underline? true :label "New Recipe"]
+                [rc/h-box
+                 :gap "2em"
+                 :children [[rc/v-box
+                             :gap "1em"
+                             :children [[wired-textbox {:label "Name"
+                                                        :form  form-key
+                                                        :key   :recipe/name}]
+                                        [wired-textbox {:label    "Description"
+                                                        :form     form-key
+                                                        :key      :recipe/description
+                                                        :textarea true}]
+                                        [wired-textbox {:label "Portions"
+                                                        :form  form-key
+                                                        :key   :recipe/portions}]
+                                        [wired-textbox {:label    "Preparation"
+                                                        :form     form-key
+                                                        :key      :recipe/preparation
+                                                        :textarea true}]]]
+                            [rc/border
+                             :l-border "1px solid lightgrey"
+                             :child [rc/v-box
+                                     :style {:padding-left "1em"}
+                                     :children [[measurements form-key]]]]]]
+                [rc/gap :size "1em"]
+                [rc/line]
+                [rc/gap :size "0.5em"]
+                [rc/h-box
+                 :align :center
+                 :gap "0.5em"
+                 :children [[rc/button
+                             :label "Add recipe"
                              :class "btn-primary"
-                             :on-click #(dispatch [:recipe/create form-key])]]]]]))
+                             :on-click #(dispatch [:recipe/create form-key])]
+                            [rc/md-circle-icon-button
+                             :md-icon-name "zmdi-delete"
+                             :tooltip "Clear form"
+                             :on-click #(dispatch [:recipe/clear form-key])]]]]]))
 
 
 ;; recipe list ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
