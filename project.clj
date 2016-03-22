@@ -52,6 +52,7 @@
                  [re-frame "0.7.0-alpha-2"]
                  [re-com "0.8.0"]
                  [json-html "0.3.8"]
+                 [com.novemberain/monger "3.0.2"]
                  ]
 
   :min-lein-version "2.0.0"

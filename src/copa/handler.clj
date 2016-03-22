@@ -1,8 +1,8 @@
 (ns copa.handler
   (:require [compojure.core :refer [defroutes routes wrap-routes]]
             [copa.layout :refer [error-page]]
-            [copa.routes.home :refer [home-routes]]
-            [copa.routes.services :refer [service-routes]]
+            [copa.http.routes :refer [home-routes]]
+            [copa.http.api :refer [service-routes]]
             [copa.middleware :as middleware]
             [taoensso.timbre :as timbre]
             [compojure.route :as route]

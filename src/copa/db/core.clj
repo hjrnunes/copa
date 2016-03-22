@@ -1,30 +1,42 @@
 (ns copa.db.core
   (:require [mount.core :refer [defstate]]
-            [datomic.api :as d]
-            [io.rkn.conformity :as c]
-            [taoensso.timbre :as timbre]))
+            [monger.core :as mg]
+            [monger.collection :as mc]
+            [monger.query :as q]
+            [monger.operators :refer :all]
+            [monger.util :refer [object-id]]
+            [monger.json]
+            [monger.joda-time]
+            [com.stuartsierra.component :as component]
+            [taoensso.timbre :as timbre])
+  (:import (com.mongodb MongoClientException)))
 
 (timbre/refer-timbre)
 
-(def uri "datomic:mem://copa")
+(def uri "mongodb://localhost/copa")
 
-(defn init-db [dburi]
-  {:pre [dburi]}
-  (if (d/create-database dburi)
-    (debug "Created database" dburi)
-    (debug "Using existing database" dburi))
-  (let [conn (d/connect dburi)
-        norms-map (c/read-resource "copa-schema.edn")]
-    (debug "Loading schema")
-    (c/ensure-conforms conn norms-map [:copa/schema
-                                       :copa/seed])
-    conn))
+(defn init-db [uri]
+  (mg/connect-via-uri uri))
 
-
-(defstate db
+(defstate mongo
           :start (init-db uri))
 
-(defn conn?
-  "Check type is a Datomic connection. Useful for pre and post conditions."
-  [conn]
-  (instance? datomic.Connection conn))
+;; -- queries ----------------------------------------
+
+(defn get-all-recipes [mongo]
+  (mc/find-maps (:db mongo) "recipes"))
+
+(defn get-all-ingredients [mongo]
+  (mc/find-maps (:db mongo) "ingredients"))
+
+(defn get-recipe [mongo name]
+  (mc/find-one-as-map (:db mongo) "recipes" {:name name}))
+
+(defn get-ingredient [mongo name]
+  (mc/find-one-as-map (:db mongo) "ingredients" {:name name}))
+
+(defn update-recipe [mongo recipe]
+  (mc/update (:db mongo) "recipes" {:name (:name recipe)} recipe {:upsert true}))
+
+
+
