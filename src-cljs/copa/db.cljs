@@ -3,20 +3,20 @@
             [schema.core :as s :include-macros true]))
 
 (s/defschema BaseEntity
-  {(s/optional-key :db/id) s/Int})
+  {(s/optional-key :_id) s/Int})
 
 (s/defschema Measurement
-  (merge BaseEntity {:measurement/ingredient            s/Str
-                     :measurement/quantity              s/Num
-                     (s/optional-key :measurement/unit) s/Str}))
+  (merge BaseEntity {:ingredient            s/Str
+                     :quantity              s/Num
+                     (s/optional-key :unit) s/Str}))
 
 (s/defschema Recipe
-  (merge BaseEntity {:recipe/name                         s/Str
-                     (s/optional-key :recipe/description) s/Str
-                     (s/optional-key :recipe/portions)    s/Int
-                     :recipe/preparation                  s/Str
-                     (s/optional-key :recipe/categories)  [s/Str]
-                     :recipe/measurements                 [Measurement]
+  (merge BaseEntity {:name                         s/Str
+                     (s/optional-key :description) s/Str
+                     (s/optional-key :portions)    s/Int
+                     :preparation                  s/Str
+                     (s/optional-key :categories)  [s/Str]
+                     :measurements                 [Measurement]
                      }))
 
 
