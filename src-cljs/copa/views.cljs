@@ -1,9 +1,11 @@
 (ns copa.views
+  (:require-macros [copa.macros :refer [handler-fn]])
   (:require [reagent.core :as reagent :refer [atom]]
             [re-frame.core :refer [subscribe dispatch]]
             [re-com.core :as rc :refer-macros [handler-fn]]
             [clojure.string :refer [join capitalize]]
-            [plumbing.core :refer [indexed]]))
+            [plumbing.core :refer [indexed]]
+            [json-html.core :refer [edn->hiccup]]))
 
 ;; recipe details ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
@@ -54,10 +56,21 @@
                             [rc/p preparation]]]]]))
 
 (defn recipe-details-header []
-  (fn [{:keys [recipe/name recipe/description recipe/portions recipe/preparation recipe/categories]}]
+  (fn [{:keys [recipe/name recipe/description recipe/portions recipe/preparation recipe/categories] :as recipe}]
     [rc/v-box
-     :children [
-                [rc/title :level :level1 :underline? true :label name]]]))
+     :children [[rc/h-box
+                 ;:gap "1"
+                 :align :center
+                 :children [[rc/box
+                             :child [rc/title :level :level1 :underline? true :label name]]
+                            [rc/md-circle-icon-button
+                             :style {:margin-left "1em"
+                                     :margin-top  "1em"}
+                             :md-icon-name "zmdi-edit"
+                             :tooltip "Edit recipe"
+                             :on-click (handler-fn
+                                         (dispatch [:form-state/load :edit-recipe recipe])
+                                         (dispatch [:state/update :active-pane :edit-recipe]))]]]]]))
 
 (defn recipe-details []
   (let [recipe (subscribe [:state/selected-recipe])]
@@ -84,7 +97,7 @@
            rc/input-textarea
            rc/input-text)
          :width width
-         :model (or @model "")
+         :model (str (or @model ""))
          :change-on-blur? true
          :on-change #(dispatch [:form-state/update form key %])]]])))
 
@@ -180,6 +193,50 @@
                              :tooltip "Clear form"
                              :on-click #(dispatch [:recipe/clear form-key])]]]]]))
 
+;; recipe edit ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(defn edit-recipe []
+  (let [form-key :edit-recipe]
+    [rc/v-box
+     :children [[rc/title :level :level1 :underline? true :label "Edit Recipe"]
+                [rc/h-box
+                 :gap "2em"
+                 :children [[rc/v-box
+                             :gap "1em"
+                             :children [[wired-textbox {:label "Name"
+                                                        :form  form-key
+                                                        :key   :recipe/name}]
+                                        [wired-textbox {:label    "Description"
+                                                        :form     form-key
+                                                        :key      :recipe/description
+                                                        :textarea true}]
+                                        [wired-textbox {:label "Portions"
+                                                        :form  form-key
+                                                        :key   :recipe/portions}]
+                                        [wired-textbox {:label    "Preparation"
+                                                        :form     form-key
+                                                        :key      :recipe/preparation
+                                                        :textarea true}]]]
+                            [rc/border
+                             :l-border "1px solid lightgrey"
+                             :child [rc/v-box
+                                     :style {:padding-left "1em"}
+                                     :children [[measurements form-key]]]]]]
+                [rc/gap :size "1em"]
+                [rc/line]
+                [rc/gap :size "0.5em"]
+                [rc/h-box
+                 :align :center
+                 :gap "0.5em"
+                 :children [[rc/button
+                             :label "Save recipe"
+                             :class "btn-primary"
+                             :on-click #(dispatch [:recipe/create form-key])]
+                            [rc/md-circle-icon-button
+                             :md-icon-name "zmdi-delete"
+                             :tooltip "Clear form"
+                             :on-click #(dispatch [:recipe/clear form-key])]]]]]))
+
 
 ;; recipe list ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
@@ -214,6 +271,7 @@
                    :children [[rc/box
                                :child [rc/title :level :level1 :label "Recipes"]]
                               [rc/md-circle-icon-button
+                               :style {:margin-top "1em"}
                                :md-icon-name "zmdi-plus"
                                :tooltip "Add new recipe"
                                :on-click #(dispatch [:state/update :active-pane :new-recipe])]]]
@@ -232,10 +290,19 @@
       [rc/h-box
        :children [[loading-status loading]]])))
 
+(defn db-state []
+  (let [db (subscribe [:db])]
+    (fn []
+      [rc/v-box
+       :children [(edn->hiccup @db)]])))
+
+
 ;; app ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (def panes {:recipe-details recipe-details
-            :new-recipe     new-recipe})
+            :new-recipe     new-recipe
+            :edit-recipe    edit-recipe
+            :db-state       db-state})
 
 (defn copa-app []
   (let [active-pane (subscribe [:state :active-pane])]
@@ -246,11 +313,14 @@
                    :gap "4em"
                    :children [[rc/v-box
                                :size "2"
-                               :children [[recipe-list-menu]]]
+                               :children [[recipe-list-menu]
+                                          [rc/button
+                                           :label "state"
+                                           :class "btn-default"
+                                           :on-click #(dispatch [:state/update :active-pane :db-state])]]]
                               [rc/v-box
                                :size "8"
                                :children [(if @active-pane
                                             [(@active-pane panes)]
                                             [rc/box
-                                             :child [:div]])]]
-                              ]]]])))
+                                             :child [:div]])]]]]]])))

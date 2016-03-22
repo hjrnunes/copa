@@ -6,6 +6,12 @@
 
 ;; -- Subscription handlers and registration  ---------------------------------
 
+;; subscription for the whole db for debug purposes
+(register-sub
+  :db
+  (fn [db _]
+    (reaction @db)))
+
 ;; generic state subscription
 (register-sub
   :state
@@ -16,6 +22,7 @@
 (register-sub
   :form-state
   (fn [db [_ form field]]
+    (println "FORM: " (get-in @db [:state :forms form]))
     (reaction (get-in @db [:state :forms form field]))))
 
 ; all recipes

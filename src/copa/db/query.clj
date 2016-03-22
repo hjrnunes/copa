@@ -2,7 +2,7 @@
   (:require [juxt.datomic.extras :refer [to-ref-id as-db db? to-entity-map]]
             [datomic.api :refer [q pull transact] :as d]
             [copa.db.core :refer [conn?]]
-            [copa.util :refer [in?]]
+            [copa.util :refer [in? ?assoc]]
             [clojure.pprint :refer [pprint]]))
 
 (defn transact-insert
@@ -63,26 +63,36 @@
            :where [?e :recipe/name ?value]]
          db name))))
 
-(defn find-ingredients [db ingredient-names]
+(defn ingredient-names [ingredients]
+  ;; new ingredients are strings, existing are maps
+  (for [ingredient ingredients]
+    (if (map? ingredient)
+      (:ingredient/name ingredient)
+      ingredient)))
+
+(defn find-ingredients [db ingredients]
   (let [db (as-db db)]
     (q '[:find (pull ?ing [*])
          :in $ [?ing-name ...]
          :where [?ing :ingredient/name ?ing-name]]
-       db ingredient-names)))
+       db (ingredient-names ingredients))))
 
 (defn process-measurements [db measurements]
   (let [rec-ingredients (map :measurement/ingredient measurements)
         existing (map first (find-ingredients db rec-ingredients))
         existing-names (map :ingredient/name existing)]
-    (vec (for [{:keys [measurement/ingredient measurement/quantity measurement/unit]} measurements]
-           (assoc {:measurement/quantity quantity
-                   :measurement/unit     unit}
-             :measurement/ingredient
-             (if (in? existing-names ingredient)
-               ;; if ingredient exists refer to by lookup ref
-               [:ingredient/name ingredient]
-               ;; else just nest create
-               {:ingredient/name ingredient}))))))
+    (vec (for [{:keys [measurement/ingredient measurement/quantity measurement/unit] :as measurement} measurements]
+           (if (map? ingredient)
+             measurement
+             ;; if ingredient is not a map, it's new
+             (?assoc {}
+                     :measurement/quantity quantity
+                     :measurement/unit unit
+                     :measurement/ingredient (if (in? existing-names ingredient)
+                                               ;; if ingredient exists refer to by lookup ref
+                                               [:ingredient/name ingredient]
+                                               ;; else just nest create
+                                               {:ingredient/name ingredient})))))))
 
 (defn create-recipe! [db & [{:keys [recipe/name recipe/description recipe/portions recipe/preparation recipe/categories recipe/measurements]}]]
   (let [recipe (d/tempid :db.part/user)]

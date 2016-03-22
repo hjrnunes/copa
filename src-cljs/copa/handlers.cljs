@@ -66,6 +66,12 @@
   (fn [db [_ form key value]]
     (assoc-in db [:state :forms form key] value)))
 
+;; form load for edit handler
+(register-handler
+  :form-state/load
+  (fn [db [_ form data]]
+    (assoc-in db [:state :forms form] data)))
+
 ;; select recipe
 (register-handler
   :recipe/select
@@ -129,6 +135,35 @@
   :recipe/create
   (fn [db [_ form]]
     (let [recipe (collect-new-recipe-form db form)]
+      (println recipe)
+      (POST (str js/context "/api/recipes")
+            {:response-format :json
+             :params          recipe
+             :keywords?       true
+             :handler         #(dispatch [:recipe/post %1])
+             :error-handler   #(dispatch [:data/error %1])})
+      (dispatch [:state/update :loading true])
+      (dispatch [:recipe/clear])
+      db)))
+
+;; edit recipe
+
+(defn- collect-edit-recipe-form [db form]
+  (into {} [[:recipe/name (get-in db [:state :forms form :recipe/name])]
+            (when-let [description (get-in db [:state :forms form :recipe/description])]
+              [:recipe/description description])
+            (when-let [portions (get-in db [:state :forms form :recipe/portions])]
+              [:recipe/portions (js/parseInt portions)])
+            [:recipe/preparation (get-in db [:state :forms form :recipe/preparation])]
+            ;; flatten ingredients
+            [:recipe/measurements (for [measurement (get-in db [:state :forms form :recipe/measurements])
+                                        :let [ing-name (get-in measurement [:measurement/ingredient :ingredient/name])]]
+                                    (assoc measurement :measurement/ingredient ing-name))]]))
+
+(register-handler
+  :recipe/save
+  (fn [db [_ form]]
+    (let [recipe (collect-edit-recipe-form db form)]
       (println recipe)
       (POST (str js/context "/api/recipes")
             {:response-format :json

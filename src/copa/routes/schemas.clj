@@ -6,8 +6,12 @@
 (s/defschema BaseEntity
   {(s/optional-key :db/id) (describe Long "Database id")})
 
+(s/defschema Ingredient
+  (merge BaseEntity {:ingredient/name (describe s/Str "Ingredient name")}))
+
 (s/defschema Measurement
-  (merge BaseEntity {:measurement/ingredient            (describe s/Str "Measurement ingredient")
+  (merge BaseEntity {:measurement/ingredient            (s/conditional map? (describe Ingredient "Measurement ingredient")
+                                                                       :else (describe s/Str "Measurement ingredient"))
                      :measurement/quantity              (describe Double "Measurement quantity")
                      (s/optional-key :measurement/unit) (describe s/Str "Measurement unit")}))
 
