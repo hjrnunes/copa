@@ -8,26 +8,18 @@
 ;; -- Event Handlers ----------------------------------------------------------
 
 ;; load data request
-(register-handler
-  :data/load
-  (fn [db _]
-    (GET (str js/context "/api/recipes")
-         {:response-format :json
-          :keywords?       true
-          :handler         #(dispatch [:data/response %1])
-          :error-handler   #(dispatch [:data/error %1])})
-    (dispatch [:state/update :loading true])
-    db))
-
-;; load data response
-(register-handler
-  :data/response
-  (fn [db [_ data]]
-    (dispatch [:state/update :loading false])
-    (-> db
-        (assoc :recipes data)
-        (assoc :index (map-vals first
-                                (group-by :_id data))))))
+;(register-handler
+;  :data/load
+;  (fn [db _]
+;    (dispatch [:get/recipes])
+;    (dispatch [:get/ingredients])
+;    db))
+;
+;;; load data response
+;(register-handler
+;  :data/response
+;  (fn [db [_ data]]
+;    db))
 
 ;; load data error
 (register-handler
@@ -54,6 +46,29 @@
   :form-state/load
   (fn [db [_ form data]]
     (assoc-in db [:state :forms form] data)))
+
+;; get recipes
+(register-handler
+  :get/recipes
+  (fn [db _]
+    (GET (str js/context "/api/recipes")
+         {:response-format :json
+          :keywords?       true
+          :handler         #(dispatch [:response/get-recipes %1])
+          :error-handler   #(dispatch [:data/error %1])})
+    (dispatch [:state/update :loading true])
+    db))
+
+;; get recipes response
+(register-handler
+  :response/get-recipes
+  (fn [db [_ data]]
+    (dispatch [:state/update :loading false])
+    (dispatch [:get/ingredients])
+    (-> db
+        (assoc-in [:data :recipes] data)
+        (assoc-in [:index :recipes] (map-vals first
+                                              (group-by :_id data))))))
 
 ;; select recipe
 (register-handler
@@ -143,5 +158,35 @@
       (dispatch [:state/update :loading false])
       (dispatch [:recipe/select recp-id])
       (-> db
-          (update-in [:recipes] conj data)
-          (assoc-in [:index recp-id] data)))))
+          (update-in [:data :recipes] conj data)
+          (assoc-in [:index :recipes recp-id] data)))))
+
+;; get ingredients
+(register-handler
+  :get/ingredients
+  (fn [db _]
+    (GET (str js/context "/api/ingredients")
+         {:response-format :json
+          :keywords?       true
+          :handler         #(dispatch [:response/get-ingredients %1])
+          :error-handler   #(dispatch [:data/error %1])})
+    (dispatch [:state/update :loading true])
+    db))
+
+;; get ingredients response
+(register-handler
+  :response/get-ingredients
+  (fn [db [_ data]]
+    (dispatch [:state/update :loading false])
+    (-> db
+        (assoc-in [:data :ingredients] data)
+        (assoc-in [:index :ingredients] (map-vals first
+                                                  (group-by :name data))))))
+
+;; select ingredient
+(register-handler
+  :ingredient/select
+  (fn [db [_ selected]]
+    (-> db
+        (assoc-in [:state :selected-ingredient] selected)
+        (assoc-in [:state :active-ingredient-pane] :ingredient-details))))

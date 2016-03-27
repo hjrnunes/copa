@@ -23,7 +23,11 @@
 
 ;; -- Entry Point -------------------------------------------------------------
 
+(defn load-data! []
+  (dispatch-sync [:get/recipes])
+  (dispatch [:get/ingredients]))
+
 (defn init! []
-  (dispatch-sync [:data/load])
+  (load-data!)
   (reagent/render [copa-app]
                   (.getElementById js/document "app")))

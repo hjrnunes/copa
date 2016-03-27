@@ -17,5 +17,7 @@
   (ok (db/get-ingredient mongo name)))
 
 (defn create-recipe [recipe]
-  (let [updt-res (db/update-recipe mongo recipe)]
+  (let [ingredients (map :ingredient (:measurements recipe))
+        updt-res (db/update-recipe mongo recipe)
+        ingr-res (doall (map #(db/update-ingredient mongo % (:name recipe)) ingredients))]
     (ok (db/get-recipe mongo (:name recipe)))))

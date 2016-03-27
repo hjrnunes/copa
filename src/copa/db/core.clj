@@ -23,20 +23,26 @@
 
 ;; -- queries ----------------------------------------
 
+;; recipes
+
 (defn get-all-recipes [mongo]
   (mc/find-maps (:db mongo) "recipes"))
-
-(defn get-all-ingredients [mongo]
-  (mc/find-maps (:db mongo) "ingredients"))
 
 (defn get-recipe [mongo name]
   (mc/find-one-as-map (:db mongo) "recipes" {:name name}))
 
-(defn get-ingredient [mongo name]
-  (mc/find-one-as-map (:db mongo) "ingredients" {:name name}))
-
 (defn update-recipe [mongo recipe]
   (mc/update (:db mongo) "recipes" {:name (:name recipe)} recipe {:upsert true}))
 
+;; ingredients
 
+(defn get-all-ingredients [mongo]
+  (mc/find-maps (:db mongo) "ingredients"))
+
+(defn get-ingredient [mongo name]
+  (mc/find-one-as-map (:db mongo) "ingredients" {:name name}))
+
+(defn update-ingredient [mongo name recipe-name]
+  (mc/update (:db mongo) "ingredients" {:name name} {$set      {:name name}
+                                                     $addToSet {:recipes recipe-name}} {:upsert true}))
 

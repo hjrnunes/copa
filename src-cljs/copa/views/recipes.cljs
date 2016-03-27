@@ -243,7 +243,7 @@
                ^{:key (:_id recipe)} [recipe-list-item recipe])])
 
 (defn recipe-list-menu []
-  (let [recipes (subscribe [:data/recipes])]
+  (let [recipes (subscribe [:data :recipes])]
     (fn []
       [rc/v-box
        :children [[rc/h-box

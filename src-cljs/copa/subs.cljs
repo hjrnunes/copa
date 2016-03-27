@@ -25,16 +25,31 @@
     (println "FORM: " (get-in @db [:state :forms form]))
     (reaction (get-in @db [:state :forms form field]))))
 
-; all recipes
+;; generic data subscription
 (register-sub
-  :data/recipes
-  (fn [db _]
-    (reaction (:recipes @db))))
+  :data
+  (fn [db [_ field]]
+    (reaction (get-in @db [:data field]))))
 
 ; selected recipe in menu
 (register-sub
   :state/selected-recipe
   (fn [db _]
     (let [selected (reaction (get-in @db [:state :selected-recipe]))
-          index (reaction (:index @db))]
+          index (reaction (get-in @db [:index :recipes]))]
       (reaction (get @index @selected)))))
+
+; selected ingredient in menu
+(register-sub
+  :state/selected-ingredient
+  (fn [db _]
+    (let [selected (reaction (get-in @db [:state :selected-ingredient]))
+          index (reaction (get-in @db [:index :ingredients]))]
+      (reaction (get @index @selected)))))
+
+; sorted ingredients
+(register-sub
+  :sorted/ingredients
+  (fn [db _]
+    (let [ingredients (reaction (get-in @db [:data :ingredients]))]
+      (reaction (sort-by :name @ingredients)))))
