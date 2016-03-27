@@ -28,7 +28,6 @@
 (register-sub
   :form-state
   (fn [db [_ form field]]
-    (println "FORM: " (get-in @db [:state :forms form]))
     (reaction (get-in @db [:state :forms form field]))))
 
 ;; generic data subscription

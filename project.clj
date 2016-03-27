@@ -31,7 +31,7 @@
                  [secretary "1.2.3"]
                  [org.clojure/core.async "0.2.374"]
                  [cljs-ajax "0.5.3"]
-                 [metosin/compojure-api "0.24.5"]
+                 [metosin/compojure-api "1.0.0"]
                  [metosin/ring-swagger-ui "2.1.4-0"]
                  [luminus-http-kit "0.1.1"]
                  [luminus-log4j "0.1.2"]

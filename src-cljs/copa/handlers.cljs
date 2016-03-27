@@ -1,5 +1,6 @@
 (ns copa.handlers
   (:require [copa.db :refer [default-value app-schema]]
+            [copa.ajax :refer [load-auth-interceptor!]]
             [re-frame.core :refer [register-handler dispatch path trim-v after]]
             [schema.core :as s]
             [plumbing.core :refer [map-vals]]
@@ -33,7 +34,7 @@
   (fn [db [_ form data]]
     (assoc-in db [:state :forms form] data)))
 
-;; get setttings
+;; get settings
 (register-handler
   :get/settings
   (fn [db _]
@@ -45,13 +46,43 @@
     (dispatch [:state/update :loading true])
     db))
 
-;; get recipes response
+;; get settings response
 (register-handler
   :response/get-settings
   (fn [db [_ data]]
     (dispatch [:state/update :loading false])
     (-> db
         (assoc-in [:settings] data))))
+
+;; login user
+(register-handler
+  :data/login
+  (fn [db [_ form]]
+    (println (get-in db [:state :form]))
+    (POST (str js/context "/auth")
+          {:params          {:username (get-in db [:state :forms form :username])
+                             :password (get-in db [:state :forms form :password])}
+           :response-format :json
+           :keywords?       true
+           :handler         #(dispatch [:response/login %1])
+           :error-handler   #(dispatch [:data/error %1])})
+    ;(dispatch [:loading/start])
+    db))
+
+(defn load-data! []
+  (dispatch [:get/settings])
+  (dispatch [:get/recipes])
+  (dispatch [:get/ingredients]))
+
+;; get auth token response
+(register-handler
+  :response/login
+  (fn [db [_ data]]
+    (load-auth-interceptor! (:token data))
+    (load-data!)
+    (-> db
+        (assoc-in [:state :token] (:token data))
+        (assoc-in [:state :user] (:user data)))))
 
 ;; get recipes
 (register-handler

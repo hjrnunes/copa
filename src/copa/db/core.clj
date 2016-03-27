@@ -19,33 +19,54 @@
 (defstate mongo
           :start (init-db uri))
 
+(def users-col "users")
+(def recipes-col "recipes")
+(def ingredients-col "ingredients")
+(def settings-col "settings")
+
 ;; -- queries ----------------------------------------
 
 ;; settings
 
 (defn get-settings [mongo]
-  (mc/find-one-as-map (:db mongo) "settings" {:name "settings"}))
+  (mc/find-one-as-map (:db mongo) settings-col {:name "settings"}))
+
+;; users
+
+(defn get-user [mongo username]
+  (mc/find-one-as-map (:db mongo) users-col {:username username}))
+
+(defn create-user [mongo username password admin]
+  (mc/insert-and-return (:db mongo) users-col {:username username
+                                               :password password
+                                               :admin    ((partial = "true") admin)}))
+
+(defn update-user-password [mongo username new-password]
+  (mc/update (:db mongo) users-col {:username username} {$set {:password new-password}}))
+
+(defn delete-user [mongo username]
+  (mc/remove (:db mongo) users-col {:username username}))
 
 ;; recipes
 
 (defn get-all-recipes [mongo]
-  (mc/find-maps (:db mongo) "recipes"))
+  (mc/find-maps (:db mongo) recipes-col))
 
 (defn get-recipe [mongo name]
-  (mc/find-one-as-map (:db mongo) "recipes" {:name name}))
+  (mc/find-one-as-map (:db mongo) recipes-col {:name name}))
 
 (defn update-recipe [mongo recipe]
-  (mc/update (:db mongo) "recipes" {:name (:name recipe)} recipe {:upsert true}))
+  (mc/update (:db mongo) recipes-col {:name (:name recipe)} recipe {:upsert true}))
 
 ;; ingredients
 
 (defn get-all-ingredients [mongo]
-  (mc/find-maps (:db mongo) "ingredients"))
+  (mc/find-maps (:db mongo) ingredients-col))
 
 (defn get-ingredient [mongo name]
-  (mc/find-one-as-map (:db mongo) "ingredients" {:name name}))
+  (mc/find-one-as-map (:db mongo) ingredients-col {:name name}))
 
 (defn update-ingredient [mongo name recipe-name]
-  (mc/update (:db mongo) "ingredients" {:name name} {$set      {:name name}
-                                                     $addToSet {:recipes recipe-name}} {:upsert true}))
+  (mc/update (:db mongo) ingredients-col {:name name} {$set      {:name name}
+                                                       $addToSet {:recipes recipe-name}} {:upsert true}))
 

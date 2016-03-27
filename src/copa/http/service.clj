@@ -1,7 +1,22 @@
 (ns copa.http.service
   (:require [copa.db.core :as db :refer [mongo]]
+            [copa.auth :refer [jws-token]]
+            [buddy.hashers :as hashers]
             [ring.util.http-response :refer :all]
+            [clj-time.core :as time]
             [cheshire.core :as json]))
+
+;; -- auth -----------------------------------------------------
+
+(defn login [username password]
+  (let [user (db/get-user mongo username)]
+    (if (hashers/check password (:password user))
+      (let [claims {:user (keyword username)
+                    :exp  (time/plus (time/now) (time/seconds 3600))}
+            token (jws-token claims)]
+        (ok {:token token
+             :user  (dissoc user :password)}))
+      (bad-request {:message "Login failed. Wrong auth details."}))))
 
 (defn get-settings []
   (ok (db/get-settings mongo)))

@@ -4,6 +4,7 @@
             [reagent.core :as reagent :refer [atom]]
             [re-frame.core :refer [dispatch dispatch-sync]]
             [secretary.core :as secretary]
+            [copa.ajax :refer [load-interceptors!]]
             [copa.views.core :refer [copa-app]]
             [copa.handlers]
             [copa.subs])
@@ -23,12 +24,7 @@
 
 ;; -- Entry Point -------------------------------------------------------------
 
-(defn load-data! []
-  (dispatch-sync [:get/settings])
-  (dispatch-sync [:get/recipes])
-  (dispatch [:get/ingredients]))
-
 (defn init! []
-  (load-data!)
+  (load-interceptors!)
   (reagent/render [copa-app]
                   (.getElementById js/document "app")))
