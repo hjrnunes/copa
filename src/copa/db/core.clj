@@ -7,9 +7,7 @@
             [monger.util :refer [object-id]]
             [monger.json]
             [monger.joda-time]
-            [com.stuartsierra.component :as component]
-            [taoensso.timbre :as timbre])
-  (:import (com.mongodb MongoClientException)))
+            [taoensso.timbre :as timbre]))
 
 (timbre/refer-timbre)
 
@@ -22,6 +20,11 @@
           :start (init-db uri))
 
 ;; -- queries ----------------------------------------
+
+;; settings
+
+(defn get-settings [mongo]
+  (mc/find-one-as-map (:db mongo) "settings" {:name "settings"}))
 
 ;; recipes
 

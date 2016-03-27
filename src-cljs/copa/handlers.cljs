@@ -33,6 +33,26 @@
   (fn [db [_ form data]]
     (assoc-in db [:state :forms form] data)))
 
+;; get setttings
+(register-handler
+  :get/settings
+  (fn [db _]
+    (GET (str js/context "/api/settings")
+         {:response-format :json
+          :keywords?       true
+          :handler         #(dispatch [:response/get-settings %1])
+          :error-handler   #(dispatch [:data/error %1])})
+    (dispatch [:state/update :loading true])
+    db))
+
+;; get recipes response
+(register-handler
+  :response/get-settings
+  (fn [db [_ data]]
+    (dispatch [:state/update :loading false])
+    (-> db
+        (assoc-in [:settings] data))))
+
 ;; get recipes
 (register-handler
   :get/recipes

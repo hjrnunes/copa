@@ -3,6 +3,8 @@
             [ring.util.http-response :refer :all]
             [cheshire.core :as json]))
 
+(defn get-settings []
+  (ok (db/get-settings mongo)))
 
 (defn get-all-recipes []
   (ok (db/get-all-recipes mongo)))

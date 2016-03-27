@@ -24,6 +24,7 @@
 ;; -- Entry Point -------------------------------------------------------------
 
 (defn load-data! []
+  (dispatch-sync [:get/settings])
   (dispatch-sync [:get/recipes])
   (dispatch [:get/ingredients]))
 

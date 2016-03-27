@@ -12,7 +12,12 @@
         (swagger-docs
           {:info {:title "Copa API"}})
         (context* "/api" []
-                  :tags ["thingie"]
+                  :tags ["api"]
+
+                  (GET* "/settings" []
+                        ;:return [schemas/Recipe]
+                        :summary "Get settings"
+                        (s/get-settings))
 
                   (GET* "/recipes" []
                         ;:return [schemas/Recipe]

@@ -35,12 +35,17 @@
                    :justify :start
                    :gap "1em"
                    :children [[rc/v-box
+                               ;:justify :around
                                :size "none"
                                :padding "0.5em"
                                :gap "1em"
                                :style {:background-color "ghostwhite"}
-                               :children [[rc/md-circle-icon-button
-                                           :md-icon-name "zmdi-cutlery"
+                               :children [[rc/gap
+                                           :size "0.5em"]
+                                          [rc/box
+                                           :child [:img {:src "images/logo.png"}]]
+                                          [rc/md-circle-icon-button
+                                           :md-icon-name "zmdi-book"
                                            :tooltip "Recipes"
                                            :tooltip-position :below-right
                                            :on-click #(dispatch [:state/update :active-main-pane :recipes])]

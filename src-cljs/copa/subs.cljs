@@ -18,6 +18,12 @@
   (fn [db [_ field]]
     (reaction (get-in @db [:state field]))))
 
+;; generic settings subscription
+(register-sub
+  :settings
+  (fn [db [_ field]]
+    (reaction (keyword (get-in @db [:settings field])))))
+
 ;; generic form state subscription
 (register-sub
   :form-state
