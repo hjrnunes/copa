@@ -42,14 +42,17 @@
                                :children [[rc/md-circle-icon-button
                                            :md-icon-name "zmdi-cutlery"
                                            :tooltip "Recipes"
+                                           :tooltip-position :below-right
                                            :on-click #(dispatch [:state/update :active-main-pane :recipes])]
                                           [rc/md-circle-icon-button
                                            :md-icon-name "zmdi-shopping-cart"
                                            :tooltip "Ingredients"
+                                           :tooltip-position :below-right
                                            :on-click #(dispatch [:state/update :active-main-pane :ingredients])]
                                           [rc/md-circle-icon-button
                                            :md-icon-name "zmdi-search"
                                            :tooltip "State"
+                                           :tooltip-position :below-right
                                            :on-click #(dispatch [:state/update :active-main-pane :db-state])]]]
                               (if @active-main-pane
                                 [(@active-main-pane main-panes)]

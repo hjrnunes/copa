@@ -7,20 +7,6 @@
 
 ;; -- Event Handlers ----------------------------------------------------------
 
-;; load data request
-;(register-handler
-;  :data/load
-;  (fn [db _]
-;    (dispatch [:get/recipes])
-;    (dispatch [:get/ingredients])
-;    db))
-;
-;;; load data response
-;(register-handler
-;  :data/response
-;  (fn [db [_ data]]
-;    db))
-
 ;; load data error
 (register-handler
   :data/error
@@ -68,7 +54,7 @@
     (-> db
         (assoc-in [:data :recipes] data)
         (assoc-in [:index :recipes] (map-vals first
-                                              (group-by :_id data))))))
+                                              (group-by :name data))))))
 
 ;; select recipe
 (register-handler

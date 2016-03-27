@@ -232,7 +232,7 @@
                        :background-color (if (or (= _id (:_id @selected-recipe))
                                                  @mouse-over?)
                                            "#eee")}
-               :attr {:on-click      #(dispatch [:recipe/select _id])
+               :attr {:on-click      #(dispatch [:recipe/select name])
                       :on-mouse-over (handler-fn (reset! mouse-over? true))
                       :on-mouse-out  (handler-fn (reset! mouse-over? false))}
                :child [rc/label :label name]]])))

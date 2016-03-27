@@ -11,13 +11,16 @@
   [rc/v-box
    :children [[rc/box
                :style {:padding "1em"}
-               :child [rc/title :level :level3 :label "Recipes"]]
+               :child [rc/title :level :level3 :label "is in recipes:"]]
               [rc/v-box
                :style {:margin-left "1em"}
                :children [(for [[idx recipe] (indexed (:recipes @ingredient))]
                             ^{:key idx} [rc/hyperlink
                                          :label recipe
-                                         :on-click #()])]]]])
+                                         :on-click (handler-fn
+                                                     (dispatch [:recipe/select recipe])
+                                                     (dispatch [:state/update :active-main-pane :recipes])
+                                                     (dispatch [:state/update :active-recipe-pane :recipe-details]))])]]]])
 
 (defn ingredient-details []
   (let [ingredient (subscribe [:state/selected-ingredient])]
@@ -28,7 +31,7 @@
                      :children [[rc/h-box
                                  :align :center
                                  :children [[rc/box
-                                             :child [rc/title :level :level1 :underline? true :label (:name @ingredient)]]]]]]
+                                             :child [rc/title :level :level1 :underline? true :label (capitalize (:name @ingredient))]]]]]]
                     [ingredient-recipe-list ingredient]]]))))
 
 ;; recipe list ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
