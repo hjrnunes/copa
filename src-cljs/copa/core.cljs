@@ -4,9 +4,9 @@
             [reagent.core :as reagent :refer [atom]]
             [re-frame.core :refer [dispatch dispatch-sync]]
             [secretary.core :as secretary]
+            [copa.views.core :refer [copa-app]]
             [copa.handlers]
-            [copa.subs]
-            [copa.views])
+            [copa.subs])
   (:import [goog History]
            [goog.history EventType]))
 
@@ -25,5 +25,5 @@
 
 (defn init! []
   (dispatch-sync [:data/load])
-  (reagent/render [copa.views/copa-app]
+  (reagent/render [copa-app]
                   (.getElementById js/document "app")))

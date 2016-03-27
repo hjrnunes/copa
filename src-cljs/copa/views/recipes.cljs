@@ -1,4 +1,4 @@
-(ns copa.views
+(ns copa.views.recipes
   (:require-macros [copa.macros :refer [handler-fn]])
   (:require [reagent.core :as r]
             [re-frame.core :refer [subscribe dispatch]]
@@ -259,61 +259,29 @@
                   (when-not (empty? @recipes)
                     [recipe-list recipes])]])))
 
-(defn loading-status [loading]
-  [:div
-   (if @loading
-     [:span.label.label-warning "Syncing"]
-     [:span.label.label-info "Synced"])])
-
-(defn db-state []
-  (let [db (subscribe [:db])]
-    (fn []
-      [rc/v-box
-       :children [(edn->hiccup @db)]])))
-
-
-;; app ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
 (def recipe-panes {:recipe-details recipe-details
                    :new-recipe     new-recipe
                    :edit-recipe    edit-recipe
-                   :db-state       db-state})
+                   ;:db-state       db-state
+                   })
 
-(defn copa-app []
+(defn recipes-section []
   (let [active-recipe-pane (subscribe [:state :active-recipe-pane])]
     (fn []
-      [rc/v-box
-       :children [[rc/h-box
-                   :size "1 0 auto"
-                   :justify :start
-                   :gap "1em"
-                   :children [[rc/v-box
-                               :size "none"
-                               :padding "0.5em"
-                               :gap "1em"
-                               :style {:background-color "ghostwhite"}
-                               :children [[rc/md-circle-icon-button
-                                           :md-icon-name "zmdi-cutlery"
-                                           :tooltip "Recipes"
-                                           :on-click #()]
-                                          [rc/md-circle-icon-button
-                                           :md-icon-name "zmdi-shopping-cart"
-                                           :tooltip "Ingredients"
-                                           :on-click #()]]]
-                              [rc/h-box
-                               :size "1"
-                               :justify :around
-                               :gap "4em"
-                               :children [[rc/v-box
-                                           :size "2"
-                                           :children [[recipe-list-menu]
-                                                      [rc/button
-                                                       :label "state"
-                                                       :class "btn-default"
-                                                       :on-click #(dispatch [:state/update :active-recipe-pane :db-state])]]]
-                                          [rc/v-box
-                                           :size "8"
-                                           :children [(if @active-recipe-pane
-                                                        [(@active-recipe-pane recipe-panes)]
-                                                        [rc/box
-                                                         :child [:div]])]]]]]]]])))
+      [rc/h-box
+       :size "1"
+       :justify :around
+       :gap "4em"
+       :children [[rc/v-box
+                   :size "2"
+                   :children [[recipe-list-menu]
+                              [rc/button
+                               :label "state"
+                               :class "btn-default"
+                               :on-click #(dispatch [:state/update :active-recipe-pane :db-state])]]]
+                  [rc/v-box
+                   :size "8"
+                   :children [(if @active-recipe-pane
+                                [(@active-recipe-pane recipe-panes)]
+                                [rc/box
+                                 :child [:div]])]]]])))
