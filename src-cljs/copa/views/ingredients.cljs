@@ -7,13 +7,29 @@
             [plumbing.core :refer [indexed]]
             [copa.views.recipes :refer [recipes-section]]))
 
+(defn ingredient-recipe-list [ingredient]
+  [rc/v-box
+   :children [[rc/box
+               :style {:padding "1em"}
+               :child [rc/title :level :level3 :label "Recipes"]]
+              [rc/v-box
+               :style {:margin-left "1em"}
+               :children [(for [[idx recipe] (indexed (:recipes @ingredient))]
+                            ^{:key idx} [rc/hyperlink
+                                         :label recipe
+                                         :on-click #()])]]]])
+
 (defn ingredient-details []
   (let [ingredient (subscribe [:state/selected-ingredient])]
     (fn []
       (when @ingredient
         [rc/v-box
-         :children [[:label (:name @ingredient)]
-                    [:label (str (:recipes @ingredient))]]]))))
+         :children [[rc/v-box
+                     :children [[rc/h-box
+                                 :align :center
+                                 :children [[rc/box
+                                             :child [rc/title :level :level1 :underline? true :label (:name @ingredient)]]]]]]
+                    [ingredient-recipe-list ingredient]]]))))
 
 ;; recipe list ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
@@ -61,11 +77,7 @@
        :gap "4em"
        :children [[rc/v-box
                    :size "2"
-                   :children [[ingredient-list-menu]
-                              [rc/button
-                               :label "state"
-                               :class "btn-default"
-                               :on-click #(dispatch [:state/update :active-recipe-pane :db-state])]]]
+                   :children [[ingredient-list-menu]]]
                   [rc/v-box
                    :size "8"
                    :children [(if @active-ingredient-pane

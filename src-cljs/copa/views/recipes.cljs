@@ -274,11 +274,7 @@
        :gap "4em"
        :children [[rc/v-box
                    :size "2"
-                   :children [[recipe-list-menu]
-                              [rc/button
-                               :label "state"
-                               :class "btn-default"
-                               :on-click #(dispatch [:state/update :active-recipe-pane :db-state])]]]
+                   :children [[recipe-list-menu]]]
                   [rc/v-box
                    :size "8"
                    :children [(if @active-recipe-pane
