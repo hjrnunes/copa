@@ -80,6 +80,7 @@
   (fn [db [_ data]]
     (load-auth-interceptor! (:token data))
     (load-data!)
+    (.setItem js/localStorage "copa-token" (:token data))
     (-> db
         (assoc-in [:state :token] (:token data))
         (assoc-in [:state :user] (:user data)))))

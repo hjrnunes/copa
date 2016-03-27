@@ -54,15 +54,20 @@
 
 ;; app ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
+(defn get-token [state-token]
+  (or
+    (.getItem js/localStorage "copa-token")
+    @state-token))
+
 (def main-panes {:recipes     recipes-section
                  :ingredients ingredients-section
                  :db-state    db-state})
 
 (defn copa-app []
   (let [active-main-pane (subscribe [:state :active-main-pane])
-        token (subscribe [:state :token])]
+        state-token (subscribe [:state :token])]
     (fn []
-      (if @token
+      (if (get-token state-token)
         [rc/v-box
          :children [[rc/h-box
                      :size "1 0 auto"

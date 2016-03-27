@@ -4,7 +4,7 @@
             [reagent.core :as reagent :refer [atom]]
             [re-frame.core :refer [dispatch dispatch-sync]]
             [secretary.core :as secretary]
-            [copa.ajax :refer [load-interceptors!]]
+            [copa.ajax :refer [load-interceptors! load-auth-interceptor!]]
             [copa.views.core :refer [copa-app]]
             [copa.handlers]
             [copa.subs])
@@ -26,5 +26,10 @@
 
 (defn init! []
   (load-interceptors!)
+  (when-let [token (.getItem js/localStorage "copa-token")]
+    (load-auth-interceptor! token)
+    (dispatch [:get/settings])
+    (dispatch [:get/recipes])
+    (dispatch [:get/ingredients]))
   (reagent/render [copa-app]
                   (.getElementById js/document "app")))
