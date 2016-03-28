@@ -6,7 +6,7 @@
             [secretary.core :as secretary]
             [copa.ajax :refer [load-interceptors! load-auth-interceptor!]]
             [copa.views.core :refer [copa-app]]
-            [copa.handlers]
+            [copa.handlers.core]
             [copa.subs])
   (:import [goog History]
            [goog.history EventType]))
