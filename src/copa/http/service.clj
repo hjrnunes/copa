@@ -12,7 +12,7 @@
   (let [user (db/get-user mongo username)]
     (if (hashers/check password (:password user))
       (let [claims {:user (keyword username)
-                    :exp  (time/plus (time/now) (time/seconds 60))}
+                    :exp  (time/plus (time/now) (time/seconds 3600))}
             token (jws-token claims)]
         (ok {:token token
              :user  (dissoc user :password)}))

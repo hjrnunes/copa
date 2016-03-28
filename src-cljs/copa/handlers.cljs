@@ -8,6 +8,21 @@
 
 ;; -- Event Handlers ----------------------------------------------------------
 
+;; -- loading -----------------------------------------------------------
+
+(register-handler
+  :loading/start
+  (fn [db _]
+    (update-in db [:state :loading] (fnil inc 0))))
+
+(register-handler
+  :loading/stop
+  (fn [db _]
+    (if (= (get-in db [:state :loading]) 0)
+      db
+      (update-in db [:state :loading] (fnil dec 0)))))
+
+
 (defn auth-error [db]
   (println "Authentication Error: token expired")
   (.setItem js/localStorage "copa-token" nil)
@@ -20,7 +35,7 @@
 (register-handler
   :data/error
   (fn [db [_ data]]
-    (dispatch [:state/update :loading false])
+    (dispatch [:loading/stop])
     (if (= (:status data) 403)
       (auth-error db)
       (do
@@ -54,14 +69,14 @@
           :keywords?       true
           :handler         #(dispatch [:response/get-settings %1])
           :error-handler   #(dispatch [:data/error %1])})
-    (dispatch [:state/update :loading true])
+    (dispatch [:loading/start])
     db))
 
 ;; get settings response
 (register-handler
   :response/get-settings
   (fn [db [_ data]]
-    (dispatch [:state/update :loading false])
+    (dispatch [:loading/stop])
     (-> db
         (assoc-in [:settings] data))))
 
@@ -106,14 +121,14 @@
           :keywords?       true
           :handler         #(dispatch [:response/get-recipes %1])
           :error-handler   #(dispatch [:data/error %1])})
-    (dispatch [:state/update :loading true])
+    (dispatch [:loading/start])
     db))
 
 ;; get recipes response
 (register-handler
   :response/get-recipes
   (fn [db [_ data]]
-    (dispatch [:state/update :loading false])
+    (dispatch [:loading/stop])
     (dispatch [:get/ingredients])
     (-> db
         (assoc-in [:data :recipes] data)
@@ -196,7 +211,7 @@
              :keywords?       true
              :handler         #(dispatch [:response/recipe-save %1])
              :error-handler   #(dispatch [:data/error %1])})
-      (dispatch [:state/update :loading true])
+      (dispatch [:loading/start])
       (dispatch [:recipe/clear])
       db)))
 
@@ -205,7 +220,7 @@
   :response/recipe-save
   (fn [db [_ data]]
     (let [recp-id (:db/id data)]
-      (dispatch [:state/update :loading false])
+      (dispatch [:loading/stop])
       (dispatch [:recipe/select recp-id])
       (-> db
           (update-in [:data :recipes] conj data)
@@ -220,14 +235,14 @@
           :keywords?       true
           :handler         #(dispatch [:response/get-ingredients %1])
           :error-handler   #(dispatch [:data/error %1])})
-    (dispatch [:state/update :loading true])
+    (dispatch [:loading/start])
     db))
 
 ;; get ingredients response
 (register-handler
   :response/get-ingredients
   (fn [db [_ data]]
-    (dispatch [:state/update :loading false])
+    (dispatch [:loading/stop])
     (-> db
         (assoc-in [:data :ingredients] data)
         (assoc-in [:index :ingredients] (map-vals first

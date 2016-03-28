@@ -36,6 +36,12 @@
   (fn [db [_ field]]
     (reaction (get-in @db [:data field]))))
 
+;; loading subscription
+(register-sub
+  :loading
+  (fn [db _]
+    (reaction (not (= (get-in @db [:state :loading]) 0)))))
+
 ; selected recipe in menu
 (register-sub
   :state/selected-recipe

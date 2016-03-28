@@ -67,7 +67,8 @@
 
 (defn copa-app []
   (let [active-main-pane (subscribe [:state :active-main-pane])
-        force-login (subscribe [:state :force-login])]
+        force-login (subscribe [:state :force-login])
+        loading (subscribe [:loading])]
     (fn []
       (if-not @force-login
         [rc/v-box
@@ -76,30 +77,34 @@
                      :justify :start
                      :gap "1em"
                      :children [[rc/v-box
-                                 ;:justify :around
-                                 :size "none"
-                                 :padding "0.5em"
-                                 :gap "1em"
+                                 :justify :between
                                  :style {:background-color "ghostwhite"}
-                                 :children [[rc/gap
-                                             :size "0.5em"]
-                                            [rc/box
-                                             :child [:img {:src "images/logo.png"}]]
-                                            [rc/md-circle-icon-button
-                                             :md-icon-name "zmdi-book"
-                                             :tooltip "Recipes"
-                                             :tooltip-position :below-right
-                                             :on-click #(dispatch [:state/update :active-main-pane :recipes])]
-                                            [rc/md-circle-icon-button
-                                             :md-icon-name "zmdi-shopping-cart"
-                                             :tooltip "Ingredients"
-                                             :tooltip-position :below-right
-                                             :on-click #(dispatch [:state/update :active-main-pane :ingredients])]
-                                            [rc/md-circle-icon-button
-                                             :md-icon-name "zmdi-search"
-                                             :tooltip "State"
-                                             :tooltip-position :below-right
-                                             :on-click #(dispatch [:state/update :active-main-pane :db-state])]]]
+                                 :children [[rc/v-box
+                                             :size "none"
+                                             :padding "0.5em"
+                                             :gap "1em"
+                                             :children [[rc/gap
+                                                         :size "0.5em"]
+                                                        [rc/box
+                                                         :child [:img {:src "images/logo.png"}]]
+                                                        [rc/md-circle-icon-button
+                                                         :md-icon-name "zmdi-book"
+                                                         :tooltip "Recipes"
+                                                         :tooltip-position :below-right
+                                                         :on-click #(dispatch [:state/update :active-main-pane :recipes])]
+                                                        [rc/md-circle-icon-button
+                                                         :md-icon-name "zmdi-shopping-cart"
+                                                         :tooltip "Ingredients"
+                                                         :tooltip-position :below-right
+                                                         :on-click #(dispatch [:state/update :active-main-pane :ingredients])]
+                                                        [rc/md-circle-icon-button
+                                                         :md-icon-name "zmdi-search"
+                                                         :tooltip "State"
+                                                         :tooltip-position :below-right
+                                                         :on-click #(dispatch [:state/update :active-main-pane :db-state])]]]
+                                            (when @loading
+                                              [rc/v-box
+                                               :children [[rc/throbber]]])]]
                                 (if @active-main-pane
                                   [(@active-main-pane main-panes)]
                                   [recipes-section])]]]]
