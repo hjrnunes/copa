@@ -8,13 +8,24 @@
 
 ;; -- Event Handlers ----------------------------------------------------------
 
+(defn auth-error [db]
+  (println "Authentication Error: token expired")
+  (.setItem js/localStorage "copa-token" nil)
+  (-> db
+      (assoc-in [:state :alert] true)
+      (assoc-in [:state :token] nil)
+      (assoc-in [:state :force-login] true)))
+
 ;; load data error
 (register-handler
   :data/error
   (fn [db [_ data]]
-    (println "Error:" data)
     (dispatch [:state/update :loading false])
-    db))
+    (if (= (:status data) 403)
+      (auth-error db)
+      (do
+        (println "Error:" data)
+        db))))
 
 ;; generic update state handler
 (register-handler
@@ -83,6 +94,7 @@
     (.setItem js/localStorage "copa-token" (:token data))
     (-> db
         (assoc-in [:state :token] (:token data))
+        (assoc-in [:state :force-login] false)
         (assoc-in [:state :user] (:user data)))))
 
 ;; get recipes

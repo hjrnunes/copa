@@ -22,14 +22,21 @@
      [:span.label.label-info "Synced"])])
 
 (defn login []
-  (let [form-key :login]
+  (let [form-key :login
+        alert (subscribe [:state :alert])]
     (fn []
       [rc/v-box
        :children [[rc/v-box
                    :justify :center
                    :align :center
                    :size "1 0 auto"
-                   :children [[rc/gap
+                   :children [(when @alert
+                                [rc/alert-box
+                                 :alert-type :danger
+                                 :body "Credentials expired. Please login again."
+                                 :closeable? true
+                                 :on-close #(dispatch [:state/update :alert false])])
+                              [rc/gap
                                :size "1em"]
                               [rc/title
                                :level :level2
@@ -54,20 +61,15 @@
 
 ;; app ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(defn get-token [state-token]
-  (or
-    (.getItem js/localStorage "copa-token")
-    @state-token))
-
 (def main-panes {:recipes     recipes-section
                  :ingredients ingredients-section
                  :db-state    db-state})
 
 (defn copa-app []
   (let [active-main-pane (subscribe [:state :active-main-pane])
-        state-token (subscribe [:state :token])]
+        force-login (subscribe [:state :force-login])]
     (fn []
-      (if (get-token state-token)
+      (if-not @force-login
         [rc/v-box
          :children [[rc/h-box
                      :size "1 0 auto"

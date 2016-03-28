@@ -26,7 +26,9 @@
 
 (defn init! []
   (load-interceptors!)
+  (dispatch-sync [:state/update :force-login true])
   (when-let [token (.getItem js/localStorage "copa-token")]
+    (dispatch-sync [:state/update :force-login false])
     (load-auth-interceptor! token)
     (dispatch [:get/settings])
     (dispatch [:get/recipes])
