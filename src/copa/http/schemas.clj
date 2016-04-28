@@ -7,9 +7,9 @@
   {(s/optional-key :_id) (describe s/Str "Database id")})
 
 (s/defschema Measurement
-  (merge BaseEntity {:ingredient            (describe s/Str "Measurement ingredient")
-                     :quantity              (describe Double "Measurement quantity")
-                     (s/optional-key :unit) (describe s/Str "Measurement unit")}))
+  (merge BaseEntity {:ingredient                (describe s/Str "Measurement ingredient")
+                     (s/optional-key :quantity) (describe Double "Measurement quantity")
+                     (s/optional-key :unit)     (describe s/Str "Measurement unit")}))
 
 (s/defschema Recipe
   (merge BaseEntity {:name                         (describe s/Str "Recipe's name")

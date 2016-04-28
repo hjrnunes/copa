@@ -42,7 +42,8 @@
         tmp-unit (get-in db [:state :forms form :tmp.measurement/unit])
         tmp-quantity (get-in db [:state :forms form :tmp.measurement/quantity])]
     (into {} [[:ingredient tmp-ingredient]
-              [:quantity (js/parseFloat tmp-quantity)]
+              (when tmp-quantity
+                [:quantity (js/parseFloat tmp-quantity)])
               (when tmp-unit
                 [:unit tmp-unit])])))
 

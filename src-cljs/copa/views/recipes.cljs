@@ -20,7 +20,8 @@
               [rc/h-box
                :size "1"
                :gap "0.2em"
-               :children [[rc/label :label quantity :class "label label-info"]
+               :children [(when quantity
+                            [rc/label :label quantity :class "label label-info"])
                           (when unit
                             [rc/label :label (capitalize unit) :class "label label-warning"])
                           (when (and edit? @mouse-over?)
