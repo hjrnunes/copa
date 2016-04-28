@@ -1,4 +1,4 @@
-(defproject copa "0.1.0"
+(defproject copa "0.1.0-SNAPSHOT"
 
   :description "FIXME: write description"
   :url "http://example.com/FIXME"
