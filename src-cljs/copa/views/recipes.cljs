@@ -4,6 +4,7 @@
             [re-frame.core :refer [subscribe dispatch]]
             [re-com.core :as rc :refer-macros [handler-fn]]
             [clojure.string :refer [join capitalize]]
+            [markdown.core :refer [md->html]]
             [plumbing.core :refer [indexed]]
             [json-html.core :refer [edn->hiccup]]
             [copa.views.util :refer [wired-textbox]]))
@@ -38,9 +39,9 @@
 
 (defn recipe-measurements-list [recipe]
   [rc/v-box
-   :children [[rc/box
-               :style {:padding "1em"}
-               :child [rc/title :level :level3 :label "Ingredients"]]
+   :gap "1em"
+   :size "1"
+   :children [[rc/title :level :level3 :label "Ingredients"]
               [rc/border
                :l-border "1px solid lightgrey"
                :child [rc/v-box
@@ -51,16 +52,10 @@
 (defn recipe-preparation []
   (fn [{:keys [name description portions preparation categories]}]
     [rc/v-box
-     :gap "2em"
-     :children [[rc/h-box
-                 :gap "1"
-                 :children [[rc/title :level :level4 :label description]
-                            (when portions
-                              [rc/title :level :level4 :label (join " " [portions "portions"])])]]
-                [rc/v-box
-                 :gap "1em"
-                 :children [[rc/title :level :level3 :label "Preparation"]
-                            [rc/p preparation]]]]]))
+     :size "2"
+     :gap "1em"
+     :children [[rc/title :level :level3 :label "Preparation"]
+                [rc/box :child [:div {:dangerouslySetInnerHTML {:__html (md->html preparation)}}]]]]))
 
 (defn recipe-details-header []
   (fn [{:keys [name description portions preparation categories] :as recipe}]
@@ -79,14 +74,29 @@
                                          (dispatch [:form-state/load :edit-recipe recipe])
                                          (dispatch [:state/update :active-recipe-pane :edit-recipe]))]]]]]))
 
+(defn recipe-details-subheader []
+  (fn [{:keys [name description portions preparation categories] :as recipe}]
+    [rc/h-box
+     :gap "2em"
+     :children [[rc/box
+                 :size "2"
+                 :child [rc/title :level :level4 :label description]]
+                [rc/box
+                 :size "1"
+                 :child (when portions
+                          [rc/title :level :level4 :label (join " " [portions "portions"])])]]]))
+
 (defn recipe-details []
   (let [recipe (subscribe [:state/selected-recipe])]
     (fn []
       (when @recipe
         [rc/v-box
          :children [[recipe-details-header @recipe]
+                    [recipe-details-subheader @recipe]
+                    [rc/gap :size "1em"]
                     [rc/h-box
                      :gap "2em"
+                     ;:justify :between
                      :children [[recipe-preparation @recipe]
                                 [recipe-measurements-list recipe]]]]]))))
 
