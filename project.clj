@@ -1,4 +1,4 @@
-(defproject copa "0.1.0-SNAPSHOT"
+(defproject copa "0.1.0"
 
   :description "FIXME: write description"
   :url "http://example.com/FIXME"
@@ -14,7 +14,6 @@
                  [org.webjars/font-awesome "4.5.0"]
                  [org.webjars.bower/tether "1.1.1"]
                  [org.webjars/jquery "2.2.0"]
-                 ;[org.clojure/tools.logging "0.3.1"]
                  [com.taoensso/tower "3.0.2"]
                  [compojure "1.4.0"]
                  [ring-webjars "0.1.1"]
@@ -35,21 +34,10 @@
                  [metosin/ring-swagger-ui "2.1.4-0"]
                  [luminus-http-kit "0.1.1"]
                  [luminus-log4j "0.1.2"]
-                 ;[com.taoensso/timbre "4.2.1"]
-                 [com.datomic/datomic-free "0.9.5302"
-                  :exclusions [org.slf4j/log4j-over-slf4j]]
-
-                 [juxt/datomic-extras "1.0.3"
-                  :exclusions [org.slf4j/slf4j-nop
-                               org.slf4j/jul-to-slf4j
-                               org.slf4j/jcl-over-slf4j
-                               org.slf4j/log4j-over-slf4j]]
-
                  [io.rkn/conformity "0.4.0"]
                  [prismatic/plumbing "0.5.2"]
                  [prismatic/schema "1.0.5"]
-                 ;[slugger "1.0.1"]
-                 [re-frame "0.7.0-alpha-2"]
+                 [re-frame "0.7.0"]
                  [re-com "0.8.0"]
                  [json-html "0.3.8"]
                  [com.novemberain/monger "3.0.2"]
