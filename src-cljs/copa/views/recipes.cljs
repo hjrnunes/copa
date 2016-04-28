@@ -13,19 +13,24 @@
 
 (defn compose-measurement [{:keys [ingredient quantity unit] :as measurement} edit? mouse-over? form-key]
   [rc/h-box
-   :gap "0.2em"
    :align :center
-   :children [[rc/label :label (capitalize ingredient)]
-              [rc/gap :size "1em"]
-              [rc/label :label quantity :class "label label-info"]
-              (when unit
-                [rc/label :label (capitalize unit) :class "label label-warning"])
-              (when (and edit? @mouse-over?)
-                [rc/md-icon-button
-                 :md-icon-name "zmdi-delete"
-                 :tooltip "Delete"
-                 :size :smaller
-                 :on-click #(dispatch [:measurement/remove form-key measurement])])]])
+   :children [[rc/box
+               :size "2"
+               :child [rc/label :label (capitalize ingredient)]]
+              [rc/h-box
+               :size "1"
+               :gap "0.2em"
+               :children [[rc/label :label quantity :class "label label-info"]
+                          (when unit
+                            [rc/label :label (capitalize unit) :class "label label-warning"])
+                          (when (and edit? @mouse-over?)
+                            [rc/h-box
+                             :children [[rc/gap :size "0.5em"]
+                                        [rc/md-icon-button
+                                         :md-icon-name "zmdi-delete"
+                                         :tooltip "Delete"
+                                         :size :smaller
+                                         :on-click #(dispatch [:measurement/remove form-key measurement])]]])]]]])
 
 (defn measurement-item []
   (let [mouse-over? (r/atom false)]
@@ -83,8 +88,8 @@
                  :child [rc/title :level :level4 :label description]]
                 [rc/box
                  :size "1"
-                 :child (when portions
-                          [rc/title :level :level4 :label (join " " [portions "portions"])])]]]))
+                 :child [rc/title :level :level4 :label (when portions
+                                                          (join " " [portions "portions"]))]]]]))
 
 (defn recipe-details []
   (let [recipe (subscribe [:state/selected-recipe])]
