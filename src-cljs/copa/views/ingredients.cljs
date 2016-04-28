@@ -11,7 +11,7 @@
   [rc/v-box
    :children [[rc/box
                :style {:padding "1em"}
-               :child [rc/title :level :level3 :label "is in recipes:"]]
+               :child [rc/title :level :level3 :label "existe nas receitas:"]]
               [rc/v-box
                :style {:margin-left "1em"}
                :children [(for [[idx recipe] (indexed (:recipes @ingredient))]
@@ -65,7 +65,7 @@
                    :gap "1"
                    :align :center
                    :children [[rc/box
-                               :child [rc/title :level :level1 :label "Ingredients"]]]]
+                               :child [rc/title :level :level1 :label "Ingredientes"]]]]
                   (when-not (empty? @ingredients)
                     [ingredient-list ingredients])]])))
 

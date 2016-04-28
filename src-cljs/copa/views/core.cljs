@@ -33,29 +33,29 @@
                    :children [(when @alert
                                 [rc/alert-box
                                  :alert-type :danger
-                                 :body "Credentials expired. Please login again."
+                                 :body "Sessão expirada!"
                                  :closeable? true
                                  :on-close #(dispatch [:state/update :alert false])])
                               [rc/gap
                                :size "1em"]
                               [rc/title
                                :level :level2
-                               :label "COPA - login"]
+                               :label "COPA - identificação"]
                               [rc/gap
                                :size "1em"]
-                              [wired-textbox {:placeholder "username"
+                              [wired-textbox {:placeholder "utilizador"
                                               :form        form-key
                                               :key         :username}]
                               [rc/gap
                                :size "0.5em"]
-                              [wired-textbox {:placeholder "password"
+                              [wired-textbox {:placeholder "senha"
                                               :form        form-key
                                               :key         :password
                                               :password    true}]
                               [rc/gap
                                :size "1em"]
                               [rc/button
-                               :label "Login"
+                               :label "Entrar"
                                :class "btn-primary"
                                :on-click #(dispatch [:data/login form-key])]]]]])))
 
@@ -89,12 +89,12 @@
                                                          :child [:img {:src "images/logo.png"}]]
                                                         [rc/md-circle-icon-button
                                                          :md-icon-name "zmdi-book"
-                                                         :tooltip "Recipes"
+                                                         :tooltip "Receitas"
                                                          :tooltip-position :below-right
                                                          :on-click #(dispatch [:state/update :active-main-pane :recipes])]
                                                         [rc/md-circle-icon-button
                                                          :md-icon-name "zmdi-shopping-cart"
-                                                         :tooltip "Ingredients"
+                                                         :tooltip "Ingredientes"
                                                          :tooltip-position :below-right
                                                          :on-click #(dispatch [:state/update :active-main-pane :ingredients])]
                                                         [rc/md-circle-icon-button

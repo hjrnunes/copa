@@ -28,7 +28,7 @@
                              :children [[rc/gap :size "0.5em"]
                                         [rc/md-icon-button
                                          :md-icon-name "zmdi-delete"
-                                         :tooltip "Delete"
+                                         :tooltip "Apagar"
                                          :size :smaller
                                          :on-click #(dispatch [:measurement/remove form-key measurement])]]])]]]])
 
@@ -46,7 +46,7 @@
   [rc/v-box
    :gap "1em"
    :size "1"
-   :children [[rc/title :level :level3 :label "Ingredients"]
+   :children [[rc/title :level :level3 :label "Ingredientes"]
               [rc/border
                :l-border "1px solid lightgrey"
                :child [rc/v-box
@@ -59,7 +59,7 @@
     [rc/v-box
      :size "2"
      :gap "1em"
-     :children [[rc/title :level :level3 :label "Preparation"]
+     :children [[rc/title :level :level3 :label "Preparação"]
                 [rc/box :child [:div {:dangerouslySetInnerHTML {:__html (md->html preparation)}}]]]]))
 
 (defn recipe-details-header []
@@ -74,7 +74,7 @@
                              :style {:margin-left "1em"
                                      :margin-top  "1em"}
                              :md-icon-name "zmdi-edit"
-                             :tooltip "Edit recipe"
+                             :tooltip "Alterar receita"
                              :on-click (handler-fn
                                          (dispatch [:form-state/load :edit-recipe recipe])
                                          (dispatch [:state/update :active-recipe-pane :edit-recipe]))]]]]]))
@@ -89,7 +89,7 @@
                 [rc/box
                  :size "1"
                  :child [rc/title :level :level4 :label (when portions
-                                                          (join " " [portions "portions"]))]]]]))
+                                                          (join " " [portions "porções"]))]]]]))
 
 (defn recipe-details []
   (let [recipe (subscribe [:state/selected-recipe])]
@@ -115,17 +115,17 @@
        :children [(if @show
                     [rc/h-box
                      :align :end
-                     :children [[wired-textbox {:label "Quantity"
+                     :children [[wired-textbox {:label "Quantidade"
                                                 :form  form-key
                                                 :key   :tmp.measurement/quantity
                                                 :width "60px"}]
                                 [rc/gap :size "0.5em"]
-                                [wired-textbox {:label "Unit"
+                                [wired-textbox {:label "Unidade"
                                                 :form  form-key
                                                 :key   :tmp.measurement/unit
                                                 :width "50px"}]
                                 [rc/gap :size "1em"]
-                                [wired-textbox {:label "Ingredient"
+                                [wired-textbox {:label "Ingrediente"
                                                 :form  form-key
                                                 :key   :tmp.measurement/ingredient
                                                 :width "150px"}]
@@ -136,13 +136,13 @@
                                  :on-click #(dispatch [:measurement/add form-key])]
                                 [rc/gap :size "1px"]
                                 [rc/button
-                                 :label "Cancel"
+                                 :label "Cancelar"
                                  :class "btn-secondary"
                                  :on-click #(dispatch [:measurement/cancel form-key])]]]
                     [rc/box
                      :align-self :start
                      :child [rc/label
-                             :label "add ingredient..."
+                             :label "adicionar ingrediente..."
                              :class "text-muted"
                              :on-click #(dispatch [:form-state/update form-key :show-new-measurement true])]])]])))
 
@@ -162,7 +162,7 @@
       [rc/v-box
        :gap "1em"
        :children [[rc/box
-                   :child [rc/title :level :level3 :label "Ingredients"]]
+                   :child [rc/title :level :level3 :label "Ingredientes"]]
                   [rc/v-box
                    :children [(for [[idx measurement] (indexed @measurements)]
                                 ^{:key idx} [editable-measurement-item measurement form-key])]]
@@ -170,22 +170,22 @@
 
 (defn recipe-form [form-key]
   [rc/v-box
-   :children [[rc/title :level :level1 :underline? true :label "New Recipe"]
+   :children [[rc/title :level :level1 :underline? true :label "Nova Receita"]
               [rc/h-box
                :gap "2em"
                :children [[rc/v-box
                            :gap "1em"
-                           :children [[wired-textbox {:label "Name"
+                           :children [[wired-textbox {:label "Nome"
                                                       :form  form-key
                                                       :key   :name}]
-                                      [wired-textbox {:label    "Description"
+                                      [wired-textbox {:label    "Descrição"
                                                       :form     form-key
                                                       :key      :description
                                                       :textarea true}]
-                                      [wired-textbox {:label "Portions"
+                                      [wired-textbox {:label "Porções"
                                                       :form  form-key
                                                       :key   :portions}]
-                                      [wired-textbox {:label    "Preparation"
+                                      [wired-textbox {:label    "Preparação"
                                                       :form     form-key
                                                       :key      :preparation
                                                       :textarea true}]]]
@@ -201,12 +201,12 @@
                :align :center
                :gap "0.5em"
                :children [[rc/button
-                           :label "Save"
+                           :label "Guardar"
                            :class "btn-primary"
                            :on-click #(dispatch [:recipe/save form-key])]
                           [rc/md-circle-icon-button
                            :md-icon-name "zmdi-delete"
-                           :tooltip "Clear form"
+                           :tooltip "Limpar ficha"
                            :on-click #(dispatch [:recipe/clear form-key])]]]]])
 
 (defn new-recipe []
@@ -251,11 +251,11 @@
                    :gap "1"
                    :align :center
                    :children [[rc/box
-                               :child [rc/title :level :level1 :label "Recipes"]]
+                               :child [rc/title :level :level1 :label "Receitas"]]
                               [rc/md-circle-icon-button
                                :style {:margin-top "1em"}
                                :md-icon-name "zmdi-plus"
-                               :tooltip "Add new recipe"
+                               :tooltip "Adicionar nova receita"
                                :on-click #(dispatch [:state/update :active-recipe-pane :new-recipe])]]]
                   (when-not (empty? @recipes)
                     [recipe-list recipes])]])))
