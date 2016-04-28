@@ -46,11 +46,11 @@
                :style {:padding          "1em"
                        :background-color (if (or (= _id (:_id @selected-ingredient))
                                                  @mouse-over?)
-                                           "#eee")}
+                                           "#EBF9D3")}
                :attr {:on-click      #(dispatch [:ingredient/select name])
                       :on-mouse-over (handler-fn (reset! mouse-over? true))
                       :on-mouse-out  (handler-fn (reset! mouse-over? false))}
-               :child [rc/label :label name]]])))
+               :child [rc/label :label (capitalize name)]]])))
 
 (defn ingredient-list [ingredients]
   [rc/v-box

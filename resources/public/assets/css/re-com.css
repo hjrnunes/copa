@@ -1007,8 +1007,8 @@ code {
 }
 
 .rc-md-circle-icon-button:hover {
-    border: 1px solid #428bca;
-    color:  #428bca;
+    border: 1px solid #729C2B;
+    color:  #729C2B;
 }
 
 .rc-circle-smaller {
@@ -1032,14 +1032,14 @@ code {
 }
 
 .rc-circle-emphasis {
-    border: 1px solid #428bca;
-    background-color: #428bca;
+    border: 1px solid #95BE4E;
+    background-color: #95BE4E;
     color:  white;
 }
 
 .rc-circle-emphasis:hover {
-    border: 1px solid #2196f3;
-    background-color: #2196f3;
+    border: 1px solid #95BE4E;
+    background-color: #95BE4E;
     color:  white;
 }
 

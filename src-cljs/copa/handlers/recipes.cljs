@@ -3,7 +3,8 @@
             [copa.ajax :refer [load-auth-interceptor!]]
             [re-frame.core :refer [register-handler dispatch path trim-v after]]
             [plumbing.core :refer [map-vals]]
-            [ajax.core :refer [GET POST]]))
+            [ajax.core :refer [GET POST]]
+            [clojure.string :refer [lower-case]]))
 
 ;; get recipes
 (register-handler
@@ -41,7 +42,7 @@
   (let [tmp-ingredient (get-in db [:state :forms form :tmp.measurement/ingredient])
         tmp-unit (get-in db [:state :forms form :tmp.measurement/unit])
         tmp-quantity (get-in db [:state :forms form :tmp.measurement/quantity])]
-    (into {} [[:ingredient tmp-ingredient]
+    (into {} [[:ingredient (lower-case tmp-ingredient)]
               (when tmp-quantity
                 [:quantity (js/parseFloat tmp-quantity)])
               (when tmp-unit

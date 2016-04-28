@@ -72,13 +72,16 @@
     (fn []
       (if-not @force-login
         [rc/v-box
+         :size "1 0 auto"
+         :style {:margin-left  "1em"
+                 :margin-right "1em"}
          :children [[rc/h-box
                      :size "1 0 auto"
                      :justify :start
                      :gap "1em"
                      :children [[rc/v-box
                                  :justify :between
-                                 :style {:background-color "ghostwhite"}
+                                 :style {:background-color "EBF9D3"}
                                  :children [[rc/v-box
                                              :size "none"
                                              :padding "0.5em"

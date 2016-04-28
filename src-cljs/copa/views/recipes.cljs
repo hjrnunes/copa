@@ -38,7 +38,7 @@
     (fn [{:keys [_id ingredient quantity unit] :as measurement}]
       [rc/box
        :style {:padding          "0.3em"
-               :background-color (if @mouse-over? "#eee")}
+               :background-color (if @mouse-over? "#EBF9D3")}
        :attr {:on-mouse-over (handler-fn (reset! mouse-over? true))
               :on-mouse-out  (handler-fn (reset! mouse-over? false))}
        :child (compose-measurement measurement false mouse-over? nil)])))
@@ -152,7 +152,7 @@
     (fn [{:keys [_id ingredient quantity unit] :as measurement} form-key]
       [rc/box
        :style {:padding          "0.3em"
-               :background-color (if @mouse-over? "#eee")}
+               :background-color (if @mouse-over? "#EBF9D3")}
        :attr {:on-mouse-over (handler-fn (reset! mouse-over? true))
               :on-mouse-out  (handler-fn (reset! mouse-over? false))}
        :child (compose-measurement measurement true mouse-over? form-key)])))
@@ -233,7 +233,7 @@
                :style {:padding          "1em"
                        :background-color (if (or (= _id (:_id @selected-recipe))
                                                  @mouse-over?)
-                                           "#eee")}
+                                           "#EBF9D3")}
                :attr {:on-click      #(dispatch [:recipe/select name])
                       :on-mouse-over (handler-fn (reset! mouse-over? true))
                       :on-mouse-out  (handler-fn (reset! mouse-over? false))}
