@@ -52,6 +52,9 @@
 (defn get-all-recipes [mongo]
   (mc/find-maps (:db mongo) recipes-col))
 
+(defn get-recipes [mongo user]
+  (mc/find-maps (:db mongo) recipes-col {:user user}))
+
 (defn get-recipe [mongo name]
   (mc/find-one-as-map (:db mongo) recipes-col {:name name}))
 

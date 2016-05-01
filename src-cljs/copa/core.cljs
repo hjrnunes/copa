@@ -4,6 +4,7 @@
             [reagent.core :as reagent :refer [atom]]
             [re-frame.core :refer [dispatch dispatch-sync]]
             [secretary.core :as secretary]
+            [hodgepodge.core :refer [local-storage]]
             [copa.ajax :refer [load-interceptors! load-auth-interceptor!]]
             [copa.views.core :refer [copa-app]]
             [copa.handlers.core]
@@ -14,7 +15,6 @@
 ;; -- Routes and History ------------------------------------------------------
 
 (defroute "/" [])
-;(defroute "/:filter" [filter] (dispatch [:set-showing (keyword filter)]))
 
 (def history
   (doto (History.)
@@ -24,14 +24,18 @@
 
 ;; -- Entry Point -------------------------------------------------------------
 
+(defn- load-data []
+  (dispatch [:get/settings])
+  (dispatch [:get/recipes])
+  (dispatch [:get/ingredients]))
+
 (defn init! []
   (load-interceptors!)
   (dispatch-sync [:state/update :force-login true])
-  (when-let [token (.getItem js/localStorage "copa-token")]
-    (dispatch-sync [:state/update :force-login false])
+  (when-let [token (get local-storage :copa-token)]
     (load-auth-interceptor! token)
-    (dispatch [:get/settings])
-    (dispatch [:get/recipes])
-    (dispatch [:get/ingredients]))
+    (dispatch-sync [:state/update :force-login false])
+    (dispatch-sync [:state/update :user (get local-storage :copa-user)])
+    (load-data))
   (reagent/render [copa-app]
                   (.getElementById js/document "app")))

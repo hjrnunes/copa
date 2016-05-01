@@ -41,6 +41,7 @@
                  [re-com "0.8.0"]
                  [json-html "0.3.8"]
                  [com.novemberain/monger "3.0.2"]
+                 [hodgepodge "0.1.3"]
                  ]
 
   :min-lein-version "2.0.0"

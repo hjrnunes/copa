@@ -102,7 +102,6 @@
                     [rc/gap :size "1em"]
                     [rc/h-box
                      :gap "2em"
-                     ;:justify :between
                      :children [[recipe-preparation @recipe]
                                 [recipe-measurements-list recipe]]]]]))))
 
@@ -264,7 +263,6 @@
 (def recipe-panes {:recipe-details recipe-details
                    :new-recipe     new-recipe
                    :edit-recipe    edit-recipe
-                   ;:db-state       db-state
                    })
 
 (defn recipes-section []

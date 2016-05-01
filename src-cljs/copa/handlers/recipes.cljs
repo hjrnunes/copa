@@ -92,9 +92,10 @@
             (when-let [description (get-in db [:state :forms form :description])]
               [:description description])
             (when-let [portions (get-in db [:state :forms form :portions])]
-              [:portions (js/parseInt portions)])
+              [:portions portions])
             [:preparation (get-in db [:state :forms form :preparation])]
-            [:measurements (get-in db [:state :forms form :measurements])]]))
+            [:measurements (get-in db [:state :forms form :measurements])]
+            [:user (get-in db [:state :user :username])]]))
 
 (register-handler
   :recipe/save

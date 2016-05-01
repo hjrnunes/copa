@@ -4,6 +4,7 @@
             [re-frame.core :refer [register-handler dispatch path trim-v after]]
             [plumbing.core :refer [map-vals]]
             [ajax.core :refer [GET POST]]
+            [hodgepodge.core :refer [local-storage]]
             [copa.handlers.ingredients]
             [copa.handlers.recipes]))
 
@@ -23,7 +24,7 @@
 
 (defn auth-error [db]
   (println "Authentication Error: token expired")
-  (.setItem js/localStorage "copa-token" nil)
+  (dissoc! local-storage :copa-token)
   (-> db
       (assoc-in [:state :alert] true)
       (assoc-in [:state :token] nil)
@@ -90,7 +91,7 @@
            :keywords?       true
            :handler         #(dispatch [:response/login %1])
            :error-handler   #(dispatch [:data/error %1])})
-    ;(dispatch [:loading/start])
+    (dispatch [:loading/start])
     db))
 
 (defn load-data! []
@@ -104,7 +105,9 @@
   (fn [db [_ data]]
     (load-auth-interceptor! (:token data))
     (load-data!)
-    (.setItem js/localStorage "copa-token" (:token data))
+    (assoc! local-storage :copa-token (:token data))
+    (assoc! local-storage :copa-user (:user data))
+    (dispatch [:loading/stop])
     (-> db
         (assoc-in [:state :token] (:token data))
         (assoc-in [:state :force-login] false)

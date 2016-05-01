@@ -24,6 +24,9 @@
 (defn get-all-recipes []
   (ok (db/get-all-recipes mongo)))
 
+(defn get-recipes [user]
+  (ok (db/get-recipes mongo user)))
+
 (defn get-all-ingredients []
   (ok (db/get-all-ingredients mongo)))
 

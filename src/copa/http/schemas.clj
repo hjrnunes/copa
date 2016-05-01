@@ -14,9 +14,10 @@
 (s/defschema Recipe
   (merge BaseEntity {:name                         (describe s/Str "Recipe's name")
                      (s/optional-key :description) (describe s/Str "Recipe's description")
-                     (s/optional-key :portions)    (describe Long "Recipe's portions")
+                     (s/optional-key :portions)    (describe s/Str "Recipe's portions")
                      :preparation                  (describe s/Str "Recipe's preparation")
                      (s/optional-key :categories)  (describe [s/Str] "Recipe's categories")
-                     :measurements                 (describe [Measurement] "Recipe's measurements")}))
+                     :measurements                 (describe [Measurement] "Recipe's measurements")
+                     :user                         (describe s/Str "Recipe's user")}))
 
 
