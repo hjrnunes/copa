@@ -25,7 +25,7 @@
                  [buddy "0.10.0"]
                  [org.clojure/clojurescript "1.7.228" :scope "provided"]
                  [reagent "0.5.1"]
-                 [reagent-forms "0.5.13"]
+                 [reagent-forms "0.5.22"]
                  [reagent-utils "0.1.7"]
                  [secretary "1.2.3"]
                  [org.clojure/core.async "0.2.374"]
@@ -42,6 +42,7 @@
                  [json-html "0.3.8"]
                  [com.novemberain/monger "3.0.2"]
                  [hodgepodge "0.1.3"]
+                 [soda-ash "0.1.0-beta"]
                  ]
 
   :min-lein-version "2.0.0"

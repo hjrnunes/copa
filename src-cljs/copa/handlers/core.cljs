@@ -83,10 +83,10 @@
 (register-handler
   :data/login
   (fn [db [_ form]]
-    (println (get-in db [:state :form]))
+    (println form)
     (POST (str js/context "/auth")
-          {:params          {:username (get-in db [:state :forms form :username])
-                             :password (get-in db [:state :forms form :password])}
+          {:params          {:username (:username form)
+                             :password (:password form)}
            :response-format :json
            :keywords?       true
            :handler         #(dispatch [:response/login %1])

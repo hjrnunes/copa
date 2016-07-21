@@ -33,7 +33,7 @@
                                          :size :smaller
                                          :on-click #(dispatch [:measurement/remove form-key measurement])]]])]]]])
 
-(defn measurement-item []
+(defn measurement-item-old []
   (let [mouse-over? (r/atom false)]
     (fn [{:keys [_id ingredient quantity unit] :as measurement}]
       [rc/box
@@ -92,7 +92,7 @@
                  :child [rc/title :level :level4 :label (when portions
                                                           (join " " [portions "porções"]))]]]]))
 
-(defn recipe-details []
+(defn recipe-details-old []
   (let [recipe (subscribe [:state/selected-recipe])]
     (fn []
       (when @recipe
@@ -222,21 +222,21 @@
 
 ;; recipe list ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(defn recipe-list-item []
-  (let [mouse-over? (r/atom false)
-        selected-recipe (subscribe [:state/selected-recipe])]
-    (fn [{:keys [_id name description portions preparation categories measurements]}]
-      [rc/border
-       :r-border "1px solid lightgrey"
-       :child [rc/box
-               :style {:padding          "1em"
-                       :background-color (if (or (= _id (:_id @selected-recipe))
-                                                 @mouse-over?)
-                                           "#EBF9D3")}
-               :attr {:on-click      #(dispatch [:recipe/select name])
-                      :on-mouse-over (handler-fn (reset! mouse-over? true))
-                      :on-mouse-out  (handler-fn (reset! mouse-over? false))}
-               :child [rc/label :label name]]])))
+;(defn recipe-list-item []
+;  (let [mouse-over? (r/atom false)
+;        selected-recipe (subscribe [:state/selected-recipe])]
+;    (fn [{:keys [_id name description portions preparation categories measurements]}]
+;      [rc/border
+;       :r-border "1px solid lightgrey"
+;       :child [rc/box
+;               :style {:padding          "1em"
+;                       :background-color (if (or (= _id (:_id @selected-recipe))
+;                                                 @mouse-over?)
+;                                           "#EBF9D3")}
+;               :attr {:on-click      #(dispatch [:recipe/select name])
+;                      :on-mouse-over (handler-fn (reset! mouse-over? true))
+;                      :on-mouse-out  (handler-fn (reset! mouse-over? false))}
+;               :child [rc/label :label name]]])))
 
 (defn recipe-list [recipes]
   [rc/v-box
@@ -265,19 +265,83 @@
                    :edit-recipe    edit-recipe
                    })
 
+(defn measurement-item []
+  (let []
+    (fn [{:keys [_id ingredient quantity unit] :as measurement}]
+      [:div.item
+       (when quantity
+         [:div.right.floated.content
+          [:div.ui.basic.tiny.label
+           quantity
+           (when unit
+             [:div.detail (capitalize unit)])]])
+       [:div.content
+        (capitalize ingredient)]])))
+
+(defn recipe-details []
+  (fn [{:keys [_id name description portions preparation categories measurements]}]
+    [:div.ui.two.column.divided.grid
+     [:div.row
+      [:div.twelve.wide.column
+       [:i description]]
+      [:div.four.wide.column
+       (when portions
+         [:i (join " " [portions "porções"])])]]
+     [:div.ui.divider]
+     [:div.row
+      [:div.twelve.wide.column
+       [:h5.ui.header "Preparação"]]
+      [:div.four.wide.column
+       [:h5.ui.header "Ingredientes"]]]
+     [:div.row
+      [:div.twelve.wide.column
+       preparation]
+      [:div.four.wide.column
+       [:div.ui.tiny.divided.list
+        (for [[idx measurement] (indexed measurements)]
+          ^{:key idx} [measurement-item measurement])
+        ]]]]))
+
+(defn recipe-item []
+  (let [selected-recipe (subscribe [:state/selected-recipe])
+        selected? #(= % (:_id @selected-recipe))]
+    (fn [{:keys [_id name description portions preparation categories measurements] :as recipe}]
+      [:div
+       [:div.title
+        (-> {:on-click #(if (selected? _id)
+                         (dispatch [:recipe/select nil])
+                         (dispatch [:recipe/select name]))}
+            (merge (when (selected? _id)
+                     {:class "active"})))
+        ;[:i.dropdown.icon]
+        name]
+       [:div.content
+        (-> {}
+            (merge (when (selected? _id)
+                     {:class "active"})))
+        [recipe-details recipe]]])))
+
 (defn recipes-section []
-  (let [active-recipe-pane (subscribe [:state :active-recipe-pane])]
+  (let [recipes (subscribe [:data :recipes])
+        active-recipe-pane (subscribe [:state :active-recipe-pane])]
     (fn []
-      [rc/h-box
-       :size "1"
-       :justify :around
-       :gap "4em"
-       :children [[rc/v-box
-                   :size "2"
-                   :children [[recipe-list-menu]]]
-                  [rc/v-box
-                   :size "8"
-                   :children [(if @active-recipe-pane
-                                [(@active-recipe-pane recipe-panes)]
-                                [rc/box
-                                 :child [:div]])]]]])))
+      [:div.ui.styled.fluid.accordion
+       (for [recipe @recipes]
+         ^{:key (:_id recipe)} [recipe-item recipe])])))
+
+;(defn recipes-section []
+;  (let [active-recipe-pane (subscribe [:state :active-recipe-pane])]
+;    (fn []
+;      [rc/h-box
+;       :size "1"
+;       :justify :around
+;       :gap "4em"
+;       :children [[rc/v-box
+;                   :size "2"
+;                   :children [[recipe-list-menu]]]
+;                  [rc/v-box
+;                   :size "8"
+;                   :children [(if @active-recipe-pane
+;                                [(@active-recipe-pane recipe-panes)]
+;                                [rc/box
+;                                 :child [:div]])]]]])))
