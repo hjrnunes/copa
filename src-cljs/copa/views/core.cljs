@@ -56,10 +56,6 @@
 
 ;; app ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(def main-panes {:recipes     recipes-section
-                 :ingredients ingredients-section
-                 :db-state    db-state})
-
 ;(defn copa-app []
 ;  (let [active-main-pane (subscribe [:state :active-main-pane])
 ;        force-login (subscribe [:state :force-login])
@@ -123,6 +119,10 @@
    (gen-item-class :ingredients "Ingredientes" #(dispatch [:state/update :active-main-pane :ingredients]) active-main-pane)
    (gen-item-class :db-state "Estado" #(dispatch [:state/update :active-main-pane :db-state]) active-main-pane)])
 
+(def main-panes {:recipes     recipes-section
+                 :ingredients ingredients-section
+                 :db-state    db-state})
+
 (defn copa-app []
   (let [active-main-pane (subscribe [:state :active-main-pane])
         force-login (subscribe [:state :force-login])
@@ -134,5 +134,6 @@
          [:div.ui.container
           (if @active-main-pane
             [(@active-main-pane main-panes)]
-            [recipes-section])]]
+            [recipes-section])
+          ]]
         [login]))))

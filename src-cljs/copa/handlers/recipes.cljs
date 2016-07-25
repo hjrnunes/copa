@@ -35,7 +35,7 @@
   (fn [db [_ selected]]
     (-> db
         (assoc-in [:state :selected-recipe] selected)
-        (assoc-in [:state :active-recipe-pane] :recipe-details))))
+        (assoc-in [:state :active-recipe-pane] :recipe-list))))
 
 ;; update new recipe measurements list
 (defn- build-tmp-measurement [db form]
