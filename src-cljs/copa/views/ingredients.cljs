@@ -2,88 +2,51 @@
   (:require-macros [copa.macros :refer [handler-fn]])
   (:require [reagent.core :as r]
             [re-frame.core :refer [subscribe dispatch]]
-            [re-com.core :as rc :refer-macros [handler-fn]]
             [clojure.string :refer [join capitalize]]
             [plumbing.core :refer [indexed]]
             [copa.views.recipes :refer [recipes-section]]))
-
-(defn ingredient-recipe-list [ingredient]
-  [rc/v-box
-   :children [[rc/box
-               :style {:padding "1em"}
-               :child [rc/title :level :level3 :label "existe nas receitas:"]]
-              [rc/v-box
-               :style {:margin-left "1em"}
-               :children [(for [[idx recipe] (indexed (:recipes @ingredient))]
-                            ^{:key idx} [rc/hyperlink
-                                         :label recipe
-                                         :on-click (handler-fn
-                                                     (dispatch [:recipe/select recipe])
-                                                     (dispatch [:state/update :active-main-pane :recipes])
-                                                     (dispatch [:state/update :active-recipe-pane :recipe-details]))])]]]])
 
 (defn ingredient-details []
   (let [ingredient (subscribe [:state/selected-ingredient])]
     (fn []
       (when @ingredient
-        [rc/v-box
-         :children [[rc/v-box
-                     :children [[rc/h-box
-                                 :align :center
-                                 :children [[rc/box
-                                             :child [rc/title :level :level1 :underline? true :label (capitalize (:name @ingredient))]]]]]]
-                    [ingredient-recipe-list ingredient]]]))))
+        [:div
+         [:div.ui.medium.header
+          (capitalize (:name @ingredient))]
+         [:div.ui.segment
+          [:div.ui.top.attached.basic.label
+           "Entra nas seguintes receitas:"]
+          [:div.ui.list
+           (for [[idx recipe] (indexed (:recipes @ingredient))]
+             ^{:key idx} [:div.item
+                          [:div.content
+                           [:a.header
+                            {:on-click (handler-fn
+                                         (dispatch [:recipe/select recipe])
+                                         (dispatch [:state/update :active-main-pane :recipes])
+                                         (dispatch [:state/update :active-recipe-pane :recipe-list]))}
+                            recipe]]])]]]))))
 
-;; recipe list ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(defn ingredient-list-item [ingredient]
+  [:div.item
+   {:on-click #(dispatch [:ingredient/select (:name ingredient)])}
+   [:div.content
+    [:div.header
+     (capitalize (:name ingredient))]]])
 
-(defn ingredient-list-item []
-  (let [mouse-over? (r/atom false)
-        selected-ingredient (subscribe [:state/selected-ingredient])]
-    (fn [{:keys [_id name recipes]}]
-      [rc/border
-       :r-border "1px solid lightgrey"
-       :child [rc/box
-               :style {:padding          "1em"
-                       :background-color (if (or (= _id (:_id @selected-ingredient))
-                                                 @mouse-over?)
-                                           "#EBF9D3")}
-               :attr {:on-click      #(dispatch [:ingredient/select name])
-                      :on-mouse-over (handler-fn (reset! mouse-over? true))
-                      :on-mouse-out  (handler-fn (reset! mouse-over? false))}
-               :child [rc/label :label (capitalize name)]]])))
-
-(defn ingredient-list [ingredients]
-  [rc/v-box
-   :children (for [ingredient @ingredients]
-               ^{:key (:_id ingredient)} [ingredient-list-item ingredient])])
-
-(defn ingredient-list-menu []
+(defn ingredient-list []
   (let [ingredients (subscribe [:sorted/ingredients])]
     (fn []
-      [rc/v-box
-       :children [[rc/h-box
-                   :gap "1"
-                   :align :center
-                   :children [[rc/box
-                               :child [rc/title :level :level1 :label "Ingredientes"]]]]
-                  (when-not (empty? @ingredients)
-                    [ingredient-list ingredients])]])))
-
-(def ingredient-panes {:ingredient-details ingredient-details})
+      [:div.ui.middle.aligned.selection.list
+       (for [ingredient @ingredients]
+         ^{:key (:_id ingredient)} [ingredient-list-item ingredient])])))
 
 (defn ingredients-section []
-  (let [active-ingredient-pane (subscribe [:state :active-ingredient-pane])]
+  (let []
     (fn []
-      [rc/h-box
-       :size "1"
-       :justify :around
-       :gap "4em"
-       :children [[rc/v-box
-                   :size "2"
-                   :children [[ingredient-list-menu]]]
-                  [rc/v-box
-                   :size "8"
-                   :children [(if @active-ingredient-pane
-                                [(@active-ingredient-pane ingredient-panes)]
-                                [rc/box
-                                 :child [:div]])]]]])))
+      [:div.ui.two.column.relaxed.divided.grid
+       [:div.row
+        [:div.two.wide.column
+         [ingredient-list]]
+        [:div.fourteen.wide.column
+         [ingredient-details]]]])))
