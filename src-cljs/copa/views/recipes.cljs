@@ -119,8 +119,9 @@
          [:div.middle.aligned.content
           (capitalize ingredient)])])))
 
-(defn new-recipe []
-  (let [form (r/atom {})]
+(defn edit-recipe []
+  (let [selected-recipe (subscribe [:state/selected-recipe])
+        form (r/atom (or @selected-recipe {}))]
     (fn []
       [:div.ui.two.column.relaxed.divided.grid
        [:div.row
@@ -231,7 +232,6 @@
                          (dispatch [:recipe/select name]))}
             (merge (when (selected? _id)
                      {:class "active"})))
-        ;[:i.dropdown.icon]
         name]
        [:div.content
         (-> {}
@@ -239,41 +239,31 @@
                      {:class "active"})))
         [recipe-details recipe]]])))
 
-(defn add-recipe-button []
-  (let [add-mouse-over? (r/atom false)]
+(defn menu-button [icon color on-click]
+  (let [mouse-over? (r/atom false)]
     (fn []
       [:div.ui.icon.item
-       {:on-mouse-over (handler-fn (reset! add-mouse-over? true))
-        :on-mouse-out  (handler-fn (reset! add-mouse-over? false))
-        :on-click      #(dispatch [:state/update :active-recipe-pane :new-recipe])}
-       [:i.plus.icon
-        (-> (merge (if @add-mouse-over?
-                     {:class "green"}
+       {:on-mouse-over (handler-fn (reset! mouse-over? true))
+        :on-mouse-out  (handler-fn (reset! mouse-over? false))
+        :on-click      on-click}
+       [icon
+        (-> (merge (if @mouse-over?
+                     {:class color}
                      {:class "disabled"})))]])))
+
+(defn add-recipe-button []
+  (menu-button :i.plus.icon "green"
+               (handler-fn
+                 (dispatch [:recipe/select nil])
+                 (dispatch [:state/update :active-recipe-pane :edit-recipe]))))
 
 (defn edit-recipe-button []
-  (let [add-mouse-over? (r/atom false)]
-    (fn []
-      [:div.ui.icon.item
-       {:on-mouse-over (handler-fn (reset! add-mouse-over? true))
-        :on-mouse-out  (handler-fn (reset! add-mouse-over? false))
-        :on-click      #(dispatch [:state/update :active-recipe-pane :new-recipe])}
-       [:i.edit.icon
-        (-> (merge (if @add-mouse-over?
-                     {:class "orange"}
-                     {:class "disabled"})))]])))
+  (menu-button :i.edit.icon "yellow"
+               #(dispatch [:state/update :active-recipe-pane :edit-recipe])))
 
 (defn delete-recipe-button []
-  (let [add-mouse-over? (r/atom false)]
-    (fn []
-      [:div.ui.icon.item
-       {:on-mouse-over (handler-fn (reset! add-mouse-over? true))
-        :on-mouse-out  (handler-fn (reset! add-mouse-over? false))
-        :on-click      #(dispatch [:state/update :active-recipe-pane :new-recipe])}
-       [:i.trash.icon
-        (-> (merge (if @add-mouse-over?
-                     {:class "red"}
-                     {:class "disabled"})))]])))
+  (menu-button :i.trash.icon "red"
+               #(dispatch [:state/update :active-recipe-pane :new-recipe])))
 
 (defn recipe-search []
   [:div.ui.right.align.category.search.item
@@ -339,7 +329,7 @@
           ^{:key (:_id recipe)} [recipe-item recipe])]])))
 
 (def recipe-panes {:recipe-list recipe-list
-                   :new-recipe  new-recipe
+                   :edit-recipe edit-recipe
                    ;:edit-recipe edit-recipe
                    })
 
@@ -349,20 +339,3 @@
       (if @active-recipe-pane
         [(@active-recipe-pane recipe-panes)]
         [recipe-list]))))
-
-;(defn recipes-section []
-;  (let [active-recipe-pane (subscribe [:state :active-recipe-pane])]
-;    (fn []
-;      [rc/h-box
-;       :size "1"
-;       :justify :around
-;       :gap "4em"
-;       :children [[rc/v-box
-;                   :size "2"
-;                   :children [[recipe-list-menu]]]
-;                  [rc/v-box
-;                   :size "8"
-;                   :children [(if @active-recipe-pane
-;                                [(@active-recipe-pane recipe-panes)]
-;                                [rc/box
-;                                 :child [:div]])]]]])))

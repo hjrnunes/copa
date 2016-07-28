@@ -69,5 +69,6 @@
 (register-sub
   :sorted/recipes
   (fn [db _]
-    (let [recipes (reaction (get-in @db [:data :recipes]))]
+    (let [index (reaction (get-in @db [:index :recipes]))
+          recipes (reaction (vals @index))]
       (reaction (sort-by :name @recipes)))))
