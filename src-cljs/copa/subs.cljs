@@ -64,3 +64,10 @@
   (fn [db _]
     (let [ingredients (reaction (get-in @db [:data :ingredients]))]
       (reaction (sort-by :name @ingredients)))))
+
+; sorted recipes
+(register-sub
+  :sorted/recipes
+  (fn [db _]
+    (let [recipes (reaction (get-in @db [:data :recipes]))]
+      (reaction (sort-by :name @recipes)))))

@@ -35,7 +35,7 @@
                  [luminus-http-kit "0.1.1"]
                  [luminus-log4j "0.1.2"]
                  [io.rkn/conformity "0.4.0"]
-                 [prismatic/plumbing "0.5.2"]
+                 [prismatic/plumbing "0.5.3"]
                  [prismatic/schema "1.0.5"]
                  [re-frame "0.7.0"]
                  [re-com "0.8.0"]

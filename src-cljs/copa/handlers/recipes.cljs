@@ -87,20 +87,31 @@
     (assoc-in db [:state :forms form] {})))
 
 ;; create new recipe
-(defn- collect-new-recipe-form [db form]
-  (into {} [[:name (get-in db [:state :forms form :name])]
-            (when-let [description (get-in db [:state :forms form :description])]
-              [:description description])
-            (when-let [portions (get-in db [:state :forms form :portions])]
-              [:portions portions])
-            [:preparation (get-in db [:state :forms form :preparation])]
-            [:measurements (get-in db [:state :forms form :measurements])]
-            [:user (get-in db [:state :user :username])]]))
+;(defn- collect-new-recipe-form [db form]
+;  (into {} [[:name (get-in db [:state :forms form :name])]
+;            (when-let [description (get-in db [:state :forms form :description])]
+;              [:description description])
+;            (when-let [portions (get-in db [:state :forms form :portions])]
+;              [:portions portions])
+;            [:preparation (get-in db [:state :forms form :preparation])]
+;            [:measurements (get-in db [:state :forms form :measurements])]
+;            [:user (get-in db [:state :user :username])]]))
+
+(defn- prep-recipe-form [db form]
+  (assoc form
+    :user (get-in db [:state :user :username])
+    :measurements (for [{:keys [ingredient quantity unit]} (:measurements form)]
+                    (into {} [[:ingredient (lower-case ingredient)]
+                              (when quantity
+                                [:quantity (js/parseFloat quantity)])
+                              (when unit
+                                [:unit unit])]))))
 
 (register-handler
   :recipe/save
   (fn [db [_ form]]
-    (let [recipe (collect-new-recipe-form db form)]
+    (let [recipe (prep-recipe-form db form)]
+      (println "Recipe" recipe)
       (POST (str js/context "/api/recipes")
             {:response-format :json
              :params          recipe

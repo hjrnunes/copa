@@ -77,17 +77,17 @@
               :on-mouse-out  (handler-fn (reset! mouse-over? false))}
        :child (compose-measurement measurement true mouse-over? form-key)])))
 
-(defn measurements [form-key]
-  (let [measurements (subscribe [:form-state form-key :measurements])]
-    (fn []
-      [rc/v-box
-       :gap "1em"
-       :children [[rc/box
-                   :child [rc/title :level :level3 :label "Ingredientes"]]
-                  [rc/v-box
-                   :children [(for [[idx measurement] (indexed @measurements)]
-                                ^{:key idx} [editable-measurement-item measurement form-key])]]
-                  [new-measurement form-key]]])))
+;(defn measurements [form-key]
+;  (let [measurements (subscribe [:form-state form-key :measurements])]
+;    (fn []
+;      [rc/v-box
+;       :gap "1em"
+;       :children [[rc/box
+;                   :child [rc/title :level :level3 :label "Ingredientes"]]
+;                  [rc/v-box
+;                   :children [(for [[idx measurement] (indexed @measurements)]
+;                                ^{:key idx} [editable-measurement-item measurement form-key])]]
+;                  [new-measurement form-key]]])))
 
 (defn add-form-measurement [form]
   (when (get @form :measurement)
@@ -122,7 +122,6 @@
 (defn new-recipe []
   (let [form (r/atom {})]
     (fn []
-      (println @form)
       [:div.ui.two.column.relaxed.divided.grid
        [:div.row
         [:div.sixteen.wide.column
@@ -136,7 +135,7 @@
        [:div.row
         [:div.sixteen.wide.column
          [:form.ui.large.form
-          [bind-fields [:input {:field :text :id :title :placeholder "Título..."}] form]]]]
+          [bind-fields [:input {:field :text :id :name :placeholder "Nome..."}] form]]]]
        [:div.row
         [:div.twelve.wide.column
          [:form.ui.large.form
@@ -180,7 +179,7 @@
            {:data-text "ou"}]
           [:button.ui.positive.button
            {:type     "button"
-            :on-click #(dispatch [:recipe/save form])}
+            :on-click #(dispatch [:recipe/save @form])}
            "Guardar"]]]
         [:div.four.wide.column]]])))
 
@@ -248,7 +247,32 @@
         :on-mouse-out  (handler-fn (reset! add-mouse-over? false))
         :on-click      #(dispatch [:state/update :active-recipe-pane :new-recipe])}
        [:i.plus.icon
-        (-> (merge (when-not @add-mouse-over?
+        (-> (merge (if @add-mouse-over?
+                     {:class "green"}
+                     {:class "disabled"})))]])))
+
+(defn edit-recipe-button []
+  (let [add-mouse-over? (r/atom false)]
+    (fn []
+      [:div.ui.icon.item
+       {:on-mouse-over (handler-fn (reset! add-mouse-over? true))
+        :on-mouse-out  (handler-fn (reset! add-mouse-over? false))
+        :on-click      #(dispatch [:state/update :active-recipe-pane :new-recipe])}
+       [:i.edit.icon
+        (-> (merge (if @add-mouse-over?
+                     {:class "orange"}
+                     {:class "disabled"})))]])))
+
+(defn delete-recipe-button []
+  (let [add-mouse-over? (r/atom false)]
+    (fn []
+      [:div.ui.icon.item
+       {:on-mouse-over (handler-fn (reset! add-mouse-over? true))
+        :on-mouse-out  (handler-fn (reset! add-mouse-over? false))
+        :on-click      #(dispatch [:state/update :active-recipe-pane :new-recipe])}
+       [:i.trash.icon
+        (-> (merge (if @add-mouse-over?
+                     {:class "red"}
                      {:class "disabled"})))]])))
 
 (defn recipe-search []
@@ -295,7 +319,8 @@
 ;        {:on-click #(reset! doc nil)} "clear"]])))
 
 (defn recipe-list []
-  (let [recipes (subscribe [:data :recipes])]
+  (let [recipes (subscribe [:sorted/recipes])
+        selected-recipe (subscribe [:state/selected-recipe])]
     (fn []
       [:div
        ;[mycheckbox]
@@ -303,6 +328,10 @@
        ;[mycheckbox2]
        [:div.ui.top.attached.menu
         [add-recipe-button]
+        (when @selected-recipe
+          [edit-recipe-button])
+        (when @selected-recipe
+          [delete-recipe-button])
         [:div.right.menu
          [recipe-search]]]
        [:div.ui.bottom.attached.styled.fluid.accordion
