@@ -4,11 +4,12 @@
             [re-frame.core :refer [subscribe dispatch]]
             [re-com.core :as rc]
             [reagent-forms.core :refer [bind-fields]]
-            [clojure.string :refer [join capitalize]]
+            [clojure.string :refer [join capitalize lower-case]]
             [markdown.core :refer [md->html]]
             [plumbing.core :refer [indexed]]
             [json-html.core :refer [edn->hiccup]]
-            [copa.views.util :refer [wired-textbox]]))
+            [copa.views.util :refer [wired-textbox]]
+            [copa.util :refer [vec-remove]]))
 
 ;; recipe details ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
@@ -64,88 +65,7 @@
      :children [[rc/title :level :level3 :label "Preparação"]
                 [rc/box :child [:div {:dangerouslySetInnerHTML {:__html (md->html preparation)}}]]]]))
 
-(defn recipe-details-header []
-  (fn [{:keys [name description portions preparation categories] :as recipe}]
-    [rc/v-box
-     :children [[rc/h-box
-                 ;:gap "1"
-                 :align :center
-                 :children [[rc/box
-                             :child [rc/title :level :level1 :underline? true :label name]]
-                            [rc/md-circle-icon-button
-                             :style {:margin-left "1em"
-                                     :margin-top  "1em"}
-                             :md-icon-name "zmdi-edit"
-                             :tooltip "Alterar receita"
-                             :on-click (handler-fn
-                                         (dispatch [:form-state/load :edit-recipe recipe])
-                                         (dispatch [:state/update :active-recipe-pane :edit-recipe]))]]]]]))
-
-(defn recipe-details-subheader []
-  (fn [{:keys [name description portions preparation categories] :as recipe}]
-    [rc/h-box
-     :gap "2em"
-     :children [[rc/box
-                 :size "2"
-                 :child [rc/title :level :level4 :label description]]
-                [rc/box
-                 :size "1"
-                 :child [rc/title :level :level4 :label (when portions
-                                                          (join " " [portions "porções"]))]]]]))
-
-;(defn recipe-details-old []
-;  (let [recipe (subscribe [:state/selected-recipe])]
-;    (fn []
-;      (when @recipe
-;        [rc/v-box
-;         :children [[recipe-details-header @recipe]
-;                    [recipe-details-subheader @recipe]
-;                    [rc/gap :size "1em"]
-;                    [rc/h-box
-;                     :gap "2em"
-;                     :children [[recipe-preparation @recipe]
-;                                [recipe-measurements-list recipe]]]]]))))
-
-
 ;; recipe creation ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-(defn new-measurement [form-key]
-  (let [show (subscribe [:form-state form-key :show-new-measurement])]
-    (fn []
-      [rc/v-box
-       :children [(if @show
-                    [rc/h-box
-                     :align :end
-                     :children [[wired-textbox {:label "Quantidade"
-                                                :form  form-key
-                                                :key   :tmp.measurement/quantity
-                                                :width "60px"}]
-                                [rc/gap :size "0.5em"]
-                                [wired-textbox {:label "Unidade"
-                                                :form  form-key
-                                                :key   :tmp.measurement/unit
-                                                :width "50px"}]
-                                [rc/gap :size "1em"]
-                                [wired-textbox {:label "Ingrediente"
-                                                :form  form-key
-                                                :key   :tmp.measurement/ingredient
-                                                :width "150px"}]
-                                [rc/gap :size "0.5em"]
-                                [rc/button
-                                 :label "OK"
-                                 :class "btn-primary"
-                                 :on-click #(dispatch [:measurement/add form-key])]
-                                [rc/gap :size "1px"]
-                                [rc/button
-                                 :label "Cancelar"
-                                 :class "btn-secondary"
-                                 :on-click #(dispatch [:measurement/cancel form-key])]]]
-                    [rc/box
-                     :align-self :start
-                     :child [rc/label
-                             :label "adicionar ingrediente..."
-                             :class "text-muted"
-                             :on-click #(dispatch [:form-state/update form-key :show-new-measurement true])]])]])))
 
 (defn editable-measurement-item [form-key]
   (let [mouse-over? (r/atom false)]
@@ -169,157 +89,100 @@
                                 ^{:key idx} [editable-measurement-item measurement form-key])]]
                   [new-measurement form-key]]])))
 
-(defn recipe-form-old [form-key]
-  [rc/v-box
-   :children [[rc/title :level :level1 :underline? true :label "Nova Receita"]
-              [rc/h-box
-               :gap "2em"
-               :children [[rc/v-box
-                           :gap "1em"
-                           :children [[wired-textbox {:label "Nome"
-                                                      :form  form-key
-                                                      :key   :name}]
-                                      [wired-textbox {:label    "Descrição"
-                                                      :form     form-key
-                                                      :key      :description
-                                                      :textarea true}]
-                                      [wired-textbox {:label "Porções"
-                                                      :form  form-key
-                                                      :key   :portions}]
-                                      [wired-textbox {:label    "Preparação"
-                                                      :form     form-key
-                                                      :key      :preparation
-                                                      :textarea true}]]]
-                          [rc/border
-                           :l-border "1px solid lightgrey"
-                           :child [rc/v-box
-                                   :style {:padding-left "1em"}
-                                   :children [[measurements form-key]]]]]]
-              [rc/gap :size "1em"]
-              [rc/line]
-              [rc/gap :size "0.5em"]
-              [rc/h-box
-               :align :center
-               :gap "0.5em"
-               :children [[rc/button
-                           :label "Guardar"
-                           :class "btn-primary"
-                           :on-click #(dispatch [:recipe/save form-key])]
-                          [rc/md-circle-icon-button
-                           :md-icon-name "zmdi-delete"
-                           :tooltip "Limpar ficha"
-                           :on-click #(dispatch [:recipe/clear form-key])]]]]])
-
-;(defn new-recipe-old []
-;  (let [form-key :new-recipe]
-;    [recipe-form form-key]))
-
-;; recipe edit ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-;(defn edit-recipe []
-;  (let [form-key :edit-recipe]
-;    [recipe-form form-key]))
-
-
-;; recipe list ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-;(defn recipe-list-item []
-;  (let [mouse-over? (r/atom false)
-;        selected-recipe (subscribe [:state/selected-recipe])]
-;    (fn [{:keys [_id name description portions preparation categories measurements]}]
-;      [rc/border
-;       :r-border "1px solid lightgrey"
-;       :child [rc/box
-;               :style {:padding          "1em"
-;                       :background-color (if (or (= _id (:_id @selected-recipe))
-;                                                 @mouse-over?)
-;                                           "#EBF9D3")}
-;               :attr {:on-click      #(dispatch [:recipe/select name])
-;                      :on-mouse-over (handler-fn (reset! mouse-over? true))
-;                      :on-mouse-out  (handler-fn (reset! mouse-over? false))}
-;               :child [rc/label :label name]]])))
-
-;(defn recipe-list [recipes]
-;  [rc/v-box
-;   :children (for [recipe @recipes]
-;               ^{:key (:_id recipe)} [recipe-list-item recipe])])
-
-;(defn recipe-list-menu []
-;  (let [recipes (subscribe [:data :recipes])]
-;    (fn []
-;      [rc/v-box
-;       :children [[rc/h-box
-;                   :gap "1"
-;                   :align :center
-;                   :children [[rc/box
-;                               :child [rc/title :level :level1 :label "Receitas"]]
-;                              [rc/md-circle-icon-button
-;                               :style {:margin-top "1em"}
-;                               :md-icon-name "zmdi-plus"
-;                               :tooltip "Adicionar nova receita"
-;                               :on-click #(dispatch [:state/update :active-recipe-pane :new-recipe])]]]
-;                  (when-not (empty? @recipes)
-;                    [recipe-list recipes])]])))
-
 (defn add-form-measurement [form]
   (when (get @form :measurement)
     (swap! form assoc :measurements (conj (get @form :measurements []) (get @form :measurement)))
     (swap! form dissoc :measurement)))
 
-(defn recipe-form [form]
-  [:form.ui.large.form
-   [:div.ui.two.column.relaxed.divided.grid
-    [:div.row
-     [:div.sixteen.wide.column
-      [:h5.ui.header "Nova receita"]]]
-    [:div.row
-     [:div.sixteen.wide.column
-      [:input {:field :text :id :title :placeholder "Título..."}]]]
-    [:div.row
-     [:div.twelve.wide.column
-      [:input {:field :text :id :description :placeholder "Descrição..."}]]
-     [:div.four.wide.column
-      [:input {:field :text :id :portions :placeholder "Porções..."}]]]
-    [:div.ui.divider]
-    [:div.row
-     [:div.twelve.wide.column
-      [:input {:field :text_area :id :preparation :placeholder "Preparação..."}]]
-     [:div.four.wide.column
-      [:h5.ui.header "Ingredientes"]
-      [:div.row
-       [:div.twelve.wide.column]
-       [:div.four.wide.column
-        [:div.ui.tiny.divided.list
-         (for [[idx {:keys [_id ingredient quantity unit] :as measurement}] (indexed (:measurements @form))]
-           ^{:key idx} [:div.item
-                        (when quantity
-                          [:div.right.floated.content
-                           [:div.ui.basic.tiny.label
-                            quantity
-                            (when unit
-                              [:div.detail (capitalize unit)])]])
-                        (when ingredient
-                          [:div.middle.aligned.content
-                           (capitalize ingredient)])])]
-        [:div.fields
-         [:div.field
-          [:input {:field :text :id :measurement.quantity :placeholder "quant"}]]
-         [:div.field
-          [:input {:field :text :id :measurement.unit :placeholder "unit"}]]
-         [:div.field
-          [:input {:field :text :id :measurement.ingredient :placeholder "Ing"}]]
-         [:button.ui.icon.button
-          {:on-click (handler-fn (add-form-measurement form)
-                                 (.preventDefault event))}
-          [:i.checkmark.icon]]]
-        ]]]]]])
+(defn remove-form-measurement [form key]
+  (swap! form assoc :measurements (vec-remove (get @form :measurements []) key)))
+
+(defn recipe-form-measurent-item []
+  (let [mouse-over? (r/atom false)]
+    (fn [form key {:keys [_id ingredient quantity unit]}]
+      [:div.item
+       {:on-mouse-over (handler-fn (reset! mouse-over? true))
+        :on-mouse-out  (handler-fn (reset! mouse-over? false))}
+       (when @mouse-over?
+         [:div.right.floated.content
+          [:div.ui.basic.red.tiny.label
+           {:on-click (handler-fn (remove-form-measurement form key)
+                                  (.preventDefault event))}
+           "X"]])
+       (when quantity
+         [:div.right.floated.content
+          [:div.ui.basic.tiny.label
+           quantity
+           (when unit
+             [:div.detail (lower-case unit)])]])
+       (when ingredient
+         [:div.middle.aligned.content
+          (capitalize ingredient)])])))
 
 (defn new-recipe []
   (let [form (r/atom {})]
     (fn []
       (println @form)
-      [bind-fields (recipe-form form) form]
-      )))
+      [:div.ui.two.column.relaxed.divided.grid
+       [:div.row
+        [:div.sixteen.wide.column
+         [:div.ui.breadcrumb
+          [:a.section
+           {:on-click #(dispatch [:state/update :active-recipe-pane :recipe-list])}
+           "Receitas"]
+          [:i.right.angle.icon.divider]
+          [:div.active.section
+           "Nova receita"]]]]
+       [:div.row
+        [:div.sixteen.wide.column
+         [:form.ui.large.form
+          [bind-fields [:input {:field :text :id :title :placeholder "Título..."}] form]]]]
+       [:div.row
+        [:div.twelve.wide.column
+         [:form.ui.large.form
+          [bind-fields [:input {:field :text :id :description :placeholder "Descrição..."}] form]]]
+        [:div.four.wide.column
+         [:form.ui.large.form
+          [bind-fields [:input {:field :text :id :portions :placeholder "Porções..."}] form]]]]
+       [:div.ui.divider]
+       [:div.row
+        [:div.twelve.wide.column
+         [:form.ui.large.form
+          [bind-fields [:input {:field :text_area :id :preparation :placeholder "Preparação..."}] form]]]
+        [:div.four.wide.column
+         [:h5.ui.header "Ingredientes"]
+         [:div.row
+          [:div.twelve.wide.column]
+          [:div.four.wide.column
+           [:div.ui.tiny.divided.list
+            (for [[idx measurement] (indexed (:measurements @form))]
+              ^{:key idx} [recipe-form-measurent-item form idx measurement])]
+           [:div.ui.form
+            [:div.inline.fields
+             [:div.four.wide.field
+              [bind-fields [:input {:field :text :id :measurement.quantity :placeholder "q"}] form]]
+             [:div.four.wide.field
+              [bind-fields [:input {:field :text :id :measurement.unit :placeholder "u"}] form]]
+             [:div.six.wide.field
+              [bind-fields [:input {:field :text :id :measurement.ingredient :placeholder "i"}] form]]
+             [:button.ui.green.icon.basic.button
+              {:type     "button"
+               :on-click (handler-fn (add-form-measurement form))}
+              [:i.checkmark.icon]]]]]]]]
+       [:div.row
+        [:div.twelve.wide.column
+         [:div.ui.right.floated.buttons
+          [:button.ui.button
+           {:on-click (handler-fn (reset! form {})
+                                  (dispatch [:state/update :active-recipe-pane :recipe-list]))}
+           "Apagar"]
+          [:div.or
+           {:data-text "ou"}]
+          [:button.ui.positive.button
+           {:type     "button"
+            :on-click #(dispatch [:recipe/save form])}
+           "Guardar"]]]
+        [:div.four.wide.column]]])))
 
 (defn measurement-item []
   (let []
@@ -330,7 +193,7 @@
           [:div.ui.basic.tiny.label
            quantity
            (when unit
-             [:div.detail (capitalize unit)])]])
+             [:div.detail (lower-case unit)])]])
        [:div.middle.aligned.content
         (capitalize ingredient)]])))
 
@@ -351,7 +214,7 @@
        [:h5.ui.header "Ingredientes"]]]
      [:div.row
       [:div.twelve.wide.column
-       preparation]
+       [:div {:dangerouslySetInnerHTML {:__html (md->html preparation)}}]]
       [:div.four.wide.column
        [:div.ui.tiny.divided.list
         (for [[idx measurement] (indexed measurements)]
@@ -394,10 +257,50 @@
     [:input.prompt {:placeholder "Procurar receita..."}]
     [:div.search.link.icon]]])
 
+;(defn mycheckbox []
+;  (let [doc (r/atom {:name false})]
+;    (fn []
+;      [:div
+;       [:p (str @doc)]
+;       [bind-fields
+;        [:input {:field :checkbox :id :name}]
+;        doc]
+;       [:button
+;        {:on-click #(reset! doc nil)} "clear"]])))
+;
+;
+;(defn mycheckbox2 []
+;  (let [doc (r/atom {:name true})]
+;    (fn []
+;      [:div
+;       [:p (str @doc)]
+;       [:input {:type      "checkbox"
+;                :field     :checkbox
+;                :id        :name
+;                :on-change #(swap! doc assoc :name (not (:name @doc)))}]
+;       [:button
+;        {:on-click #(reset! doc nil)} "clear"]])))
+;
+;(defn myradio []
+;  (let [doc (r/atom {:radioselection true})]
+;    (fn []
+;      [:div
+;       [:p (str @doc)]
+;       [bind-fields
+;        [:form
+;         [:input {:field :radio :value :a :name :radioselection} "foo"]
+;         [:input {:field :radio :value :b :name :radioselection} "bar"]]
+;        doc]
+;       [:button
+;        {:on-click #(reset! doc nil)} "clear"]])))
+
 (defn recipe-list []
   (let [recipes (subscribe [:data :recipes])]
     (fn []
       [:div
+       ;[mycheckbox]
+       ;[myradio]
+       ;[mycheckbox2]
        [:div.ui.top.attached.menu
         [add-recipe-button]
         [:div.right.menu
