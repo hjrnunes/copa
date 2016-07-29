@@ -3,6 +3,7 @@
   (:require [reagent.core :as r]
             [re-frame.core :refer [subscribe dispatch]]
             [re-com.core :as rc]
+            [goog.dom :as dom]
             [reagent-forms.core :refer [bind-fields]]
             [clojure.string :refer [join capitalize lower-case]]
             [markdown.core :refer [md->html]]
@@ -266,10 +267,19 @@
                #(dispatch [:state/update :active-recipe-pane :new-recipe])))
 
 (defn recipe-search []
-  [:div.ui.right.align.category.search.item
-   [:div.ui.transparent.icon.input
-    [:input.prompt {:placeholder "Procurar receita..."}]
-    [:div.search.link.icon]]])
+  (let [recipes (subscribe [:sorted/recipes])]
+    (fn []
+      [:div.ui.right.align.search.item
+       [:div.ui.transparent.icon.input
+        [:input#recsearch.prompt {:placeholder "Procurar receita..."
+                                  :on-change   (handler-fn (.search (js/$ ".ui.search") (clj->js {:source       @recipes
+                                                                                                  :searchFields ["name"]
+                                                                                                  :fields       {"description" "description"
+                                                                                                                 "title"       "name"}})))}]
+        [:i.search.link.icon
+         {:on-click (handler-fn (dispatch [:recipe/select (.-value (dom/getElement "recsearch"))])
+                                (set! (.-value (dom/getElement "recsearch")) nil))}]]
+       [:div.results]])))
 
 ;(defn mycheckbox []
 ;  (let [doc (r/atom {:name false})]
