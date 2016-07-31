@@ -3,7 +3,6 @@
   (:require [reagent.core :as r]
             [re-frame.core :refer [subscribe dispatch]]
             [re-com.core :as rc :refer-macros [handler-fn]]
-            [soda-ash.element :as s]
             [reagent-forms.core :refer [bind-fields]]
             [plumbing.core :refer [indexed]]
             [json-html.core :refer [edn->hiccup]]
@@ -134,6 +133,8 @@
          [:div.ui.container
           (if @active-main-pane
             [(@active-main-pane main-panes)]
-            [recipes-section])
+            (do
+              (dispatch [:state/update :active-main-pane :recipes])
+              [recipes-section]))
           ]]
         [login]))))
