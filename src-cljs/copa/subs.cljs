@@ -64,6 +64,14 @@
           index (subscribe [:index :ingredients])]
       (reaction (get @index @selected)))))
 
+; selected user in admin users menu
+(register-sub
+  :state/selected-user
+  (fn [db _]
+    (let [selected (reaction (get-in @db [:state :selected-user]))
+          index (subscribe [:index :users])]
+      (reaction (get @index @selected)))))
+
 ; sorted ingredients
 (register-sub
   :sorted/ingredients
@@ -79,6 +87,15 @@
           recipes (reaction (vals @index))]
       (reaction (sort-by :name @recipes)))))
 
+; sorted users
+(register-sub
+  :sorted/users
+  (fn [db _]
+    (let [index (subscribe [:index :users])
+          recipes (reaction (vals @index))]
+      (reaction (sort-by :username @recipes)))))
+
+; recipes of user
 (register-sub
   :user/recipes
   (fn [db [_ user]]

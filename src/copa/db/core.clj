@@ -33,6 +33,9 @@
 
 ;; users
 
+(defn get-users [mongo]
+  (mc/find-maps (:db mongo) users-col))
+
 (defn get-user [mongo username]
   (mc/find-one-as-map (:db mongo) users-col {:username username}))
 
@@ -60,6 +63,9 @@
 
 (defn update-recipe [mongo recipe]
   (mc/update (:db mongo) recipes-col {:name (:name recipe)} recipe {:upsert true}))
+
+(defn remove-recipe [mongo name]
+  (mc/remove (:db mongo) recipes-col {:name name}))
 
 ;; ingredients
 

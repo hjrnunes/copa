@@ -8,8 +8,7 @@
             [json-html.core :refer [edn->hiccup]]
             [copa.views.recipes :refer [recipes-section]]
             [copa.views.ingredients :refer [ingredients-section]]
-            [copa.views.user :refer [user-section]]
-            [copa.views.util :refer [wired-textbox]]))
+            [copa.views.user :refer [user-section]]))
 
 (defn db-state []
   (let [db (subscribe [:db])]
@@ -37,7 +36,7 @@
                :id           :password
                :placeholder  "senha"
                :on-key-press (handler-fn (if (= 13 (.-charCode event))
-                                           #(dispatch [:data/login @form])))}]]]
+                                           (dispatch [:data/login @form])))}]]]
     [:div.ui.fluid.large.olive.submit.button
      {:on-click #(dispatch [:data/login @form])}
      "Entrar"]]])
@@ -123,7 +122,7 @@
         [:img {:src "images/logo.png"}]]
        (gen-item-class :recipes "Receitas" #(dispatch [:state/update :active-main-pane :recipes]) active-main-pane)
        (gen-item-class :ingredients "Ingredientes" #(dispatch [:state/update :active-main-pane :ingredients]) active-main-pane)
-       (gen-item-class :db-state "Estado" #(dispatch [:state/update :active-main-pane :db-state]) active-main-pane)
+       ;(gen-item-class :db-state "Estado" #(dispatch [:state/update :active-main-pane :db-state]) active-main-pane)
        [:div.right.menu
         [:a.item
          (-> {:on-click #(dispatch [:state/update :active-main-pane :user])}

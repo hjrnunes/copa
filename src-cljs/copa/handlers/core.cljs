@@ -6,7 +6,8 @@
             [ajax.core :refer [GET POST]]
             [hodgepodge.core :refer [local-storage]]
             [copa.handlers.ingredients]
-            [copa.handlers.recipes]))
+            [copa.handlers.recipes]
+            [copa.handlers.user]))
 
 ;; -- loading -----------------------------------------------------------
 

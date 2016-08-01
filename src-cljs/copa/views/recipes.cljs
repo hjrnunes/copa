@@ -8,7 +8,7 @@
             [markdown.core :refer [md->html]]
             [plumbing.core :refer [indexed]]
             [json-html.core :refer [edn->hiccup]]
-            [copa.views.util :refer [wired-textbox]]
+            [copa.views.util :refer [menu-button]]
             [copa.util :refer [vec-remove]]))
 
 (defn add-form-measurement [form]
@@ -172,20 +172,6 @@
                     {:class "active"})))
        [:div.content
         (capitalize name)]])))
-
-(defn menu-button [icon color desc on-click]
-  (let [mouse-over? (r/atom false)]
-    (fn []
-      [:span
-       {:data-tooltip desc}
-       [:div.ui.icon.item
-        {:on-mouse-over (handler-fn (reset! mouse-over? true))
-         :on-mouse-out  (handler-fn (reset! mouse-over? false))
-         :on-click      on-click}
-        [icon
-         (-> (merge (if @mouse-over?
-                      {:class color}
-                      {:class "disabled"})))]]])))
 
 (defn add-recipe-button []
   (menu-button :i.plus.icon "olive" "Nova receita"

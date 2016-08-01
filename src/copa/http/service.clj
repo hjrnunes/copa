@@ -19,6 +19,16 @@
              :user  (dissoc user :password)}))
       (bad-request {:message "Login failed. Wrong auth details."}))))
 
+(defn get-users []
+  (ok (db/get-users mongo)))
+
+(defn create-user [{:keys [username password admin] :as user}]
+  (let [crypted-passwd (hashers/encrypt password)]
+    (ok (db/create-user mongo username crypted-passwd admin))))
+
+(defn delete-user [username]
+  (ok (db/delete-user mongo username)))
+
 (defn get-settings []
   (ok (db/get-settings mongo)))
 
@@ -33,6 +43,9 @@
 
 (defn get-recipe-by-name [name]
   (ok (db/get-recipe mongo name)))
+
+(defn delete-recipe-by-name [name]
+  (ok (db/remove-recipe mongo name)))
 
 (defn get-ingredient-by-name [name]
   (ok (db/get-ingredient mongo name)))
