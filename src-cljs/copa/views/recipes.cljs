@@ -191,21 +191,22 @@
       [:div.item
        (when quantity
          [:div.right.floated.content
-          ;[:div.ui.basic.tiny.label
-          ; quantity
-          ; (when unit
-          ;   [:div.detail (lower-case unit)])]
-          quantity
-          (when unit
-            [:span
-             {:style {:margin-left "0.5em"}}
-             (lower-case unit)])
-          ])
+          [:div.ui.basic.tiny.horizontal.label
+           quantity
+           (when unit
+             [:div.detail (lower-case unit)])]
+          ;quantity
+          ;(when unit
+          ;  [:span
+          ;   {:style {:margin-left "0.5em"}}
+          ;   (lower-case unit)])
+          ]
+         )
        [:div.middle.aligned.content
         (capitalize ingredient)]])))
 
 (defn recipe-details []
-  (fn [{:keys [_id name description portions preparation categories measurements]}]
+  (fn [{:keys [_id name description portions preparation user categories measurements]}]
     [:div.ui.two.column.relaxed.divided.grid
      [:div.row
       [:div.twelve.wide.column
@@ -213,11 +214,18 @@
         (capitalize name)
         [:div.sub.header
          [:i description]]]]
-      [:div.four.wide.column
-       (when portions
-         (if (= "1" portions)
-           [:i (join " " [portions "porção"])]
-           [:i (join " " [portions "porções"])]))]]
+      (when (or user portions)
+        [:div.four.wide.column
+         (when user
+           [:div.row
+            [:div.ui.mini.label
+             [:i.user.icon]
+             user]])
+         (when portions
+           [:div.row
+            (if (= "1" portions)
+              [:i (join " " [portions "porção"])]
+              [:i (join " " [portions "porções"])])])])]
      [:div.ui.divider]
      [:div.row
       [:div.twelve.wide.column

@@ -110,13 +110,18 @@
                 {:class "active"})))
    label])
 
-(defn copa-menu [active-main-pane]
-  [:div.ui.stackable.container.secondary.menu
-   [:div.item
-    [:img {:src "images/logo.png"}]]
-   (gen-item-class :recipes "Receitas" #(dispatch [:state/update :active-main-pane :recipes]) active-main-pane)
-   (gen-item-class :ingredients "Ingredientes" #(dispatch [:state/update :active-main-pane :ingredients]) active-main-pane)
-   (gen-item-class :db-state "Estado" #(dispatch [:state/update :active-main-pane :db-state]) active-main-pane)])
+(defn copa-menu []
+  (let [user (subscribe [:state :user])]
+    (fn [active-main-pane]
+      [:div.ui.stackable.container.secondary.menu
+       [:div.item
+        [:img {:src "images/logo.png"}]]
+       (gen-item-class :recipes "Receitas" #(dispatch [:state/update :active-main-pane :recipes]) active-main-pane)
+       (gen-item-class :ingredients "Ingredientes" #(dispatch [:state/update :active-main-pane :ingredients]) active-main-pane)
+       (gen-item-class :db-state "Estado" #(dispatch [:state/update :active-main-pane :db-state]) active-main-pane)
+       [:div.right.menu
+        [:div.item
+         [:i.user.icon] (:username @user)]]])))
 
 (def main-panes {:recipes     recipes-section
                  :ingredients ingredients-section
@@ -129,7 +134,7 @@
     (fn []
       (if-not @force-login
         [:div
-         (copa-menu active-main-pane)
+         [copa-menu active-main-pane]
          [:div.ui.container
           (if @active-main-pane
             [(@active-main-pane main-panes)]
