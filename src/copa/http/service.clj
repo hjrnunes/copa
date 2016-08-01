@@ -11,8 +11,9 @@
 (defn login [username password]
   (let [user (db/get-user mongo username)]
     (if (hashers/check password (:password user))
-      (let [claims {:user (keyword username)
-                    :exp  (time/plus (time/now) (time/seconds 3600))}
+      (let [claims {:user  (keyword username)
+                    :admin (get user :admin false)
+                    :exp   (time/plus (time/now) (time/seconds 3600))}
             token (jws-token claims)]
         (ok {:token token
              :user  (dissoc user :password)}))

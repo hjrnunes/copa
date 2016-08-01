@@ -8,6 +8,7 @@
             [json-html.core :refer [edn->hiccup]]
             [copa.views.recipes :refer [recipes-section]]
             [copa.views.ingredients :refer [ingredients-section]]
+            [copa.views.user :refer [user-section]]
             [copa.views.util :refer [wired-textbox]]))
 
 (defn db-state []
@@ -124,11 +125,16 @@
        (gen-item-class :ingredients "Ingredientes" #(dispatch [:state/update :active-main-pane :ingredients]) active-main-pane)
        (gen-item-class :db-state "Estado" #(dispatch [:state/update :active-main-pane :db-state]) active-main-pane)
        [:div.right.menu
-        [:div.item
-         [:i.user.icon] (:username @user)]]])))
+        [:a.item
+         (-> {:on-click #(dispatch [:state/update :active-main-pane :user])}
+             (merge (when (= :user @active-main-pane)
+                      {:class "active"})))
+         [:i.user.icon]
+         (:username @user)]]])))
 
 (def main-panes {:recipes     recipes-section
                  :ingredients ingredients-section
+                 :user        user-section
                  :db-state    db-state})
 
 (defn copa-app []

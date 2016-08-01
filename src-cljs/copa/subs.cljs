@@ -78,3 +78,11 @@
     (let [index (subscribe [:index :recipes])
           recipes (reaction (vals @index))]
       (reaction (sort-by :name @recipes)))))
+
+(register-sub
+  :user/recipes
+  (fn [db [_ user]]
+    (let [index (subscribe [:index :recipes])
+          recipes (reaction (vals @index))
+          user-recps (reaction (filter #(= (name user) (:user %))) @recipes)]
+      (reaction (sort-by :name @user-recps)))))
