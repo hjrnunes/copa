@@ -165,7 +165,11 @@
              [:div.four.wide.field
               [bind-fields [:input {:field :text :id :measurement.unit :placeholder "u"}] form]]
              [:div.six.wide.field
-              [bind-fields [:input {:field :text :id :measurement.ingredient :placeholder "i"}] form]]
+              [bind-fields [:input {:field        :text
+                                    :id           :measurement.ingredient
+                                    :placeholder  "i"
+                                    :on-key-press (handler-fn (if (= 13 (.-charCode event))
+                                                                (add-form-measurement form)))}] form]]
              [:button.ui.green.icon.basic.button
               {:type     "button"
                :on-click (handler-fn (add-form-measurement form))}

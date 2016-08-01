@@ -32,7 +32,11 @@
     [:div.field
      [:div.ui.left.icon.input
       [:i.lock.icon]
-      [:input {:field :password :id :password :placeholder "senha"}]]]
+      [:input {:field        :password
+               :id           :password
+               :placeholder  "senha"
+               :on-key-press (handler-fn (if (= 13 (.-charCode event))
+                                           #(dispatch [:data/login @form])))}]]]
     [:div.ui.fluid.large.olive.submit.button
      {:on-click #(dispatch [:data/login @form])}
      "Entrar"]]])
