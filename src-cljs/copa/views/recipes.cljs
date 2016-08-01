@@ -119,14 +119,7 @@
           [:div.ui.basic.tiny.horizontal.label
            quantity
            (when unit
-             [:div.detail (lower-case unit)])]
-          ;quantity
-          ;(when unit
-          ;  [:span
-          ;   {:style {:margin-left "0.5em"}}
-          ;   (lower-case unit)])
-          ]
-         )
+             [:div.detail (lower-case unit)])]])
        [:div.middle.aligned.content
         (capitalize ingredient)]])))
 
@@ -195,7 +188,7 @@
                       {:class "disabled"})))]]])))
 
 (defn add-recipe-button []
-  (menu-button :i.plus.icon "green" "Nova receita"
+  (menu-button :i.plus.icon "olive" "Nova receita"
                (handler-fn
                  (dispatch [:recipe/select nil])
                  (dispatch [:state/update :active-recipe-pane :edit-recipe]))))
