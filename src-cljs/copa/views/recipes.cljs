@@ -137,7 +137,7 @@
         [:div.four.wide.column
          (when user
            [:div.row
-            [:div.ui.mini.label
+            [:div.ui.basic.mini.label
              [:i.user.icon]
              user]])
          (when portions
