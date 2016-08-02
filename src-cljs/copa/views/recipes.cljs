@@ -183,9 +183,11 @@
   (menu-button :i.edit.icon "yellow" "Editar receita"
                #(dispatch [:state/update :active-recipe-pane :edit-recipe])))
 
-(defn delete-recipe-button []
+(defn delete-recipe-button [selected]
   (menu-button :i.trash.icon "red" "Apagar receita"
-               #(dispatch [:state/update :active-recipe-pane :new-recipe])))
+               (handler-fn
+                 (dispatch [:recipe/select nil])
+                 (dispatch [:recipe/delete (:name @selected)]))))
 
 (defn recipe-search []
   (let [recipes (subscribe [:sorted/recipes])]
@@ -215,7 +217,7 @@
         (when @selected-recipe
           [edit-recipe-button])
         (when @selected-recipe
-          [delete-recipe-button])
+          [delete-recipe-button selected-recipe])
         [:div.right.menu
          [recipe-search]]]
        [:div.ui.bottom.attached.segment

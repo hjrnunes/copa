@@ -20,11 +20,11 @@
       (bad-request {:message "Login failed. Wrong auth details."}))))
 
 (defn get-users []
-  (ok (db/get-users mongo)))
+  (ok (map #(dissoc % :password) (db/get-users mongo))))
 
 (defn create-user [{:keys [username password admin] :as user}]
   (let [crypted-passwd (hashers/encrypt password)]
-    (ok (db/create-user mongo username crypted-passwd admin))))
+    (ok (dissoc (db/create-user mongo username crypted-passwd admin) :password))))
 
 (defn delete-user [username]
   (ok (db/delete-user mongo username)))

@@ -40,9 +40,9 @@
       (s/create-recipe body))
 
     (DELETE "/recipes" []
-      :query-params [name :- sc/Str]
+      :body [body {:name sc/Str}]
       :summary "Delete a recipe by name"
-      (s/delete-recipe-by-name name))
+      (s/delete-recipe-by-name (:name body)))
 
     (GET "/recipe" []
       :query-params [name :- sc/Str]
@@ -68,11 +68,11 @@
         (s/get-users))
 
       (POST "/users" []
-        :body [body schemas/Recipe]
+        :body [body schemas/User]
         :summary "Create new user"
         (s/create-user body))
 
       (DELETE "/users" []
-        :query-params [name :- sc/Str]
+        :body [body {:username sc/Str}]
         :summary "Delete a user by username"
-        (s/delete-user name)))))
+        (s/delete-user (:username body))))))

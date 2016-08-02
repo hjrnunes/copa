@@ -48,7 +48,8 @@
   (mc/update (:db mongo) users-col {:username username} {$set {:password new-password}}))
 
 (defn delete-user [mongo username]
-  (mc/remove (:db mongo) users-col {:username username}))
+  (mc/remove (:db mongo) users-col {:username username})
+  {:username username})
 
 ;; recipes
 
@@ -65,7 +66,8 @@
   (mc/update (:db mongo) recipes-col {:name (:name recipe)} recipe {:upsert true}))
 
 (defn remove-recipe [mongo name]
-  (mc/remove (:db mongo) recipes-col {:name name}))
+  (mc/remove (:db mongo) recipes-col {:name name})
+  {:name name})
 
 ;; ingredients
 

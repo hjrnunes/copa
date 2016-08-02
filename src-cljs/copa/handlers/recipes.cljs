@@ -3,7 +3,7 @@
             [copa.ajax :refer [load-auth-interceptor!]]
             [re-frame.core :refer [register-handler dispatch path trim-v after]]
             [plumbing.core :refer [map-vals]]
-            [ajax.core :refer [GET POST]]
+            [ajax.core :refer [GET POST DELETE]]
             [clojure.string :refer [lower-case]]))
 
 ;; get recipes
@@ -55,7 +55,6 @@
   :recipe/save
   (fn [db [_ form]]
     (let [recipe (prep-recipe-form db form)]
-      (println "Recipe" recipe)
       (POST (str js/context "/api/recipes")
             {:response-format :json
              :params          recipe
@@ -63,14 +62,12 @@
              :handler         #(dispatch [:response/recipe-save %1])
              :error-handler   #(dispatch [:data/error %1])})
       (dispatch [:loading/start])
-      (dispatch [:recipe/clear])
       db)))
 
 ;; recipe post result
 (register-handler
   :response/recipe-save
   (fn [db [_ data]]
-    (println "RSP" data)
     (let [name (:name data)
           db (-> db
                  ;(update-in [:data :recipes] conj data)
@@ -80,10 +77,26 @@
       db)))
 
 ;; delete recipe
-
 (register-handler
   :recipe/delete
-  (fn [db [_ selected]]
-    (-> db
-        (assoc-in [:state :selected-recipe] selected)
-        (assoc-in [:state :active-recipe-pane] :recipe-list))))
+  (fn [db [_ name]]
+    (let [params {:name name}]
+      (DELETE (str js/context "/api/recipes")
+              {:response-format :json
+               :params          params
+               :keywords?       true
+               :handler         #(dispatch [:response/recipe-delete %1])
+               :error-handler   #(dispatch [:data/error %1])})
+      (dispatch [:loading/start])
+      db)))
+
+;; recipe delete result
+(register-handler
+  :response/recipe-delete
+  (fn [db [_ data]]
+    (let [name (:name data)
+          db (-> db
+                 (assoc-in [:index :recipes] (dissoc (get-in db [:index :recipes]) name)))]
+      (dispatch [:loading/stop])
+      (dispatch [:recipe/select nil])
+      db)))
