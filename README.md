@@ -1,6 +1,6 @@
 # COPA - Culinary Operating Procedure Adviser
 
-COPA is a Clojure/Clojurescript recipe manager. It is a bit rough around the edges, and it's purpose is mainly for me to learn Clojurescript and related frontend technologies. But it's a fairly complete example of a Clojure/Clojurescript SPA with an API backend so it might be useful for begginers.
+COPA is a Clojure/Clojurescript recipe manager. It is a bit rough around the edges, and it's purpose is mainly for me to learn Clojurescript and related frontend technologies. But it's a fairly complete example of a Clojure/Clojurescript SPA with an API backend so it might be useful for beginners.
 
 Started with a [Luminus][1] template.
 
