@@ -33,6 +33,9 @@
 
 ;; users
 
+(defn get-users [mongo]
+  (mc/find-maps (:db mongo) users-col))
+
 (defn get-user [mongo username]
   (mc/find-one-as-map (:db mongo) users-col {:username username}))
 
@@ -45,7 +48,8 @@
   (mc/update (:db mongo) users-col {:username username} {$set {:password new-password}}))
 
 (defn delete-user [mongo username]
-  (mc/remove (:db mongo) users-col {:username username}))
+  (mc/remove (:db mongo) users-col {:username username})
+  {:username username})
 
 ;; recipes
 
@@ -60,6 +64,10 @@
 
 (defn update-recipe [mongo recipe]
   (mc/update (:db mongo) recipes-col {:name (:name recipe)} recipe {:upsert true}))
+
+(defn remove-recipe [mongo name]
+  (mc/remove (:db mongo) recipes-col {:name name})
+  {:name name})
 
 ;; ingredients
 

@@ -1,6 +1,6 @@
 (ns copa.subs
   (:require-macros [reagent.ratom :refer [reaction]])
-  (:require [re-frame.core :refer [register-sub]]))
+  (:require [re-frame.core :refer [register-sub subscribe]]))
 
 ;; -- Helpers -----------------------------------------------------------------
 
@@ -36,6 +36,12 @@
   (fn [db [_ field]]
     (reaction (get-in @db [:data field]))))
 
+;; generic index subscription
+(register-sub
+  :index
+  (fn [db [_ field]]
+    (reaction (get-in @db [:index field]))))
+
 ;; loading subscription
 (register-sub
   :loading
@@ -47,7 +53,7 @@
   :state/selected-recipe
   (fn [db _]
     (let [selected (reaction (get-in @db [:state :selected-recipe]))
-          index (reaction (get-in @db [:index :recipes]))]
+          index (subscribe [:index :recipes])]
       (reaction (get @index @selected)))))
 
 ; selected ingredient in menu
@@ -55,7 +61,15 @@
   :state/selected-ingredient
   (fn [db _]
     (let [selected (reaction (get-in @db [:state :selected-ingredient]))
-          index (reaction (get-in @db [:index :ingredients]))]
+          index (subscribe [:index :ingredients])]
+      (reaction (get @index @selected)))))
+
+; selected user in admin users menu
+(register-sub
+  :state/selected-user
+  (fn [db _]
+    (let [selected (reaction (get-in @db [:state :selected-user]))
+          index (subscribe [:index :users])]
       (reaction (get @index @selected)))))
 
 ; sorted ingredients
@@ -64,3 +78,28 @@
   (fn [db _]
     (let [ingredients (reaction (get-in @db [:data :ingredients]))]
       (reaction (sort-by :name @ingredients)))))
+
+; sorted recipes
+(register-sub
+  :sorted/recipes
+  (fn [db _]
+    (let [index (subscribe [:index :recipes])
+          recipes (reaction (vals @index))]
+      (reaction (sort-by :name @recipes)))))
+
+; sorted users
+(register-sub
+  :sorted/users
+  (fn [db _]
+    (let [index (subscribe [:index :users])
+          recipes (reaction (vals @index))]
+      (reaction (sort-by :username @recipes)))))
+
+; recipes of user
+(register-sub
+  :user/recipes
+  (fn [db [_ user]]
+    (let [index (subscribe [:index :recipes])
+          recipes (reaction (vals @index))
+          user-recps (reaction (filter #(= (name user) (:user %))) @recipes)]
+      (reaction (sort-by :name @user-recps)))))

@@ -20,4 +20,8 @@
                      :measurements                 (describe [Measurement] "Recipe's measurements")
                      :user                         (describe s/Str "Recipe's user")}))
 
+(s/defschema User
+  (merge BaseEntity {:username (describe s/Str "User name")
+                     :password (describe s/Str "User password")
+                     :admin    (describe s/Bool "Is the user an admin?")}))
 

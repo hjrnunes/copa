@@ -69,6 +69,19 @@
   (restrict handler {:handler  authenticated?
                      :on-error on-error}))
 
+(defn admin?
+  "Return `true` if the `request` is an
+  authenticated request.
+
+  This function checks the `:identity` key
+  in the request."
+  [request]
+  (boolean (get-in request [:identity :admin])))
+
+(defn wrap-admin [handler]
+  (restrict handler {:handler  {:and [authenticated? admin?]}
+                     :on-error on-error}))
+
 (defn wrap-identity [handler]
   (fn [request]
     (binding [*identity* (get-in request [:session :identity])]

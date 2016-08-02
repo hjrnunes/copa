@@ -10,7 +10,6 @@
                  [ring-middleware-format "0.7.0"]
                  [metosin/ring-http-response "0.6.5"]
                  [bouncer "1.0.0"]
-                 [org.webjars/bootstrap "4.0.0-alpha.2"]
                  [org.webjars/font-awesome "4.5.0"]
                  [org.webjars.bower/tether "1.1.1"]
                  [org.webjars/jquery "2.2.0"]
@@ -23,9 +22,9 @@
                  [mount "0.1.8"]
                  [luminus-nrepl "0.1.2"]
                  [buddy "0.10.0"]
-                 [org.clojure/clojurescript "1.7.228" :scope "provided"]
-                 [reagent "0.5.1"]
-                 [reagent-forms "0.5.13"]
+                 [org.clojure/clojurescript "1.9.89" :scope "provided"]
+                 [reagent "0.6.0-rc"]
+                 [reagent-forms "0.5.24"]
                  [reagent-utils "0.1.7"]
                  [secretary "1.2.3"]
                  [org.clojure/core.async "0.2.374"]
@@ -35,7 +34,7 @@
                  [luminus-http-kit "0.1.1"]
                  [luminus-log4j "0.1.2"]
                  [io.rkn/conformity "0.4.0"]
-                 [prismatic/plumbing "0.5.2"]
+                 [prismatic/plumbing "0.5.3"]
                  [prismatic/schema "1.0.5"]
                  [re-frame "0.7.0"]
                  [re-com "0.8.0"]
@@ -105,7 +104,8 @@
                                       :compiler
                                                     {:output-to     "target/test.js"
                                                      :main          "copa.doo-runner"
-                                                     :optimizations :whitespace
+                                                     ;:optimizations :whitespace
+                                                     :optimizations :advanced
                                                      :pretty-print  true}}}}
 
                    :figwheel
