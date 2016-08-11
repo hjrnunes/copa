@@ -1,5 +1,18 @@
-copa:
-  build: .
-  command: java -jar copa.jar
-  ports:
-    - "3000:3000"
+version: 2
+services:
+  copa:
+    container_name: copa
+    build: .
+    command: java -jar copa.jar
+    ports:
+      - "3000:3000"
+    links:
+      - db
+
+  mongo:
+   image: mongo:3.0.2
+   volumes:
+    - "mongo-data:/var/lib/mongodb"
+
+volumes:
+  mongo-data:

@@ -1,5 +1,6 @@
 (ns copa.db.core
-  (:require [mount.core :refer [defstate]]
+  (:require [config.core :refer [env]]
+            [mount.core :refer [defstate]]
             [monger.core :as mg]
             [monger.collection :as mc]
             [monger.query :as q]
@@ -11,7 +12,9 @@
 
 (timbre/refer-timbre)
 
-(def uri "mongodb://localhost/copa")
+(def uri (if (env :copa-docker)
+           (str "mongodb://" (env :db-port-27017-tcp-addr) "/copa")
+           "mongodb://localhost/copa"))
 
 (defn init-db [uri]
   (mg/connect-via-uri uri))
