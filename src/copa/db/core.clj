@@ -13,10 +13,11 @@
 (timbre/refer-timbre)
 
 (def uri (if (env :copa-docker)
-           (str "mongodb://" (env :db-port-27017-tcp-addr) "/copa")
+           (str "mongodb://" (env :copa-db-host) "/copa")
            "mongodb://localhost/copa"))
 
 (defn init-db [uri]
+  (info "Connecting to " uri)
   (mg/connect-via-uri uri))
 
 (defstate mongo

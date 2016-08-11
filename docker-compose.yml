@@ -1,4 +1,4 @@
-version: 2
+version: "2"
 services:
   copa:
     container_name: copa
@@ -7,7 +7,10 @@ services:
     ports:
       - "3000:3000"
     links:
-      - db
+      - mongo
+    environment:
+      - COPA_DOCKER=true
+      - COPA_DB_HOST=mongo
 
   mongo:
    image: mongo:3.0.2
