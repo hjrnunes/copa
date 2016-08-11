@@ -70,7 +70,6 @@
   (fn [db [_ data]]
     (let [name (:name data)
           db (-> db
-                 ;(update-in [:data :recipes] conj data)
                  (assoc-in [:index :recipes name] data))]
       (dispatch [:loading/stop])
       (dispatch [:recipe/select name])

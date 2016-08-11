@@ -189,19 +189,24 @@
                  (dispatch [:recipe/select nil])
                  (dispatch [:recipe/delete (:name @selected)]))))
 
+(defn recipe-search-dispatch []
+  (handler-fn (dispatch [:recipe/select (.-value (dom/getElement "recsearch"))])
+              (set! (.-value (dom/getElement "recsearch")) nil)))
+
 (defn recipe-search []
   (let [recipes (subscribe [:sorted/recipes])]
     (fn []
       [:div.ui.right.align.search.item
        [:div.ui.transparent.icon.input
         [:input#recsearch.prompt {:placeholder "Procurar receita..."
-                                  :on-change   (handler-fn (.search (js/$ ".ui.search") (clj->js {:source       @recipes
-                                                                                                  :searchFields ["name"]
-                                                                                                  :fields       {"description" "description"
-                                                                                                                 "title"       "name"}})))}]
+                                  :on-change   (handler-fn
+                                                 (.. (js/$ ".ui.search")
+                                                     (search (clj->js {:source       @recipes
+                                                                       :searchFields ["name"]
+                                                                       :fields       {"description" "description"
+                                                                                      "title"       "name"}}))))}]
         [:i.search.link.icon
-         {:on-click (handler-fn (dispatch [:recipe/select (.-value (dom/getElement "recsearch"))])
-                                (set! (.-value (dom/getElement "recsearch")) nil))}]]
+         {:on-click (recipe-search-dispatch)}]]
        [:div.results]])))
 
 (defn recipe-list []
@@ -209,9 +214,6 @@
         selected-recipe (subscribe [:state/selected-recipe])]
     (fn []
       [:div
-       ;[mycheckbox]
-       ;[myradio]
-       ;[mycheckbox2]
        [:div.ui.top.attached.menu
         [add-recipe-button]
         (when @selected-recipe
@@ -232,7 +234,6 @@
 
 (def recipe-panes {:recipe-list recipe-list
                    :edit-recipe edit-recipe
-                   ;:edit-recipe edit-recipe
                    })
 
 (defn recipes-section []
@@ -241,40 +242,3 @@
       (if @active-recipe-pane
         [(@active-recipe-pane recipe-panes)]
         [recipe-list]))))
-
-;(defn mycheckbox []
-;  (let [doc (r/atom {:name false})]
-;    (fn []
-;      [:div
-;       [:p (str @doc)]
-;       [bind-fields
-;        [:input {:field :checkbox :id :name}]
-;        doc]
-;       [:button
-;        {:on-click #(reset! doc nil)} "clear"]])))
-;
-;
-;(defn mycheckbox2 []
-;  (let [doc (r/atom {:name true})]
-;    (fn []
-;      [:div
-;       [:p (str @doc)]
-;       [:input {:type      "checkbox"
-;                :field     :checkbox
-;                :id        :name
-;                :on-change #(swap! doc assoc :name (not (:name @doc)))}]
-;       [:button
-;        {:on-click #(reset! doc nil)} "clear"]])))
-;
-;(defn myradio []
-;  (let [doc (r/atom {:radioselection true})]
-;    (fn []
-;      [:div
-;       [:p (str @doc)]
-;       [bind-fields
-;        [:form
-;         [:input {:field :radio :value :a :name :radioselection} "foo"]
-;         [:input {:field :radio :value :b :name :radioselection} "bar"]]
-;        doc]
-;       [:button
-;        {:on-click #(reset! doc nil)} "clear"]])))

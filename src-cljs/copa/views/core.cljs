@@ -90,7 +90,6 @@
         force-login (subscribe [:state :force-login])
         loading (subscribe [:loading])]
     (fn []
-      (println "AP" @active-main-pane)
       (if-not @force-login
         [:div
          [copa-menu active-main-pane]
