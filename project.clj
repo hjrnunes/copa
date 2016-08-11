@@ -26,8 +26,6 @@
                  [reagent "0.6.0-rc"]
                  [reagent-forms "0.5.24"]
                  [reagent-utils "0.1.7"]
-                 [secretary "1.2.3"]
-                 [org.clojure/core.async "0.2.374"]
                  [cljs-ajax "0.5.3"]
                  [metosin/compojure-api "1.0.0"]
                  [metosin/ring-swagger-ui "2.1.4-0"]
@@ -37,10 +35,11 @@
                  [prismatic/plumbing "0.5.3"]
                  [prismatic/schema "1.0.5"]
                  [re-frame "0.7.0"]
-                 [re-com "0.8.0"]
                  [json-html "0.3.8"]
                  [com.novemberain/monger "3.0.2"]
                  [hodgepodge "0.1.3"]
+                 [bidi "2.0.9"]
+                 [kibu/pushy "0.3.6"]
                  ]
 
   :min-lein-version "2.0.0"

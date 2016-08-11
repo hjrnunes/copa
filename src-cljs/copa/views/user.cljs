@@ -7,6 +7,7 @@
             [markdown.core :refer [md->html]]
             [plumbing.core :refer [indexed]]
             [json-html.core :refer [edn->hiccup]]
+            [copa.routes :refer [url-for]]
             [copa.views.util :refer [menu-button]]
             [copa.util :refer [vec-remove]]))
 
@@ -20,7 +21,7 @@
        [:div.ui.attached.segment
         (when (get @user :admin false)
           [:a.ui.yellow.right.ribbon.label
-           {:on-click #(dispatch [:state/update :active-main-pane :db-state])}
+           {:href (url-for :db-state)}
            [:i.search.icon]
            "Estado"])
         [:div.ui.statistics

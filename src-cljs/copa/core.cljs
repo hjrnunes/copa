@@ -1,26 +1,16 @@
 (ns copa.core
-  (:require-macros [secretary.core :refer [defroute]])
-  (:require [goog.events :as events]
-            [reagent.core :as reagent :refer [atom]]
+  (:require [reagent.core :as reagent :refer [atom]]
             [re-frame.core :refer [dispatch dispatch-sync]]
-            [secretary.core :as secretary]
             [hodgepodge.core :refer [local-storage]]
+            [copa.routes :refer [app-routes]]
             [copa.ajax :refer [load-interceptors! load-auth-interceptor!]]
             [copa.views.core :refer [copa-app]]
             [copa.handlers.core]
-            [copa.subs])
-  (:import [goog History]
-           [goog.history EventType]))
+            [copa.subs]))
 
 ;; -- Routes and History ------------------------------------------------------
 
-(defroute "/" [])
-
-(def history
-  (doto (History.)
-    (events/listen EventType.NAVIGATE
-                   (fn [event] (secretary/dispatch! (.-token event))))
-    (.setEnabled true)))
+(app-routes)
 
 ;; -- Entry Point -------------------------------------------------------------
 
