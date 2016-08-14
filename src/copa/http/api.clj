@@ -58,6 +58,15 @@
       :summary "Get an ingredient by name"
       (s/get-ingredient-by-name name))
 
+    (context "/user" []
+      :middleware [middleware/wrap-admin]
+      :tags ["user"]
+
+      (POST "/lang" []
+        :body [body schemas/UserLang]
+        :summary "Update user language preference"
+        (s/update-user-lang (:username body) (:lang body))))
+
     ;; ------ ADMIN ----------------------
     (context "/admin" []
       :middleware [middleware/wrap-admin]

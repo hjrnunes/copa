@@ -35,6 +35,14 @@
 (defn get-settings [mongo]
   (mc/find-one-as-map (:db mongo) settings-col {:name "settings"}))
 
+;; prefs
+
+(defn update-lang [mongo username lang]
+  (mc/update (:db mongo) users-col {:username username} {$set {:lang lang}}))
+
+(defn update-user-password [mongo username new-password]
+  (mc/update (:db mongo) users-col {:username username} {$set {:password new-password}}))
+
 ;; users
 
 (defn get-users [mongo]
@@ -47,9 +55,6 @@
   (mc/insert-and-return (:db mongo) users-col {:username username
                                                :password password
                                                :admin    ((partial = "true") admin)}))
-
-(defn update-user-password [mongo username new-password]
-  (mc/update (:db mongo) users-col {:username username} {$set {:password new-password}}))
 
 (defn delete-user [mongo username]
   (mc/remove (:db mongo) users-col {:username username})

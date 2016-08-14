@@ -4,10 +4,12 @@
             [re-frame.core :refer [subscribe dispatch]]
             [clojure.string :refer [join capitalize]]
             [plumbing.core :refer [indexed]]
-            [copa.views.recipes :refer [recipes-section]]))
+            [copa.views.recipes :refer [recipes-section]]
+            [copa.util :refer [t]]))
 
 (defn ingredient-details []
-  (let [ingredient (subscribe [:state/selected-ingredient])]
+  (let [ingredient (subscribe [:state/selected-ingredient])
+        lang (subscribe [:lang])]
     (fn []
       (when @ingredient
         [:div
@@ -15,7 +17,7 @@
           (capitalize (:name @ingredient))]
          [:div.ui.segment
           [:div.ui.top.attached.basic.label
-           "Entra nas seguintes receitas:"]
+           (t @lang :ingredients/is-in-recipes)]
           [:div.ui.list
            (for [[idx recipe] (indexed (:recipes @ingredient))]
              ^{:key idx} [:div.item

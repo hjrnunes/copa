@@ -55,3 +55,10 @@
         updt-res (db/update-recipe mongo recipe)
         ingr-res (doall (map #(db/update-ingredient mongo % (:name recipe)) ingredients))]
     (ok (db/get-recipe mongo (:name recipe)))))
+
+(defn update-user-lang [username lang]
+  (let [res (db/update-lang mongo username lang)
+        user (db/get-user mongo username)]
+    (if (= 1 (.getN res))
+      (ok (assoc user :lang lang))
+      (ok user))))

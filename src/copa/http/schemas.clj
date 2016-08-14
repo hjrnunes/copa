@@ -25,3 +25,7 @@
                      :password (describe s/Str "User password")
                      :admin    (describe s/Bool "Is the user an admin?")}))
 
+(s/defschema UserLang
+  (merge BaseEntity {:username (describe s/Str "User name")
+                     :lang     (describe s/Str "Language preference")}))
+
