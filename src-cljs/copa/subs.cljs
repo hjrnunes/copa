@@ -24,6 +24,11 @@
   (fn [db [_ field]]
     (reaction (keyword (get-in @db [:settings field])))))
 
+(register-sub
+  :lang
+  (fn [db _]
+    (reaction (keyword (get-in @db [:state :user :lang])))))
+
 ;; generic form state subscription
 (register-sub
   :form-state

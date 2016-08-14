@@ -8,7 +8,8 @@
             [copa.views.recipes :refer [recipes-section]]
             [copa.views.ingredients :refer [ingredients-section]]
             [copa.views.user :refer [user-section]]
-            [copa.routes :refer [url-for]]))
+            [copa.routes :refer [url-for]]
+            [copa.util :refer [t]]))
 
 (defn db-state []
   (let [db (subscribe [:db])]
@@ -21,28 +22,29 @@
      [:span.label.label-warning "Syncing"]
      [:span.label.label-info "Synced"])])
 
-(defn login-form [form]
+(defn login-form [form user-ph pass-ph button-label]
   [:form.ui.large.form
    [:div.ui.stacked.segment
     [:div.field
      [:div.ui.left.icon.input
       [:i.user.icon]
-      [:input {:field :text :id :username :placeholder "utilizador"}]]]
+      [:input {:field :text :id :username :placeholder user-ph}]]]
     [:div.field
      [:div.ui.left.icon.input
       [:i.lock.icon]
       [:input {:field        :password
                :id           :password
-               :placeholder  "senha"
+               :placeholder  pass-ph
                :on-key-press (handler-fn (if (= 13 (.-charCode event))
                                            (dispatch [:data/login @form])))}]]]
     [:div.ui.fluid.large.olive.submit.button
      {:on-click #(dispatch [:data/login @form])}
-     "Entrar"]]])
+     button-label]]])
 
 (defn login []
   (let [form (r/atom {})
-        alert (subscribe [:state :alert])]
+        alert (subscribe [:state :alert])
+        lang (subscribe [:lang])]
     (fn []
       [:div.ui.middle.aligned.center.aligned.grid
        {:style {:height "100%"}}
@@ -50,11 +52,14 @@
         {:style {:max-width "450px"}}
         [:h2.ui.olive.header
          [:div.content
-          "COPA - identificação"]]
-        [bind-fields (login-form form) form]
+          (t @lang :core/login-header)]]
+        [bind-fields (login-form form
+                                 (t @lang :core/login-user-ph)
+                                 (t @lang :core/login-pass-ph)
+                                 (t @lang :core/login-button-label)) form]
         (println "Alert" @alert)
         (when @alert
-          [:div.ui.error.message "Sessão expirada!"])]])))
+          [:div.ui.error.message (t @lang :core/login-expired)])]])))
 
 (defn gen-item-class [id label target active-pane]
   [:a.item
@@ -64,13 +69,14 @@
    label])
 
 (defn copa-menu []
-  (let [user (subscribe [:state :user])]
+  (let [user (subscribe [:state :user])
+        lang (subscribe [:lang])]
     (fn [active-main-pane]
       [:div.ui.stackable.container.secondary.menu
        [:div.item
         [:img {:src "images/logo.png"}]]
-       (gen-item-class :recipes "Receitas" (url-for :recipes) active-main-pane)
-       (gen-item-class :ingredients "Ingredientes" (url-for :ingredients) active-main-pane)
+       (gen-item-class :recipes (t @lang :core/menu-item-recipes) (url-for :recipes) active-main-pane)
+       (gen-item-class :ingredients (t @lang :core/menu-item-ingredients) (url-for :ingredients) active-main-pane)
        [:div.right.menu
         [:a.item
          (-> {:href (url-for :user)}

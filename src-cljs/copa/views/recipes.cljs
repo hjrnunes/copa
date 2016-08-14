@@ -9,7 +9,7 @@
             [plumbing.core :refer [indexed]]
             [json-html.core :refer [edn->hiccup]]
             [copa.views.util :refer [menu-button]]
-            [copa.util :refer [vec-remove]]))
+            [copa.util :refer [vec-remove t]]))
 
 (defn add-form-measurement [form]
   (when (get @form :measurement)
@@ -42,7 +42,8 @@
 
 (defn edit-recipe []
   (let [selected-recipe (subscribe [:state/selected-recipe])
-        form (r/atom (or @selected-recipe {}))]
+        form (r/atom (or @selected-recipe {}))
+        lang (subscribe [:lang])]
     (fn []
       [:div.ui.two.column.relaxed.divided.grid
        [:div.row
@@ -57,21 +58,21 @@
        [:div.row
         [:div.sixteen.wide.column
          [:form.ui.large.form
-          [bind-fields [:input {:field :text :id :name :placeholder "Nome..."}] form]]]]
+          [bind-fields [:input {:field :text :id :name :placeholder (str (t @lang :recipes/details-name) "...")}] form]]]]
        [:div.row
         [:div.twelve.wide.column
          [:form.ui.large.form
-          [bind-fields [:input {:field :text :id :description :placeholder "Descrição..."}] form]]]
+          [bind-fields [:input {:field :text :id :description :placeholder (str (t @lang :recipes/details-description) "...")}] form]]]
         [:div.four.wide.column
          [:form.ui.large.form
-          [bind-fields [:input {:field :text :id :portions :placeholder "Porções..."}] form]]]]
+          [bind-fields [:input {:field :text :id :portions :placeholder (str (capitalize (t @lang :recipes/details-portions-p)) "...")}] form]]]]
        [:div.ui.divider]
        [:div.row
         [:div.twelve.wide.column
          [:form.ui.large.form
-          [bind-fields [:input {:field :text_area :id :preparation :placeholder "Preparação..."}] form]]]
+          [bind-fields [:input {:field :text_area :id :preparation :placeholder (str (t @lang :recipes/details-preparation) "...")}] form]]]
         [:div.four.wide.column
-         [:h5.ui.header "Ingredientes"]
+         [:h5.ui.header (t @lang :recipes/details-ingredients)]
          [:div.row
           [:div.twelve.wide.column]
           [:div.four.wide.column
@@ -101,13 +102,13 @@
            {:type     "button"
             :on-click (handler-fn (reset! form {})
                                   (dispatch [:state/update :active-recipe-pane :recipe-list]))}
-           "Apagar"]
+           (t @lang :recipes/edit-button-label-cancel)]
           [:div.or
-           {:data-text "ou"}]
+           {:data-text (t @lang :recipes/edit-button-label-or)}]
           [:button.ui.positive.button
            {:type     "button"
             :on-click #(dispatch [:recipe/save @form])}
-           "Guardar"]]]
+           (t @lang :recipes/edit-button-label-save)]]]
         [:div.four.wide.column]]])))
 
 (defn measurement-item []
@@ -125,40 +126,40 @@
 
 ;; recipe details ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (defn recipe-details []
-  (fn [{:keys [_id name description portions preparation user categories measurements]}]
-    [:div.ui.two.column.relaxed.divided.grid
-     [:div.row
-      [:div.twelve.wide.column
-       [:h4.ui.olive.header
-        (capitalize name)
-        [:div.sub.header
-         [:i description]]]]
-      (when (or user portions)
+  (let [lang (subscribe [:lang])]
+    (fn [{:keys [_id name description portions preparation user categories measurements]}]
+      [:div.ui.two.column.relaxed.divided.grid
+       [:div.row
+        [:div.twelve.wide.column
+         [:h4.ui.olive.header
+          (capitalize name)
+          [:div.sub.header
+           [:i description]]]]
+        (when (or user portions)
+          [:div.four.wide.column
+           (when user
+             [:div.row
+              [:div.ui.basic.mini.label
+               [:i.user.icon]
+               user]])
+           (when portions
+             [:div.row
+              (if (= "1" portions)
+                [:i (join " " [portions (t @lang :recipes/details-portions-s)])]
+                [:i (join " " [portions (t @lang :recipes/details-portions-p)])])])])]
+       [:div.ui.divider]
+       [:div.row
+        [:div.twelve.wide.column
+         [:h5.ui.header (t @lang :recipes/details-preparation)]]
         [:div.four.wide.column
-         (when user
-           [:div.row
-            [:div.ui.basic.mini.label
-             [:i.user.icon]
-             user]])
-         (when portions
-           [:div.row
-            (if (= "1" portions)
-              [:i (join " " [portions "porção"])]
-              [:i (join " " [portions "porções"])])])])]
-     [:div.ui.divider]
-     [:div.row
-      [:div.twelve.wide.column
-       [:h5.ui.header "Preparação"]]
-      [:div.four.wide.column
-       [:h5.ui.header "Ingredientes"]]]
-     [:div.row
-      [:div.twelve.wide.column
-       [:div {:dangerouslySetInnerHTML {:__html (md->html preparation)}}]]
-      [:div.four.wide.column
-       [:div.ui.small.divided.list
-        (for [[idx measurement] (indexed measurements)]
-          ^{:key idx} [measurement-item measurement])
-        ]]]]))
+         [:h5.ui.header (t @lang :recipes/details-ingredients)]]]
+       [:div.row
+        [:div.twelve.wide.column
+         [:div {:dangerouslySetInnerHTML {:__html (md->html preparation)}}]]
+        [:div.four.wide.column
+         [:div.ui.small.divided.list
+          (for [[idx measurement] (indexed measurements)]
+            ^{:key idx} [measurement-item measurement])]]]])))
 
 (defn recipe-list-item []
   (let [selected-recipe (subscribe [:state/selected-recipe])
@@ -173,18 +174,18 @@
        [:div.content
         (capitalize name)]])))
 
-(defn add-recipe-button []
-  (menu-button :i.plus.icon "olive" "Nova receita"
+(defn add-recipe-button [button-label]
+  (menu-button :i.plus.icon "olive" button-label
                (handler-fn
                  (dispatch [:recipe/select nil])
                  (dispatch [:state/update :active-recipe-pane :edit-recipe]))))
 
-(defn edit-recipe-button []
-  (menu-button :i.edit.icon "yellow" "Editar receita"
+(defn edit-recipe-button [button-label]
+  (menu-button :i.edit.icon "yellow" button-label
                #(dispatch [:state/update :active-recipe-pane :edit-recipe])))
 
-(defn delete-recipe-button [selected]
-  (menu-button :i.trash.icon "red" "Apagar receita"
+(defn delete-recipe-button [button-label selected]
+  (menu-button :i.trash.icon "red" button-label
                (handler-fn
                  (dispatch [:recipe/select nil])
                  (dispatch [:recipe/delete (:name @selected)]))))
@@ -193,12 +194,12 @@
   (handler-fn (dispatch [:recipe/select (.-value (dom/getElement "recsearch"))])
               (set! (.-value (dom/getElement "recsearch")) nil)))
 
-(defn recipe-search []
+(defn recipe-search [ph-label]
   (let [recipes (subscribe [:sorted/recipes])]
     (fn []
       [:div.ui.right.align.search.item
        [:div.ui.transparent.icon.input
-        [:input#recsearch.prompt {:placeholder "Procurar receita..."
+        [:input#recsearch.prompt {:placeholder ph-label
                                   :on-change   (handler-fn
                                                  (.. (js/$ ".ui.search")
                                                      (search (clj->js {:source       @recipes
@@ -211,17 +212,18 @@
 
 (defn recipe-list []
   (let [recipes (subscribe [:sorted/recipes])
-        selected-recipe (subscribe [:state/selected-recipe])]
+        selected-recipe (subscribe [:state/selected-recipe])
+        lang (subscribe [:lang])]
     (fn []
       [:div
        [:div.ui.top.attached.menu
-        [add-recipe-button]
+        [add-recipe-button (t @lang :recipes/menu-add)]
         (when @selected-recipe
-          [edit-recipe-button])
+          [edit-recipe-button (t @lang :recipes/menu-edit)])
         (when @selected-recipe
-          [delete-recipe-button selected-recipe])
+          [delete-recipe-button (t @lang :recipes/menu-delete) selected-recipe])
         [:div.right.menu
-         [recipe-search]]]
+         [recipe-search (t @lang :recipes/menu-search-ph)]]]
        [:div.ui.bottom.attached.segment
         [:div.ui.two.column.relaxed.divided.grid
          [:div.four.wide.column

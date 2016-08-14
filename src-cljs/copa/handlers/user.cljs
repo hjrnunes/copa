@@ -3,6 +3,7 @@
             [copa.ajax :refer [load-auth-interceptor!]]
             [re-frame.core :refer [register-handler dispatch path trim-v after]]
             [plumbing.core :refer [map-vals]]
+            [hodgepodge.core :refer [local-storage]]
             [ajax.core :refer [GET POST DELETE]]))
 
 ;; get users
@@ -82,4 +83,31 @@
                  (assoc-in [:index :users] (dissoc (get-in db [:index :users]) username)))]
       (dispatch [:loading/stop])
       (dispatch [:user/select nil])
+      db)))
+
+;; update language pref
+(register-handler
+  :user/update-lang
+  (fn [db [_ username lang]]
+    (let [params {:lang     (name lang)
+                  :username username}]
+      (POST (str js/context "/api/user/lang")
+            {:response-format :json
+             :params          params
+             :keywords?       true
+             :handler         #(dispatch [:response/user-update-lang %1])
+             :error-handler   #(dispatch [:data/error %1])})
+      (dispatch [:loading/start])
+      db)))
+
+;; user delete result
+(register-handler
+  :response/user-update-lang
+  (fn [db [_ data]]
+    (let [username (:username data)
+          db (-> db
+                 (assoc-in [:index :users username] data)
+                 (assoc-in [:state :user] data))]
+      (assoc! local-storage :copa-user data)
+      (dispatch [:loading/stop])
       db)))
