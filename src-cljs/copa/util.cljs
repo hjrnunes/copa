@@ -1,5 +1,6 @@
 (ns copa.util
-  (:require [copa.lang.pt :as lang-pt]
+  (:require [cuerdas.core :as str]
+            [copa.lang.pt :as lang-pt]
             [copa.lang.en :as lang-en]))
 
 (defn vec-remove
@@ -12,3 +13,8 @@
 
 (defn t [lang s]
   (get-in langs [lang s]))
+
+(defn capitalize [s]
+  (let [initial (str/slice s 0 1)
+        res (str/slice s 1)]
+    (str (str/capitalize initial) res)))

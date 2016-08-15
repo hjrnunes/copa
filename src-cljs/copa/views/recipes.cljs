@@ -4,12 +4,12 @@
             [re-frame.core :refer [subscribe dispatch]]
             [goog.dom :as dom]
             [reagent-forms.core :refer [bind-fields]]
-            [clojure.string :refer [join capitalize lower-case]]
+            [clojure.string :refer [join lower-case]]
             [markdown.core :refer [md->html]]
             [plumbing.core :refer [indexed]]
             [json-html.core :refer [edn->hiccup]]
             [copa.views.util :refer [menu-button]]
-            [copa.util :refer [vec-remove t]]
+            [copa.util :refer [vec-remove t capitalize]]
             [copa.routes :refer [push-url-for]]))
 
 (defn add-form-measurement [form]

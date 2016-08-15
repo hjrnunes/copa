@@ -40,6 +40,7 @@
                  [hodgepodge "0.1.3"]
                  [bidi "2.0.9"]
                  [kibu/pushy "0.3.6"]
+                 [funcool/cuerdas "0.8.0"]
                  ]
 
   :min-lein-version "2.0.0"
