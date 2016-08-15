@@ -51,7 +51,7 @@
         [:div.sixteen.wide.column
          [:div.ui.breadcrumb
           [:a.section
-           {:on-click #(dispatch [:state/update :active-recipe-pane :recipe-list])}
+           {:on-click #(dispatch [:push-url-for :recipes])}
            (t @lang :recipes/breadcrumb-recipes)]
           [:i.right.angle.icon.divider]
           [:div.active.section
@@ -200,12 +200,11 @@
 (defn add-recipe-button [button-label]
   (menu-button :i.plus.icon "olive" button-label
                (handler-fn
-                 (dispatch [:push-url-for :recipes])
-                 (dispatch [:state/update :active-recipe-pane :edit-recipe]))))
+                 (dispatch [:push-url-for :recipe-new]))))
 
-(defn edit-recipe-button [button-label]
+(defn edit-recipe-button [button-label selected]
   (menu-button :i.edit.icon "yellow" button-label
-               #(dispatch [:state/update :active-recipe-pane :edit-recipe])))
+               #(dispatch [:push-url-for :recipe-edit :id (:_id @selected)])))
 
 (defn delete-recipe-button [button-label selected]
   (menu-button :i.trash.icon "red" button-label
@@ -246,7 +245,7 @@
        [:div.ui.top.attached.menu
         [add-recipe-button (t @lang :recipes/menu-add)]
         (when @selected-recipe
-          [edit-recipe-button (t @lang :recipes/menu-edit)])
+          [edit-recipe-button (t @lang :recipes/menu-edit) selected-recipe])
         (when @selected-recipe
           [delete-recipe-button (t @lang :recipes/menu-delete) selected-recipe])
         [:div.right.menu
@@ -262,8 +261,7 @@
             [recipe-details @selected-recipe])]]]])))
 
 (def recipe-panes {:recipe-list recipe-list
-                   :edit-recipe edit-recipe
-                   })
+                   :edit-recipe edit-recipe})
 
 (defn recipes-section []
   (let [active-recipe-pane (subscribe [:state :active-recipe-pane])]

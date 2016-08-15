@@ -7,9 +7,11 @@
 ;; -- Routes and History ------------------------------------------------------
 
 (def routes ["/" {""      :home
-                  "r"     {""        :recipes
-                           "/"       :recipes
-                           ["/" :id] :recipe}
+                  "r"     {""                :recipes
+                           "/"               :recipes
+                           "/new"            :recipe-new
+                           ["/" :id]         :recipe
+                           ["/" :id "/edit"] :recipe-edit}
                   "i"     {""        :ingredients
                            "/"       :ingredients
                            ["/" :id] :ingredient}
@@ -20,6 +22,17 @@
 
 (defn- parse-url [url]
   (bidi/match-route routes url))
+
+(defn dispatch-recipe-new [route-params]
+  (dispatch [:recipe/select nil])
+  (dispatch [:state/update :active-main-pane :recipes])
+  (dispatch [:state/update :active-recipe-pane :edit-recipe]))
+
+(defn dispatch-recipe-edit [route-params]
+  (dispatch [:recipe/select nil])
+  (dispatch [:state/update :active-main-pane :recipes])
+  (dispatch [:recipe/select (:id route-params)])
+  (dispatch [:state/update :active-recipe-pane :edit-recipe]))
 
 (defn dispatch-recipe [route-params]
   (dispatch [:recipe/select nil])
@@ -41,6 +54,8 @@
 (defn- dispatch-route [{:keys [handler route-params]}]
   (let [handler-fn (handler {:recipes     dispatch-recipe
                              :recipe      dispatch-recipe
+                             :recipe-new  dispatch-recipe-new
+                             :recipe-edit dispatch-recipe-edit
                              :ingredients dispatch-ingredients
                              :ingredient  dispatch-ingredients
                              :user        dispatch-user
