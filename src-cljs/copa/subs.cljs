@@ -30,10 +30,10 @@
     (reaction (keyword (get-in @db [:state :user :lang] :en)))))
 
 ;; generic form state subscription
-(register-sub
-  :form-state
-  (fn [db [_ form field]]
-    (reaction (get-in @db [:state :forms form field]))))
+;(register-sub
+;  :form-state
+;  (fn [db [_ form field]]
+;    (reaction (get-in @db [:state :forms form field]))))
 
 ;; generic data subscription
 (register-sub

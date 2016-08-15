@@ -49,16 +49,16 @@
     (assoc-in db [:state key] value)))
 
 ;; generic update form state handler
-(register-handler
-  :form-state/update
-  (fn [db [_ form key value]]
-    (assoc-in db [:state :forms form key] value)))
+;(register-handler
+;  :form-state/update
+;  (fn [db [_ form key value]]
+;    (assoc-in db [:state :forms form key] value)))
 
 ;; form load for edit handler
-(register-handler
-  :form-state/load
-  (fn [db [_ form data]]
-    (assoc-in db [:state :forms form] data)))
+;(register-handler
+;  :form-state/load
+;  (fn [db [_ form data]]
+;    (assoc-in db [:state :forms form] data)))
 
 ;; get settings
 (register-handler

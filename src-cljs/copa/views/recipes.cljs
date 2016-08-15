@@ -190,7 +190,7 @@
       [:div.item
        (-> {:on-click #(if (selected? _id)
                         (dispatch [:recipe/select nil])
-                        (dispatch [:recipe/select name]))}
+                        (dispatch [:recipe/select _id]))}
            (merge (when (selected? _id)
                     {:class "active"})))
        [:div.content
@@ -212,12 +212,14 @@
                  (dispatch [:recipe/select nil])
                  (dispatch [:recipe/delete (:name @selected)]))))
 
-(defn recipe-search-dispatch []
-  (handler-fn (dispatch [:recipe/select (.-value (dom/getElement "recsearch"))])
+(defn recipe-search-dispatch [selected]
+  (handler-fn (when selected
+                (dispatch [:recipe/select selected]))
               (set! (.-value (dom/getElement "recsearch")) nil)))
 
 (defn recipe-search [ph-label]
-  (let [recipes (subscribe [:sorted/recipes])]
+  (let [recipes (subscribe [:sorted/recipes])
+        selected (r/atom nil)]
     (fn []
       [:div.ui.right.align.search.item
        [:div.ui.transparent.icon.input
@@ -225,11 +227,13 @@
                                   :on-change   (handler-fn
                                                  (.. (js/$ ".ui.search")
                                                      (search (clj->js {:source       @recipes
-                                                                       :searchFields ["name"]
+                                                                       :searchFields ["name" "description"]
                                                                        :fields       {"description" "description"
-                                                                                      "title"       "name"}}))))}]
+                                                                                      "title"       "name"}
+                                                                       :onSelect     (fn [result _]
+                                                                                       (reset! selected (:_id (js->clj result :keywordize-keys true))))}))))}]
         [:i.search.link.icon
-         {:on-click (recipe-search-dispatch)}]]
+         {:on-click (recipe-search-dispatch @selected)}]]
        [:div.results]])))
 
 (defn recipe-list []

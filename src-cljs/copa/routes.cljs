@@ -20,9 +20,8 @@
 (defn- parse-url [url]
   (bidi/match-route routes url))
 
-(defn- dispatch-route [matched-route]
-  (let [handler (:handler matched-route)]
-    (dispatch [:state/update :active-main-pane handler])))
+(defn- dispatch-route [{:keys [handler route-param]}]
+  (dispatch [:state/update :active-main-pane handler]))
 
 (def history (pushy/pushy dispatch-route parse-url))
 

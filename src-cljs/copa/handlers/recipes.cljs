@@ -27,7 +27,7 @@
     (-> db
         (assoc-in [:data :recipes] data)
         (assoc-in [:index :recipes] (map-vals first
-                                              (group-by :name data))))))
+                                              (group-by :_id data))))))
 
 ;; select recipe
 (register-handler
@@ -68,11 +68,11 @@
 (register-handler
   :response/recipe-save
   (fn [db [_ data]]
-    (let [name (:name data)
+    (let [id (:_id data)
           db (-> db
-                 (assoc-in [:index :recipes name] data))]
+                 (assoc-in [:index :recipes id] data))]
       (dispatch [:loading/stop])
-      (dispatch [:recipe/select name])
+      (dispatch [:recipe/select id])
       db)))
 
 ;; delete recipe
