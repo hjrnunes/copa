@@ -44,8 +44,11 @@
 (defn get-recipe-by-name [name]
   (ok (db/get-recipe mongo name)))
 
-(defn delete-recipe-by-name [name]
-  (ok (db/remove-recipe mongo name)))
+(defn delete-recipe-by-id [id]
+  (let [recipe (db/get-recipe-by-id mongo id)
+        ingredients (map :ingredient (:measurements recipe))]
+    (doall (map #(db/remove-ingredient-recipes mongo % id) ingredients))
+    (ok (db/remove-recipe mongo id))))
 
 (defn get-ingredient-by-name [name]
   (ok (db/get-ingredient mongo name)))
@@ -53,8 +56,9 @@
 (defn create-recipe [recipe]
   (let [ingredients (map :ingredient (:measurements recipe))
         updt-res (db/update-recipe mongo recipe)
-        ingr-res (doall (map #(db/update-ingredient mongo % (.getUpsertedId updt-res)) ingredients))]
-    (ok (db/get-recipe mongo (:name recipe)))))
+        rid (or (:_id recipe) (.getUpsertedId updt-res))
+        ingr-res (doall (map #(db/update-ingredient-recipes mongo % rid) ingredients))]
+    (ok (db/get-recipe-by-id mongo rid))))
 
 (defn update-user-lang [username lang]
   (let [res (db/update-lang mongo username lang)

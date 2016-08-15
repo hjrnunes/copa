@@ -3,6 +3,7 @@
             [mount.core :refer [defstate]]
             [monger.core :as mg]
             [monger.collection :as mc]
+            [monger.conversion :refer [to-object-id]]
             [monger.query :as q]
             [monger.operators :refer :all]
             [monger.util :refer [object-id]]
@@ -71,12 +72,17 @@
 (defn get-recipe [mongo name]
   (mc/find-one-as-map (:db mongo) recipes-col {:name name}))
 
-(defn update-recipe [mongo recipe]
-  (mc/update (:db mongo) recipes-col {:name (:name recipe)} recipe {:upsert true}))
+(defn get-recipe-by-id [mongo id]
+  (mc/find-by-id (:db mongo) recipes-col (to-object-id id)))
 
-(defn remove-recipe [mongo name]
-  (mc/remove (:db mongo) recipes-col {:name name})
-  {:name name})
+(defn update-recipe [mongo recipe]
+  (if-let [sid (:_id recipe)]
+    (mc/update-by-id (:db mongo) recipes-col (to-object-id sid) (assoc recipe :_id (to-object-id sid)))
+    (mc/update (:db mongo) recipes-col {:name (:name recipe)} recipe {:upsert true})))
+
+(defn remove-recipe [mongo id]
+  (mc/remove-by-id (:db mongo) recipes-col (to-object-id id))
+  {:_id id})
 
 ;; ingredients
 
@@ -86,7 +92,10 @@
 (defn get-ingredient [mongo name]
   (mc/find-one-as-map (:db mongo) ingredients-col {:name name}))
 
-(defn update-ingredient [mongo name recipe-id]
+(defn update-ingredient-recipes [mongo name recipe-id]
   (mc/update (:db mongo) ingredients-col {:name name} {$set      {:name name}
-                                                       $addToSet {:recipes recipe-id}} {:upsert true}))
+                                                       $addToSet {:recipes (str recipe-id)}} {:upsert true}))
+
+(defn remove-ingredient-recipes [mongo name recipe-id]
+  (mc/update (:db mongo) ingredients-col {:name name} {$pull {:recipes recipe-id}}))
 

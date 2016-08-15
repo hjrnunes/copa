@@ -41,7 +41,6 @@
 
 (defn- prep-recipe-form [db form]
   (-> form
-      (dissoc :_id)
       (assoc :user (get-in db [:state :user :username]))
       (assoc :measurements (for [{:keys [ingredient quantity unit]} (:measurements form)]
                              (into {} [[:ingredient (lower-case ingredient)]
@@ -71,6 +70,7 @@
     (let [id (:_id data)
           db (-> db
                  (assoc-in [:index :recipes id] data))]
+      (dispatch [:get/ingredients])
       (dispatch [:loading/stop])
       (dispatch [:push-url-for :recipe :id id])
       db)))
@@ -78,8 +78,8 @@
 ;; delete recipe
 (register-handler
   :recipe/delete
-  (fn [db [_ name]]
-    (let [params {:name name}]
+  (fn [db [_ id]]
+    (let [params {:_id id}]
       (DELETE (str js/context "/api/recipes")
               {:response-format :json
                :params          params
@@ -93,9 +93,9 @@
 (register-handler
   :response/recipe-delete
   (fn [db [_ data]]
-    (let [name (:name data)
+    (let [id (:_id data)
           db (-> db
-                 (assoc-in [:index :recipes] (dissoc (get-in db [:index :recipes]) name)))]
+                 (assoc-in [:index :recipes] (dissoc (get-in db [:index :recipes]) id)))]
       (dispatch [:loading/stop])
       (dispatch [:recipe/select nil])
       db)))

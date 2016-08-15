@@ -210,7 +210,7 @@
   (menu-button :i.trash.icon "red" button-label
                (handler-fn
                  (dispatch [:push-url-for :recipes])
-                 (dispatch [:recipe/delete (:name @selected)]))))
+                 (dispatch [:recipe/delete (:_id @selected)]))))
 
 (defn recipe-search-dispatch [selected]
   (handler-fn (when selected
