@@ -27,7 +27,7 @@
 (register-sub
   :lang
   (fn [db _]
-    (reaction (keyword (get-in @db [:state :user :lang])))))
+    (reaction (keyword (get-in @db [:state :user :lang] :en)))))
 
 ;; generic form state subscription
 (register-sub

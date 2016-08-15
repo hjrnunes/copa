@@ -14,33 +14,33 @@
 (defn language-pref [user lang]
   (let [sel-lang (r/atom nil)]
     (r/create-class
-      {:reagent-render    (fn []
-                            [:row
-                             [:div.ui.grid
-                              [:div.four.wide.column
-                               [:form.ui.form
-                                [:div.field
-                                 [:div.ui.selection.dropdown
-                                  [:div.default.text (t lang :user/language)]
-                                  [:i.dropdown.icon]
-                                  [:div.menu
-                                   (for [[idx [txt val flag]] (indexed [["EN" "en" "gb"]
-                                                                        ["PT" "pt" "pt"]])]
-                                     ^{:key idx} [:div.item {:data-value val}
-                                                  [:i
-                                                   {:class (str flag " flag")}]
-                                                  txt])]]]]]
-                              [:div.four.wide.column
-                               (when @sel-lang
-                                 [:button.ui.green.icon.basic.button
-                                  {:type     "button"
-                                   :on-click (handler-fn (dispatch [:user/update-lang (:username user) @sel-lang])
-                                                         (reset! sel-lang nil))}
-                                  [:i.checkmark.icon]])]]])
-       :componentDidMount (fn [comp]
-                            (.. (js/$ ".ui.selection.dropdown")
-                                (dropdown (clj->js {:onChange (fn [value, text, item]
-                                                                (reset! sel-lang (keyword value)))}))))}))
+      {:reagent-render      (fn []
+                              [:row
+                               [:div.ui.grid
+                                [:div.four.wide.column
+                                 [:form.ui.form
+                                  [:div.field
+                                   [:div.ui.selection.dropdown
+                                    [:div.default.text (t lang :user/language)]
+                                    [:i.dropdown.icon]
+                                    [:div.menu
+                                     (for [[idx [txt val flag]] (indexed [["EN" "en" "gb"]
+                                                                          ["PT" "pt" "pt"]])]
+                                       ^{:key idx} [:div.item {:data-value val}
+                                                    [:i
+                                                     {:class (str flag " flag")}]
+                                                    txt])]]]]]
+                                [:div.four.wide.column
+                                 (when @sel-lang
+                                   [:button.ui.green.icon.basic.button
+                                    {:type     "button"
+                                     :on-click (handler-fn (dispatch [:user/update-lang (:username user) @sel-lang])
+                                                           (reset! sel-lang nil))}
+                                    [:i.checkmark.icon]])]]])
+       :component-did-mount (fn [comp]
+                              (.. (js/$ ".ui.selection.dropdown")
+                                  (dropdown (clj->js {:onChange (fn [value, text, item]
+                                                                  (reset! sel-lang (keyword value)))}))))}))
   )
 
 (defn user-details []

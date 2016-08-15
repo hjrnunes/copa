@@ -18,9 +18,14 @@
    :recipes/details-portions-s         "porção"
    :recipes/details-portions-p         "porções"
    :recipes/details-name               "Nome"
-   :recipes/details-description        "Descriçãp"
+   :recipes/details-description        "Descrição"
    :recipes/details-preparation        "Preparação"
    :recipes/details-ingredients        "Ingredientes"
+   :recipes/details-duration           "Duração"
+   :recipes/details-source             "Fonte"
+
+   :recipes/breadcrumb-recipes         "Receitas"
+   :recipes/breadcrumb-new-recipe      "Nova Receita"
 
    :recipes/edit-button-label-save     "Guardar"
    :recipes/edit-button-label-or       "ou"

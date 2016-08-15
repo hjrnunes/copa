@@ -51,10 +51,10 @@
          [:div.ui.breadcrumb
           [:a.section
            {:on-click #(dispatch [:state/update :active-recipe-pane :recipe-list])}
-           "Receitas"]
+           (t @lang :recipes/breadcrumb-recipes)]
           [:i.right.angle.icon.divider]
           [:div.active.section
-           "Nova receita"]]]]
+           (t @lang :recipes/breadcrumb-new-recipe)]]]]
        [:div.row
         [:div.sixteen.wide.column
          [:form.ui.large.form
@@ -66,6 +66,13 @@
         [:div.four.wide.column
          [:form.ui.large.form
           [bind-fields [:input {:field :text :id :portions :placeholder (str (capitalize (t @lang :recipes/details-portions-p)) "...")}] form]]]]
+       [:div.row
+        [:div.twelve.wide.column
+         [:form.ui.large.form
+          [bind-fields [:input {:field :text :id :source :placeholder (str (t @lang :recipes/details-source) "...")}] form]]]
+        [:div.four.wide.column
+         [:form.ui.large.form
+          [bind-fields [:input {:field :text :id :duration :placeholder (str (t @lang :recipes/details-duration) "...")}] form]]]]
        [:div.ui.divider]
        [:div.row
         [:div.twelve.wide.column
@@ -124,10 +131,22 @@
        [:div.middle.aligned.content
         (capitalize ingredient)]])))
 
+(defn meta-item [id icon content]
+  (r/create-class
+    {:reagent-render      (fn []
+                            [:span
+                             {:id            id
+                              :data-tooltip  content
+                              :data-inverted ""}
+                             [icon]])
+     :component-did-mount (fn [comp]
+                            (.. (js/$ (str "#" id))
+                                (popup)))}))
+
 ;; recipe details ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (defn recipe-details []
   (let [lang (subscribe [:lang])]
-    (fn [{:keys [_id name description portions preparation user categories measurements]}]
+    (fn [{:keys [_id name description source duration portions preparation user categories measurements]}]
       [:div.ui.two.column.relaxed.divided.grid
        [:div.row
         [:div.twelve.wide.column
@@ -135,13 +154,16 @@
           (capitalize name)
           [:div.sub.header
            [:i description]]]]
-        (when (or user portions)
+        (when (or user source duration portions)
           [:div.four.wide.column
-           (when user
+           (when (or user source duration)
              [:div.row
-              [:span
-               [:i.user.icon]
-               user]])
+              (when user
+                [meta-item "usertt" :i.user.icon user])
+              (when source
+                [meta-item "srctt" :i.book.icon source])
+              (when duration
+                [meta-item "durationtt" :i.clock.icon duration])])
            (when portions
              [:div.row
               (if (= "1" portions)

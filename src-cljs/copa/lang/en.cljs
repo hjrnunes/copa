@@ -21,6 +21,11 @@
    :recipes/details-description        "Description"
    :recipes/details-preparation        "Preparation"
    :recipes/details-ingredients        "Ingredients"
+   :recipes/details-duration           "Duration"
+   :recipes/details-source             "Source"
+
+   :recipes/breadcrumb-recipes         "Recipes"
+   :recipes/breadcrumb-new-recipe      "New Recipe"
 
    :recipes/edit-button-label-save     "Save"
    :recipes/edit-button-label-or       "or"

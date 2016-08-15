@@ -15,6 +15,8 @@
   (merge BaseEntity {:name                         (describe s/Str "Recipe's name")
                      (s/optional-key :description) (describe s/Str "Recipe's description")
                      (s/optional-key :portions)    (describe s/Str "Recipe's portions")
+                     (s/optional-key :source)      (describe s/Str "Recipe's source")
+                     (s/optional-key :duration)    (describe s/Str "Recipe's duration")
                      :preparation                  (describe s/Str "Recipe's preparation")
                      (s/optional-key :categories)  (describe [s/Str] "Recipe's categories")
                      :measurements                 (describe [Measurement] "Recipe's measurements")
