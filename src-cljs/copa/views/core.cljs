@@ -74,7 +74,7 @@
     (fn [active-main-pane]
       [:div.ui.stackable.container.secondary.menu
        [:div.item
-        [:img {:src "images/logo.png"}]]
+        [:img {:src "/images/logo.png"}]]
        (gen-item-class :recipes (t @lang :core/menu-item-recipes) (url-for :recipes) active-main-pane)
        (gen-item-class :ingredients (t @lang :core/menu-item-ingredients) (url-for :ingredients) active-main-pane)
        [:div.right.menu

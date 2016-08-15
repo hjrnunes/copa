@@ -25,14 +25,12 @@
                           [:div.content
                            [:a.header
                             {:on-click (handler-fn
-                                         (dispatch [:recipe/select recipe])
-                                         (dispatch [:state/update :active-main-pane :recipes])
-                                         (dispatch [:state/update :active-recipe-pane :recipe-list]))}
+                                         (dispatch [:push-url-for :recipe :id recipe]))}
                             (:name (get @recipes-index recipe))]]])]]]))))
 
 (defn ingredient-list-item [ingredient]
   [:div.item
-   {:on-click #(dispatch [:ingredient/select (:_id ingredient)])}
+   {:on-click (handler-fn (dispatch [:push-url-for :ingredient :id (:_id ingredient)]))}
    [:div.content
     [:div.header
      (capitalize (:name ingredient))]]])

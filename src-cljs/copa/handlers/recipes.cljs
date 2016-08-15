@@ -72,7 +72,7 @@
           db (-> db
                  (assoc-in [:index :recipes id] data))]
       (dispatch [:loading/stop])
-      (dispatch [:recipe/select id])
+      (dispatch [:push-url-for :recipe :id id])
       db)))
 
 ;; delete recipe

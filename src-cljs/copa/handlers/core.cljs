@@ -7,7 +7,8 @@
             [hodgepodge.core :refer [local-storage]]
             [copa.handlers.ingredients]
             [copa.handlers.recipes]
-            [copa.handlers.user]))
+            [copa.handlers.user]
+            [copa.routes :refer [push-url-for]]))
 
 ;; -- loading -----------------------------------------------------------
 
@@ -22,6 +23,12 @@
     (if (= (get-in db [:state :loading]) 0)
       db
       (update-in db [:state :loading] (fnil dec 0)))))
+
+(register-handler
+  :push-url-for
+  (fn [db [_ handler & params]]
+    (apply push-url-for handler params)
+    db))
 
 (defn auth-error [db]
   (println "Authentication Error: token expired")
@@ -47,18 +54,6 @@
   :state/update
   (fn [db [_ key value]]
     (assoc-in db [:state key] value)))
-
-;; generic update form state handler
-;(register-handler
-;  :form-state/update
-;  (fn [db [_ form key value]]
-;    (assoc-in db [:state :forms form key] value)))
-
-;; form load for edit handler
-;(register-handler
-;  :form-state/load
-;  (fn [db [_ form data]]
-;    (assoc-in db [:state :forms form] data)))
 
 ;; get settings
 (register-handler

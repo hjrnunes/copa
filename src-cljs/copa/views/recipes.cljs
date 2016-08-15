@@ -9,7 +9,8 @@
             [plumbing.core :refer [indexed]]
             [json-html.core :refer [edn->hiccup]]
             [copa.views.util :refer [menu-button]]
-            [copa.util :refer [vec-remove t]]))
+            [copa.util :refer [vec-remove t]]
+            [copa.routes :refer [push-url-for]]))
 
 (defn add-form-measurement [form]
   (when (get @form :measurement)
@@ -189,8 +190,8 @@
     (fn [{:keys [_id name description portions preparation categories measurements] :as recipe}]
       [:div.item
        (-> {:on-click #(if (selected? _id)
-                        (dispatch [:recipe/select nil])
-                        (dispatch [:recipe/select _id]))}
+                        (dispatch [:push-url-for :recipes])
+                        (dispatch [:push-url-for :recipe :id _id]))}
            (merge (when (selected? _id)
                     {:class "active"})))
        [:div.content
@@ -199,7 +200,7 @@
 (defn add-recipe-button [button-label]
   (menu-button :i.plus.icon "olive" button-label
                (handler-fn
-                 (dispatch [:recipe/select nil])
+                 (dispatch [:push-url-for :recipes])
                  (dispatch [:state/update :active-recipe-pane :edit-recipe]))))
 
 (defn edit-recipe-button [button-label]
@@ -209,12 +210,12 @@
 (defn delete-recipe-button [button-label selected]
   (menu-button :i.trash.icon "red" button-label
                (handler-fn
-                 (dispatch [:recipe/select nil])
+                 (dispatch [:push-url-for :recipes])
                  (dispatch [:recipe/delete (:name @selected)]))))
 
 (defn recipe-search-dispatch [selected]
   (handler-fn (when selected
-                (dispatch [:recipe/select selected]))
+                (dispatch [:push-url-for :recipe :id selected]))
               (set! (.-value (dom/getElement "recsearch")) nil)))
 
 (defn recipe-search [ph-label]

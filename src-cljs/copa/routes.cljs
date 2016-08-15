@@ -9,9 +9,10 @@
 (def routes ["/" {""      :home
                   "r"     {""        :recipes
                            "/"       :recipes
-                           ["/" :id] :recipes}
-                  "i"     {""  :ingredients
-                           "/" :ingredients}
+                           ["/" :id] :recipe}
+                  "i"     {""        :ingredients
+                           "/"       :ingredients
+                           ["/" :id] :ingredient}
                   "u"     {""  :user
                            "/" :user}
                   "state" {""  :db-state
@@ -20,8 +21,32 @@
 (defn- parse-url [url]
   (bidi/match-route routes url))
 
+(defn dispatch-recipe [route-params]
+  (dispatch [:recipe/select nil])
+  (dispatch [:state/update :active-main-pane :recipes])
+  (if route-params
+    (dispatch [:recipe/select (:id route-params)])))
+
+(defn dispatch-ingredients [route-params]
+  (dispatch [:state/update :active-main-pane :ingredients])
+  (if route-params
+    (dispatch [:ingredient/select (:id route-params)])))
+
+(defn dispatch-user [route-params]
+  (dispatch [:state/update :active-main-pane :user]))
+
+(defn dispatch-state [route-params]
+  (dispatch [:state/update :active-main-pane :db-state]))
+
 (defn- dispatch-route [{:keys [handler route-params]}]
-  (dispatch [:state/update :active-main-pane handler]))
+  (let [handler-fn (handler {:recipes     dispatch-recipe
+                             :recipe      dispatch-recipe
+                             :ingredients dispatch-ingredients
+                             :ingredient  dispatch-ingredients
+                             :user        dispatch-user
+                             :db-state    dispatch-state})]
+    (when handler-fn
+      (handler-fn route-params))))
 
 (def history (pushy/pushy dispatch-route parse-url))
 
@@ -30,6 +55,6 @@
 
 (def url-for (partial bidi/path-for routes))
 
-(defn set-current-path []
-  (let [current-path (:pathname (js->clj (.. js/window -location)))]
-    (pushy/set-token! history current-path)))
+(defn push-url-for [handler & params]
+  (let [url (apply url-for handler params)]
+    (pushy/set-token! history url)))
