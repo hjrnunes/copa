@@ -53,7 +53,7 @@
 (defn create-recipe [recipe]
   (let [ingredients (map :ingredient (:measurements recipe))
         updt-res (db/update-recipe mongo recipe)
-        ingr-res (doall (map #(db/update-ingredient mongo % (:name recipe)) ingredients))]
+        ingr-res (doall (map #(db/update-ingredient mongo % (.getUpsertedId updt-res)) ingredients))]
     (ok (db/get-recipe mongo (:name recipe)))))
 
 (defn update-user-lang [username lang]

@@ -86,7 +86,7 @@
 (defn get-ingredient [mongo name]
   (mc/find-one-as-map (:db mongo) ingredients-col {:name name}))
 
-(defn update-ingredient [mongo name recipe-name]
+(defn update-ingredient [mongo name recipe-id]
   (mc/update (:db mongo) ingredients-col {:name name} {$set      {:name name}
-                                                       $addToSet {:recipes recipe-name}} {:upsert true}))
+                                                       $addToSet {:recipes recipe-id}} {:upsert true}))
 

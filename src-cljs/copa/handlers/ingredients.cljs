@@ -26,7 +26,7 @@
     (-> db
         (assoc-in [:data :ingredients] data)
         (assoc-in [:index :ingredients] (map-vals first
-                                                  (group-by :name data))))))
+                                                  (group-by :_id data))))))
 
 ;; select ingredient
 (register-handler

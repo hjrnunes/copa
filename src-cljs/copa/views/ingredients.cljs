@@ -9,6 +9,7 @@
 
 (defn ingredient-details []
   (let [ingredient (subscribe [:state/selected-ingredient])
+        recipes-index (subscribe [:index :recipes])
         lang (subscribe [:lang])]
     (fn []
       (when @ingredient
@@ -27,11 +28,11 @@
                                          (dispatch [:recipe/select recipe])
                                          (dispatch [:state/update :active-main-pane :recipes])
                                          (dispatch [:state/update :active-recipe-pane :recipe-list]))}
-                            recipe]]])]]]))))
+                            (:name (get @recipes-index recipe))]]])]]]))))
 
 (defn ingredient-list-item [ingredient]
   [:div.item
-   {:on-click #(dispatch [:ingredient/select (:name ingredient)])}
+   {:on-click #(dispatch [:ingredient/select (:_id ingredient)])}
    [:div.content
     [:div.header
      (capitalize (:name ingredient))]]])

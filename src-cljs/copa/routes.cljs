@@ -7,9 +7,9 @@
 ;; -- Routes and History ------------------------------------------------------
 
 (def routes ["/" {""      :home
-                  "r"     {""          :recipes
-                           "/"         :recipes
-                           ["/" :slug] :recipes}
+                  "r"     {""        :recipes
+                           "/"       :recipes
+                           ["/" :id] :recipes}
                   "i"     {""  :ingredients
                            "/" :ingredients}
                   "u"     {""  :user
@@ -20,7 +20,7 @@
 (defn- parse-url [url]
   (bidi/match-route routes url))
 
-(defn- dispatch-route [{:keys [handler route-param]}]
+(defn- dispatch-route [{:keys [handler route-params]}]
   (dispatch [:state/update :active-main-pane handler]))
 
 (def history (pushy/pushy dispatch-route parse-url))
