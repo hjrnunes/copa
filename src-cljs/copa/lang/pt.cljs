@@ -31,6 +31,9 @@
    :recipes/edit-button-label-or       "ou"
    :recipes/edit-button-label-cancel   "Apagar"
 
+   :recipes/edit-md-tt                 "Este campo aceita formatação com Markdown. Ver ligação para ajuda."
+   :recipes/edit-md-link               "Pode usar Markdown"
+
    :ingredients/is-in-recipes          "Entra nas seguintes receitas:"
 
    :user/recipes                       "Receitas"

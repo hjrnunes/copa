@@ -31,6 +31,9 @@
    :recipes/edit-button-label-or       "or"
    :recipes/edit-button-label-cancel   "Cancel"
 
+   :recipes/edit-md-tt                 "This field accepts Markdown syntax. See the link for details."
+   :recipes/edit-md-link               "Styling with Markdown is supported"
+
    :ingredients/is-in-recipes          "Goes in the following recipes:"
 
    :user/recipes                       "Recipes"

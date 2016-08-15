@@ -41,6 +41,20 @@
          [:div.middle.aligned.content
           (capitalize ingredient)])])))
 
+(defn md-tooltip [lang]
+  (r/create-class
+    {:reagent-render      (fn []
+                            [:span
+                             [:span
+                              {:id        "mdtooltip"
+                               :data-html (t @lang :recipes/edit-md-tt)}
+                              [:i.orange.idea.link.icon]]
+                             [:a {:href "https://guides.github.com/features/mastering-markdown"}
+                              (t @lang :recipes/edit-md-link)]])
+     :component-did-mount (fn [comp]
+                            (.. (js/$ "#mdtooltip")
+                                (popup)))}))
+
 (defn edit-recipe []
   (let [selected-recipe (subscribe [:state/selected-recipe])
         form (r/atom (or @selected-recipe {}))
@@ -78,7 +92,9 @@
        [:div.row
         [:div.twelve.wide.column
          [:form.ui.large.form
-          [bind-fields [:input {:field :text_area :id :preparation :placeholder (str (t @lang :recipes/details-preparation) "...")}] form]]]
+          [:div.field
+           [bind-fields [:input {:field :text_area :id :preparation :placeholder (str (t @lang :recipes/details-preparation) "...")}] form]]
+          [md-tooltip lang]]]
         [:div.four.wide.column
          [:h5.ui.header (t @lang :recipes/details-ingredients)]
          [:div.row
