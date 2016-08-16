@@ -2,8 +2,6 @@
   (:require-macros [reagent.ratom :refer [reaction]])
   (:require [re-frame.core :refer [register-sub subscribe]]))
 
-;; -- Helpers -----------------------------------------------------------------
-
 ;; -- Subscription handlers and registration  ---------------------------------
 
 ;; subscription for the whole db for debug purposes
@@ -28,12 +26,6 @@
   :lang
   (fn [db _]
     (reaction (keyword (get-in @db [:state :user :lang] :en)))))
-
-;; generic form state subscription
-;(register-sub
-;  :form-state
-;  (fn [db [_ form field]]
-;    (reaction (get-in @db [:state :forms form field]))))
 
 ;; generic data subscription
 (register-sub

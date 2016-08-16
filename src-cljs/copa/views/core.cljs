@@ -69,7 +69,8 @@
 
 (defn copa-menu []
   (let [user (subscribe [:state :user])
-        lang (subscribe [:lang])]
+        lang (subscribe [:lang])
+        loading (subscribe [:loading])]
     (fn [active-main-pane]
       [:div.ui.stackable.container.secondary.menu
        [:div.item
@@ -77,6 +78,11 @@
        (gen-item-class :recipes (t @lang :core/menu-item-recipes) (url-for :recipes) active-main-pane)
        (gen-item-class :ingredients (t @lang :core/menu-item-ingredients) (url-for :ingredients) active-main-pane)
        [:div.right.menu
+        [:div.item
+         [:div.ui.small.loader
+          (-> {}
+              (merge (when @loading
+                       {:class "active"})))]]
         [:a.item
          (-> {:href (url-for :user)}
              (merge (when (= :user @active-main-pane)
@@ -92,8 +98,7 @@
 
 (defn copa-app []
   (let [active-main-pane (subscribe [:state :active-main-pane])
-        force-login (subscribe [:state :force-login])
-        loading (subscribe [:loading])]
+        force-login (subscribe [:state :force-login])]
     (fn []
       (if-not @force-login
         [:div
