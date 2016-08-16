@@ -15,33 +15,72 @@
   (let [sel-lang (r/atom nil)]
     (r/create-class
       {:reagent-render      (fn []
-                              [:row
+                              [:div.row
                                [:div.ui.grid
                                 [:div.four.wide.column
+                                 [:h5.ui.header (t lang :user/language)]
                                  [:form.ui.form
-                                  [:div.field
-                                   [:div.ui.selection.dropdown
-                                    [:div.default.text (t lang :user/language)]
-                                    [:i.dropdown.icon]
-                                    [:div.menu
-                                     (for [[idx [txt val flag]] (indexed [["EN" "en" "gb"]
-                                                                          ["PT" "pt" "pt"]])]
-                                       ^{:key idx} [:div.item {:data-value val}
-                                                    [:i
-                                                     {:class (str flag " flag")}]
-                                                    txt])]]]]]
-                                [:div.four.wide.column
-                                 (when @sel-lang
-                                   [:button.ui.green.icon.basic.button
-                                    {:type     "button"
-                                     :on-click (handler-fn (dispatch [:user/update-lang (:username user) @sel-lang])
-                                                           (reset! sel-lang nil))}
-                                    [:i.checkmark.icon]])]]])
+                                  [:div.fields
+                                   [:div.field
+                                    [:div.ui.selection.dropdown
+                                     [:div.default.text (t lang :user/language)]
+                                     [:i.dropdown.icon]
+                                     [:div.menu
+                                      (for [[idx [txt val flag]] (indexed [["EN" "en" "gb"]
+                                                                           ["PT" "pt" "pt"]])]
+                                        ^{:key idx} [:div.item {:data-value val}
+                                                     [:i
+                                                      {:class (str flag " flag")}]
+                                                     txt])]]]
+                                   (when @sel-lang
+                                     [:div.field
+                                      [:button.ui.green.icon.basic.button
+                                       {:type     "button"
+                                        :on-click (handler-fn (dispatch [:user/update-lang (:username user) @sel-lang])
+                                                              (reset! sel-lang nil))}
+                                       [:i.checkmark.icon]]])]]]]])
        :component-did-mount (fn [comp]
                               (.. (js/$ ".ui.selection.dropdown")
                                   (dropdown (clj->js {:onChange (fn [value, text, item]
-                                                                  (reset! sel-lang (keyword value)))}))))}))
-  )
+                                                                  (reset! sel-lang (keyword value)))}))))})))
+
+(defn update-password []
+  (let [form (r/atom {})]
+    (fn [user lang]
+      [:div.row
+       [:div.ui.grid
+        [:div.column
+         [:h5.ui.header (t lang :user/update-pass)]
+         [:div.ui.form
+          [:div.fields
+           [:div.field
+            [bind-fields [:input {:field :password :id :current :placeholder (t lang :user/update-pass-current-ph)}] form]]
+           [:div.field
+            [bind-fields [:input {:field :password :id :new :placeholder (t lang :user/update-pass-new-ph)}] form]]
+           [:div.field
+            [bind-fields [:input {:field :password :id :confirm :placeholder (t lang :user/update-pass-confirm-ph)}] form]]
+           (when (and (:current @form) (:new @form) (:confirm @form))
+             [:div.field
+              [:button.ui.green.icon.basic.button
+               {:type     "button"
+                :on-click (handler-fn
+                            (dispatch [:user/update-password (:username user) (:current @form) (:new @form) (:confirm @form)])
+                            (reset! form nil))}
+               [:i.checkmark.icon]]])]]]]])))
+
+(defn user-prefs []
+  (let [user (subscribe [:state :user])
+        lang (subscribe [:lang])]
+    (fn []
+      [:div.row
+       [:div.column
+        [:h3.ui.top.attached.header
+         (t @lang :user/preferences)]
+        [:div.ui.attached.segment
+         [:ui.vertically.divided.grid
+          [language-pref @user @lang]
+          [:div.ui.divider]
+          [update-password @user @lang]]]]])))
 
 (defn user-details []
   (let [user (subscribe [:state :user])
@@ -49,58 +88,59 @@
         lang (subscribe [:lang])]
     (fn []
       [:div.row
-       [:h3.ui.top.attached.header
-        (:username @user)]
-       [:div.ui.attached.segment
-        (when (get @user :admin false)
-          [:a.ui.yellow.right.ribbon.label
-           {:href (url-for :db-state)}
-           [:i.search.icon]
-           (t @lang :admin/state)])
-        [:row
-         [:div.ui.statistics
-          [:div.olive.statistic
-           [:div.value
-            (count @recipes)]
-           [:div.label
-            (t @lang :user/recipes)]]
-          [:div.olive.statistic
-           [:div.value
-            (capitalize (name @lang))]
-           [:div.label
-            (t @lang :user/language)]]]]
-        [language-pref @user @lang]]])))
+       [:div.column
+        [:h3.ui.top.attached.header
+         (:username @user)]
+        [:div.ui.attached.segment
+         (when (get @user :admin false)
+           [:a.ui.yellow.right.ribbon.label
+            {:href (url-for :db-state)}
+            [:i.search.icon]
+            (t @lang :admin/state)])
+         [:row
+          [:div.ui.statistics
+           [:div.olive.statistic
+            [:div.value
+             (count @recipes)]
+            [:div.label
+             (t @lang :user/recipes)]]
+           [:div.olive.statistic
+            [:div.value
+             (capitalize (name @lang))]
+            [:div.label
+             (t @lang :user/language)]]]]]]])))
 
 (defn user-form-template [form lang]
   [:div.row
-   [:h5.ui.top.attached.header
-    (t @lang :admin/new-user-heading)]
-   [:div.ui.attached.basic.segment
-    [:div.ui.form
-     [:div.inline.fields
-      [:div.field
-       [:label (t @lang :admin/new-user-user-label)]
-       [bind-fields [:input {:field :text :id :username :placeholder (t @lang :admin/new-user-user-ph)}] form]]
-      [:div.field
-       [:label (t @lang :admin/new-user-password-label)]
-       [bind-fields [:input {:field :password :id :password :placeholder (t @lang :admin/new-user-password-ph)}] form]]
-      [:div.field
-       [:div.ui.toggle.checkbox
-        [bind-fields [:input {:field :checkbox :id :admin}] form]
-        [:label (t @lang :admin/new-user-admin-label)]]]
-      [:div.ui.right.floated.buttons
-       [:button.ui.button
-        {:type     "button"
-         :on-click (handler-fn (reset! form {:admin false})
-                               (dispatch [:state/update :active-users-pane :user-list]))}
-        (t @lang :admin/new-user-button-label-cancel)]
-       [:div.or
-        {:data-text (t @lang :admin/new-user-button-label-or)}]
-       [:button.ui.positive.button
-        {:type     "button"
-         :on-click (handler-fn (dispatch [:user/save @form])
-                               (dispatch [:state/update :active-users-pane :user-list]))}
-        (t @lang :admin/new-user-button-label-save)]]]]]])
+   [:div.column
+    [:h5.ui.top.attached.header
+     (t @lang :admin/new-user-heading)]
+    [:div.ui.attached.basic.segment
+     [:div.ui.form
+      [:div.inline.fields
+       [:div.field
+        [:label (t @lang :admin/new-user-user-label)]
+        [bind-fields [:input {:field :text :id :username :placeholder (t @lang :admin/new-user-user-ph)}] form]]
+       [:div.field
+        [:label (t @lang :admin/new-user-password-label)]
+        [bind-fields [:input {:field :password :id :password :placeholder (t @lang :admin/new-user-password-ph)}] form]]
+       [:div.field
+        [:div.ui.toggle.checkbox
+         [bind-fields [:input {:field :checkbox :id :admin}] form]
+         [:label (t @lang :admin/new-user-admin-label)]]]
+       [:div.ui.right.floated.buttons
+        [:button.ui.button
+         {:type     "button"
+          :on-click (handler-fn (reset! form {:admin false})
+                                (dispatch [:state/update :active-users-pane :user-list]))}
+         (t @lang :admin/new-user-button-label-cancel)]
+        [:div.or
+         {:data-text (t @lang :admin/new-user-button-label-or)}]
+        [:button.ui.positive.button
+         {:type     "button"
+          :on-click (handler-fn (dispatch [:user/save @form])
+                                (dispatch [:state/update :active-users-pane :user-list]))}
+         (t @lang :admin/new-user-button-label-save)]]]]]]])
 
 (defn user-form []
   (let [form (r/atom {:admin false})
@@ -112,7 +152,7 @@
 (defn admin-user-details []
   (let [selected-user (subscribe [:state/selected-user])]
     (fn []
-      [:div.twelve.wide.column
+      [:div.column
        [:div.row
         [:h3.ui.header
          (:username @selected-user)]]
@@ -167,30 +207,35 @@
     (dispatch [:get/users])
     (fn []
       [:div.row
-       {:style {:margin-top "1rem"}}
-       [:div.ui.top.attached.menu
-        [:div.item
-         [:h5.ui.header
-          "Users"]]
-        [add-user-button (t @lang :admin/menu-add)]
-        (when @selected-user
-          [edit-user-button (t @lang :admin/menu-edit)])
-        (when @selected-user
-          [delete-user-button (t @lang :admin/menu-delete) selected-user])
-        [:div.right.menu
-         [:div.ui.icon.item
-          {:on-click (handler-fn (dispatch [:get/users]))}
-          [:i.refresh.icon]]]]
-       [:div.ui.bottom.attached.segment
-        (if @active-users-pane
-          [(@active-users-pane user-panes)]
-          [users-list-details])]])))
+       [:div.ui.column
+        {:style {:margin-top "1rem"}}
+        [:div.ui.top.attached.menu
+         [:div.item
+          [:h5.ui.header
+           "Users"]]
+         [add-user-button (t @lang :admin/menu-add)]
+         (when @selected-user
+           [edit-user-button (t @lang :admin/menu-edit)])
+         (when @selected-user
+           [delete-user-button (t @lang :admin/menu-delete) selected-user])
+         [:div.right.menu
+          [:div.ui.icon.item
+           {:on-click (handler-fn (dispatch [:get/users]))}
+           [:i.refresh.icon]]]]
+        [:div.ui.bottom.attached.segment
+         (if @active-users-pane
+           [(@active-users-pane user-panes)]
+           [users-list-details])]]])))
 
 (defn user-section []
   (let [user (subscribe [:state :user])]
     (fn []
-      [:div.sixteen.wide.column
+      [:div.ui.grid
        [user-details]
+       [user-prefs]
        (when (:admin @user)
-         [users-admin-panel])])))
+         [:div
+          [:div.ui.horizontal.divider
+           "Admin"]
+          [users-admin-panel]])])))
 

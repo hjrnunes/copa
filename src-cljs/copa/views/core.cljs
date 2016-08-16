@@ -57,7 +57,6 @@
                                  (t @lang :core/login-user-ph)
                                  (t @lang :core/login-pass-ph)
                                  (t @lang :core/login-button-label)) form]
-        (println "Alert" @alert)
         (when @alert
           [:div.ui.error.message (t @lang :core/login-expired)])]])))
 

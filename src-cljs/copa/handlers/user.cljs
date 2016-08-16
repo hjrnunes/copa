@@ -111,3 +111,28 @@
       (assoc! local-storage :copa-user data)
       (dispatch [:loading/stop])
       db)))
+
+;; update password
+(register-handler
+  :user/update-password
+  (fn [db [_ username current new confirm]]
+    (let [params {:username username
+                  :current  current
+                  :new      new
+                  :confirm  confirm}]
+      (POST (str js/context "/api/user/password")
+            {:response-format :json
+             :params          params
+             :keywords?       true
+             :handler         #(dispatch [:response/user-update-password %1])
+             :error-handler   #(dispatch [:data/error %1])})
+      (dispatch [:loading/start])
+      db)))
+
+;; update password result
+(register-handler
+  :response/user-update-password
+  (fn [db [_ data]]
+    (let [username (:username data)]
+      (dispatch [:loading/stop])
+      db)))

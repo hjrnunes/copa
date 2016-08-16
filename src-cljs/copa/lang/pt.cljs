@@ -37,7 +37,14 @@
    :ingredients/is-in-recipes          "Entra nas seguintes receitas:"
 
    :user/recipes                       "Receitas"
+
+   :user/preferences                   "Preferências"
    :user/language                      "Língua"
+
+   :user/update-pass                   "Alterar senha"
+   :user/update-pass-current-ph        "Senha actual"
+   :user/update-pass-new-ph            "Nova senha"
+   :user/update-pass-confirm-ph        "Confirmar nova senha"
 
    :admin/state                        "Estado"
    :admin/new-user-heading             "Novo utilizador"

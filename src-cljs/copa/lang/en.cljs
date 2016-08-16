@@ -37,7 +37,14 @@
    :ingredients/is-in-recipes          "Goes in the following recipes:"
 
    :user/recipes                       "Recipes"
+
+   :user/preferences                   "Preferences"
    :user/language                      "Language"
+
+   :user/update-pass                   "Update password"
+   :user/update-pass-current-ph        "Current password"
+   :user/update-pass-new-ph            "New password"
+   :user/update-pass-confirm-ph        "Confirm new password"
 
    :admin/state                        "State"
    :admin/new-user-heading             "New user"

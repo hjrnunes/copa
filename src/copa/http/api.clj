@@ -65,7 +65,12 @@
       (POST "/lang" []
         :body [body schemas/UserLang]
         :summary "Update user language preference"
-        (s/update-user-lang (:username body) (:lang body))))
+        (s/update-user-lang (:username body) (:lang body)))
+
+      (POST "/password" []
+        :body [body schemas/UserPassword]
+        :summary "Update user password"
+        (s/update-user-password (:username body) (:current body) (:new body) (:confirm body))))
 
     ;; ------ ADMIN ----------------------
     (context "/admin" []

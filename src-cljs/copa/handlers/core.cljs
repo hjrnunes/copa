@@ -79,7 +79,6 @@
 (register-handler
   :data/login
   (fn [db [_ form]]
-    (println form)
     (POST (str js/context "/auth")
           {:params          {:username (:username form)
                              :password (:password form)}

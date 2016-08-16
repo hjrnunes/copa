@@ -8,12 +8,14 @@
 
 ;; -- auth -----------------------------------------------------
 
+(def token-exp-secs 60)
+
 (defn login [username password]
   (let [user (db/get-user mongo username)]
     (if (hashers/check password (:password user))
       (let [claims {:user  (keyword username)
                     :admin (get user :admin false)
-                    :exp   (time/plus (time/now) (time/seconds 3600))}
+                    :exp   (time/plus (time/now) (time/seconds token-exp-secs))}
             token (jws-token claims)]
         (ok {:token token
              :user  (dissoc user :password)}))
@@ -66,3 +68,13 @@
     (if (= 1 (.getN res))
       (ok (assoc user :lang lang))
       (ok user))))
+
+(defn update-user-password [username current new confirm]
+  (let [user (db/get-user mongo username)]
+    (if (hashers/check current (:password user))
+      (if (= new confirm)
+        (let [crypted-passwd (hashers/encrypt new)]
+          (db/update-user-password mongo username crypted-passwd)
+          (ok (dissoc (db/get-user mongo username) :password)))
+        (bad-request {:message (str "New password confirmation does not match for user " username "!")}))
+      (bad-request {:message (str "Wrong password for user " username "!")}))))

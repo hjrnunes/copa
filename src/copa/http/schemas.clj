@@ -31,3 +31,9 @@
   (merge BaseEntity {:username (describe s/Str "User name")
                      :lang     (describe s/Str "Language preference")}))
 
+(s/defschema UserPassword
+  (merge BaseEntity {:username (describe s/Str "User name")
+                     :current  (describe s/Str "Current password")
+                     :new      (describe s/Str "New password")
+                     :confirm  (describe s/Str "New password confirmation")}))
+
