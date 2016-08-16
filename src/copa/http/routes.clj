@@ -10,8 +10,11 @@
 (defroutes home-routes
            (GET "/" [] (index))
            (GET "/r" [] (index))
-           (GET "/r/:slug" [slug] (index))
+           (GET "/r/new" [] (index))
+           (GET "/r/:id" [id] (index))
+           (GET "/r/:id/edit" [id] (index))
            (GET "/i" [] (index))
+           (GET "/i/:id" [id] (index))
            (GET "/u" [] (index))
            (GET "/state" [] (index)))
 
