@@ -43,11 +43,26 @@
   :data/error
   (fn [db [_ data]]
     (dispatch [:loading/stop])
+    (println "Error" data)
     (if (= (:status data) 403)
       (auth-error db)
       (do
-        (println "Error:" data)
+        (dispatch [:alert/show :negative (or (get-in data [:response :message]) (:status-text data))])
         db))))
+
+
+;; -- alert -----------------------------------------------------------
+
+(register-handler
+  :alert/show
+  (fn [db [_ type message]]
+    (assoc-in db [:state :alert] {:type    type
+                                  :message message})))
+
+(register-handler
+  :alert/hide
+  (fn [db _]
+    (assoc-in db [:state :alert] {})))
 
 ;; generic update state handler
 (register-handler

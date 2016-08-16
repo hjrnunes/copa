@@ -90,6 +90,26 @@
          [:i.user.icon]
          (:username @user)]]])))
 
+(defn copa-message []
+  (let [message (subscribe [:alert :message])
+        type (subscribe [:alert :type])]
+    (fn []
+      (when @message
+        [:div.ui.two.column.centered.grid
+         {:style {:margin-bottom "1em"}}
+         [:div.column
+          [:div.ui.mini.icon.message
+           (-> {}
+               (merge {:class (name @type)}))
+           (cond
+             (= @type :positive) [:i.checkmark.icon]
+             (= @type :negative) [:i.warning.icon]
+             :else [:i.checkmark.info.icon])
+           [:i.close.icon
+            {:on-click #(dispatch [:alert/hide])}]
+           [:div.content
+            [:p @message]]]]]))))
+
 (def main-panes {:home        recipes-section
                  :recipes     recipes-section
                  :ingredients ingredients-section
@@ -104,6 +124,7 @@
         [:div
          [copa-menu active-main-pane]
          [:div.ui.container
+          [copa-message]
           (if @active-main-pane
             [(@active-main-pane main-panes)]
             [recipes-section])

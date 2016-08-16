@@ -15,7 +15,6 @@
 ;; -- Entry Point -------------------------------------------------------------
 
 (defn- load-data []
-  (dispatch [:get/settings])
   (dispatch [:get/recipes])
   (dispatch [:get/ingredients]))
 
