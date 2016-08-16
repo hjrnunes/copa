@@ -8,7 +8,7 @@
 
 ;; -- auth -----------------------------------------------------
 
-(def token-exp-secs 60)
+(def token-exp-secs 3600)
 
 (defn login [username password]
   (let [user (db/get-user mongo username)]

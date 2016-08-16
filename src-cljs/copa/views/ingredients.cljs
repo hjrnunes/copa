@@ -20,13 +20,13 @@
           [:div.ui.top.attached.basic.label
            (t @lang :ingredients/is-in-recipes)]
           [:div.ui.list
-           (for [[idx recipe] (indexed (:recipes @ingredient))]
-             ^{:key idx} [:div.item
-                          [:div.content
-                           [:a.header
-                            {:on-click (handler-fn
-                                         (dispatch [:push-url-for :recipe :id recipe]))}
-                            (:name (get @recipes-index recipe))]]])]]]))))
+           (doall (for [[idx recipe] (indexed (:recipes @ingredient))]
+                    ^{:key idx} [:div.item
+                                 [:div.content
+                                  [:a.header
+                                   {:on-click (handler-fn
+                                                (dispatch [:push-url-for :recipe :id recipe]))}
+                                   (:name (get @recipes-index recipe))]]]))]]]))))
 
 (defn ingredient-list-item [ingredient]
   [:div.item
