@@ -1,35 +1,37 @@
 <html>
-  <head>
-      <META http-equiv="Content-Type" content="text/html; charset=UTF-8">
-      <meta name="viewport" content="width=device-width, initial-scale=1">
-      <title>Welcome to copa</title>
-      <link href="http://fonts.googleapis.com/css?family=Roboto:300,400,500,700,400italic" rel="stylesheet" type="text/css">
-      <link href='http://fonts.googleapis.com/css?family=Roboto+Condensed:400,300' rel='stylesheet' type='text/css'>
-  </head>
-  <body>
-    <div id="app">
-      <div class="container-fluid">
-        <div class="three-quarters-loader">Loading…</div>
-        <p>If you're seeing this message, that means you haven't yet compiled your ClojureScript!</p>
-        <p>Please run <code>lein figwheel</code> to start the ClojureScript compiler and reload the page.</p>
-        <p>See <a href="http://www.luminusweb.net/docs/clojurescript.md">ClojureScript</a> documentation for further details.</p>
-      </div>
+<head>
+    <META http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Welcome to copa</title>
+    <link href="http://fonts.googleapis.com/css?family=Roboto:300,400,500,700,400italic" rel="stylesheet"
+          type="text/css">
+    <link href='http://fonts.googleapis.com/css?family=Roboto+Condensed:400,300' rel='stylesheet' type='text/css'>
+</head>
+<body>
+<div id="app">
+    <div class="ui container">
+        <div class="ui active dimmer">
+            <div class="ui indeterminate text big loader"><img src="/images/logo.png"></div>
+        </div>
     </div>
+</div>
 
-    <!-- scripts and styles -->
-    {% style "/assets/font-awesome/css/font-awesome.min.css" %}
-    {% style "/css/human.json.css" %}
-    {% style "/css/screen.css" %}
+<!-- scripts and styles -->
+{% style "/assets/font-awesome/css/font-awesome.min.css" %}
+{% style "/css/human.json.css" %}
+{% style "/css/screen.css" %}
 
-    <script   src="https://code.jquery.com/jquery-2.2.3.min.js"   integrity="sha256-a23g1Nt4dtEYOj7bR+vTu7+T8VP13humZFBJNIYoEJo="   crossorigin="anonymous"></script>
-    <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.2.1/semantic.css">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.2.1/semantic.js"></script>
+<script src="https://code.jquery.com/jquery-2.2.3.min.js"
+        integrity="sha256-a23g1Nt4dtEYOj7bR+vTu7+T8VP13humZFBJNIYoEJo=" crossorigin="anonymous"></script>
+<link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.2.1/semantic.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.2.1/semantic.js"></script>
 
-    <script type="text/javascript">
+<script type="text/javascript">
         var context = "{{servlet-context}}";
-    </script>
-    {% script "/js/app.js" %}
-  </body>
+
+</script>
+{% script "/js/app.js" %}
+</body>
 </html>
 
 
