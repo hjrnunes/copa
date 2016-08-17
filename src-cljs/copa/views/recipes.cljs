@@ -42,18 +42,13 @@
           (capitalize ingredient)])])))
 
 (defn md-tooltip [lang]
-  (r/create-class
-    {:reagent-render      (fn []
-                            [:span
-                             [:span
-                              {:id        "mdtooltip"
-                               :data-html (t @lang :recipes/edit-md-tt)}
-                              [:i.orange.idea.link.icon]]
-                             [:a {:href "https://guides.github.com/features/mastering-markdown"}
-                              (t @lang :recipes/edit-md-link)]])
-     :component-did-mount (fn [comp]
-                            (.. (js/$ "#mdtooltip")
-                                (popup)))}))
+  [:span
+   [:span
+    {:data-tooltip  (t @lang :recipes/edit-md-tt)
+     :data-position "top left"}
+    [:i.orange.idea.link.icon]]
+   [:a {:href "https://guides.github.com/features/mastering-markdown"}
+    (t @lang :recipes/edit-md-link)]])
 
 (defn edit-recipe []
   (let [selected-recipe (subscribe [:state/selected-recipe])
@@ -148,17 +143,11 @@
        [:div.middle.aligned.content
         (capitalize ingredient)]])))
 
-(defn meta-item [id icon content]
-  (r/create-class
-    {:reagent-render      (fn []
-                            [:span
-                             {:id            id
-                              :data-tooltip  content
-                              :data-inverted ""}
-                             [icon]])
-     :component-did-mount (fn [comp]
-                            (.. (js/$ (str "#" id))
-                                (popup)))}))
+(defn meta-item [icon content]
+  [:span
+   {:data-tooltip  content
+    :data-inverted ""}
+   [icon]])
 
 ;; recipe details ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (defn recipe-details []
@@ -176,11 +165,11 @@
            (when (or user source duration)
              [:div.row
               (when user
-                [meta-item "usertt" :i.user.icon user])
+                [meta-item :i.user.icon user])
               (when source
-                [meta-item "srctt" :i.book.icon source])
+                [meta-item :i.book.icon source])
               (when duration
-                [meta-item "durationtt" :i.clock.icon duration])])
+                [meta-item :i.clock.icon duration])])
            (when portions
              [:div.row
               (if (= "1" portions)
