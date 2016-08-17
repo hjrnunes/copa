@@ -41,6 +41,7 @@
                  [bidi "2.0.9"]
                  [kibu/pushy "0.3.6"]
                  [funcool/cuerdas "0.8.0"]
+                 [cljsjs/semantic-ui "2.2.2-0"]
                  ]
 
   :min-lein-version "2.0.0"
