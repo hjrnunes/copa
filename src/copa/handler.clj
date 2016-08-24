@@ -9,7 +9,7 @@
             [config.core :refer [env]]
             [copa.config :refer [defaults]]
             [mount.core :as mount]
-            [copa.db.core]))
+            [copa.db.mongo]))
 
 (timbre/refer-timbre)
 

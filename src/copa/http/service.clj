@@ -1,5 +1,5 @@
 (ns copa.http.service
-  (:require [copa.db.core :as db :refer [mongo]]
+  (:require [copa.db.mongo :as db :refer [mongo]]
             [copa.auth :refer [jws-token]]
             [buddy.hashers :as hashers]
             [ring.util.http-response :refer :all]

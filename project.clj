@@ -19,7 +19,7 @@
                  [ring/ring-defaults "0.1.5"]
                  [ring-ttl-session "0.3.0"]
                  [ring "1.4.0" :exclusions [ring/ring-jetty-adapter]]
-                 [mount "0.1.8"]
+                 [mount "0.1.10"]
                  [luminus-nrepl "0.1.2"]
                  [buddy "0.10.0"]
                  [org.clojure/clojurescript "1.9.89" :scope "provided"]
@@ -42,6 +42,10 @@
                  [kibu/pushy "0.3.6"]
                  [funcool/cuerdas "0.8.0"]
                  [cljsjs/semantic-ui "2.2.2-0"]
+                 [luminus-migrations "0.2.6"]
+                 [conman "0.6.0"]
+                 [com.h2database/h2 "1.3.176"]
+                 [cprop "0.1.9"]
                  ]
 
   :min-lein-version "2.0.0"
@@ -50,9 +54,12 @@
   :resource-paths ["resources" "target/cljsbuild"]
 
   :main copa.core
+  :migratus {:store :database :db ~(get (System/getenv) "DATABASE_URL")}
 
   :plugins [[lein-environ "1.0.1"]
-            [lein-cljsbuild "1.1.1"]]
+            [lein-cljsbuild "1.1.1"]
+            [lein-cprop "1.0.1"]
+            [migratus-lein "0.4.1"]]
   :clean-targets ^{:protect false} [:target-path [:cljsbuild :builds :app :compiler :output-dir] [:cljsbuild :builds :app :compiler :output-to]]
   :cljsbuild
   {:builds
