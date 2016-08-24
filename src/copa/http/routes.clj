@@ -1,11 +1,17 @@
 (ns copa.http.routes
   (:require [copa.layout :as layout]
+            [copa.http.service :as s]
             [compojure.core :refer [defroutes context GET ANY]]
             [ring.util.http-response :refer [ok]]
-            [clojure.java.io :as io]))
+            [ring.util.response :as r]
+            [copa.http.service :as s]))
 
 (defn index []
   (layout/render "home.html"))
+
+(defn export []
+  (-> (s/get-all-recipes)
+      (r/header "Content-Disposition" "attachment; filename='copa_export.json'")))
 
 (defroutes home-routes
            (GET "/" [] (index))
@@ -16,5 +22,6 @@
            (GET "/i" [] (index))
            (GET "/i/:id" [id] (index))
            (GET "/u" [] (index))
-           (GET "/state" [] (index)))
+           (GET "/state" [] (index))
+           (GET "/export" [] (export)))
 

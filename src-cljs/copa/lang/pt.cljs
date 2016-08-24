@@ -40,6 +40,8 @@
 
    :user/preferences                   "Preferências"
    :user/language                      "Língua"
+   :user/export                        "Exportar receitas"
+   :user/export-button                 "Exportar"
 
    :user/update-pass                   "Alterar senha"
    :user/update-pass-current-ph        "Senha actual"

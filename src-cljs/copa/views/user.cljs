@@ -68,6 +68,18 @@
                             (reset! form nil))}
                [:i.checkmark.icon]]])]]]]])))
 
+(defn export-data [lang]
+  [:div.row
+   [:div.ui.grid
+    [:div.column
+     [:h5.ui.header (t lang :user/export)]
+     [:div.ui.form
+      [:button.ui.basic.button
+       {:on-click (handler-fn
+                    (set! (.. js/window -location -href) "/export"))}
+       [:i.down.arrow.icon]
+       (t lang :user/export-button)]]]]])
+
 (defn user-prefs []
   (let [user (subscribe [:state :user])
         lang (subscribe [:lang])]
@@ -80,7 +92,9 @@
          [:ui.vertically.divided.grid
           [language-pref @user @lang]
           [:div.ui.divider]
-          [update-password @user @lang]]]]])))
+          [update-password @user @lang]
+          [:div.ui.divider]
+          [export-data @lang]]]]])))
 
 (defn user-details []
   (let [user (subscribe [:state :user])
