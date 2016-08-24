@@ -1,5 +1,5 @@
-(ns copa.config
-  (:require [taoensso.timbre :as timbre]))
+(ns copa.env
+    (:require [taoensso.timbre :as timbre]))
 
 (timbre/refer-timbre)
 

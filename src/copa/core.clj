@@ -2,7 +2,7 @@
   (:require [copa.handler :refer [app init destroy]]
             [luminus.repl-server :as repl]
             [luminus.http-server :as http]
-            [config.core :refer [env]])
+            [copa.config :refer [env]])
   (:gen-class))
 
 (defn parse-port [port]

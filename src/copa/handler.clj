@@ -7,7 +7,7 @@
             [taoensso.timbre :as timbre]
             [compojure.route :as route]
             [config.core :refer [env]]
-            [copa.config :refer [defaults]]
+            [copa.env :refer [defaults]]
             [mount.core :as mount]
             [copa.db.mongo]))
 
