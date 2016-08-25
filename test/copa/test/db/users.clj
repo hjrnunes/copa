@@ -1,11 +1,10 @@
-(ns copa.test.db.core
+(ns copa.test.db.users
   (:require [copa.db.core :refer [*db*] :as db]
             [luminus-migrations.core :as migrations]
             [clojure.test :refer :all]
             [clojure.java.jdbc :as jdbc]
             [copa.config :refer [env]]
-            [mount.core :as mount]
-            [clojure.pprint :as pprint])
+            [mount.core :as mount])
   (:import (java.sql SQLException)))
 
 (use-fixtures

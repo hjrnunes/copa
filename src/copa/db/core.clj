@@ -16,6 +16,6 @@
           :start (init-db)
           :stop (conman/disconnect! *db*))
 
-(conman/bind-connection *db* "sql/users.sql")
+(conman/bind-connection *db* "sql/users.sql" "sql/ingredients.sql")
 
 
