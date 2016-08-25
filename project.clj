@@ -47,6 +47,7 @@
                  [com.h2database/h2 "1.3.176"]
                  [cprop "0.1.9"]
                  [com.taoensso/timbre "4.7.4"]
+                 [com.fzakaria/slf4j-timbre "0.3.2"]
                  ]
 
   :min-lein-version "2.0.0"
@@ -136,8 +137,6 @@
                    :env            {:dev        true
                                     :port       3000
                                     :nrepl-port 7000}}
-   :project/test  {:env {:test       true
-                         :port       3001
-                         :nrepl-port 7001}}
+   :project/test  {:resource-paths ["env/dev/resources" "env/test/resources"]}
    :profiles/dev  {}
    :profiles/test {}})

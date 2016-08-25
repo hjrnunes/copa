@@ -2,12 +2,20 @@
   (:require
     [conman.core :as conman]
     [mount.core :refer [defstate]]
-    [config.core :refer [env]]))
+    [config.core :refer [env]]
+    [taoensso.timbre :as timbre]))
+
+
+(timbre/refer-timbre)
+
+(defn init-db []
+  (info "Connecting to DB " (env :database-url))
+  (conman/connect! {:jdbc-url (env :database-url)}))
 
 (defstate ^:dynamic *db*
-          :start (conman/connect! {:jdbc-url (env :database-url)})
+          :start (init-db)
           :stop (conman/disconnect! *db*))
 
-(conman/bind-connection *db* "sql/queries.sql")
+(conman/bind-connection *db* "sql/users.sql")
 
 
