@@ -17,7 +17,7 @@ SELECT * FROM recipes
 DELETE FROM recipes
 WHERE recipe_id = :recipe_id
 
--- :name create-recipe! :! :n
+-- :name create-recipe! :insert
 -- :doc creates a new recipe record
 INSERT INTO recipes
 (name, description, portions, source, preparation, user)
@@ -27,5 +27,5 @@ VALUES (:name, :description, :portions, :source, :preparation, :user)
 -- :doc update an existing recipe record
 UPDATE recipes
 SET name = :name, description = :description, portions = :portions, source = :source, preparation = :preparation
-WHERE recipe_id = recipe_id
+WHERE recipe_id = :recipe_id
 
