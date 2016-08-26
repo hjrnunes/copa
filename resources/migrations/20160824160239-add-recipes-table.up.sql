@@ -4,7 +4,7 @@ CREATE TABLE recipes
  description VARCHAR(300),
  portions VARCHAR(10),
  source VARCHAR(300),
- preparation CLOB NOT NULL,
+ preparation VARCHAR NOT NULL,
  user VARCHAR(50),
  CONSTRAINT pk_recipe_id PRIMARY KEY (recipe_id),
  CONSTRAINT fk_user FOREIGN KEY (user) REFERENCES users(username));
