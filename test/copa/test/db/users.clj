@@ -8,13 +8,12 @@
   (:import (java.sql SQLException)))
 
 (use-fixtures
-  :each
+  :once
   (fn [f]
     (mount/start
       #'copa.config/env
       #'copa.db.core/*db*)
     (migrations/migrate ["reset"] {:database-url "jdbc:h2:./copa_test"})
-    ;(migrations/migrate ["migrate"] (select-keys env [:database-url]))
     (f)))
 
 (deftest get-user
@@ -25,7 +24,7 @@
                                       :password "admin"
                                       :admin    true
                                       :lang     "en"}
-                                     (dissoc (db/get-user {:username "admin"}) :id))))))
+                                     (dissoc (db/get-user {:username "admin"}) :user_id))))))
 
 (deftest get-all-users
   (jdbc/with-db-transaction [t-conn *db*]
@@ -45,7 +44,7 @@
                                       :password "pass"
                                       :admin    false
                                       :lang     "en"}
-                                     (dissoc (db/get-user t-conn {:username "newuser"}) :id))))
+                                     (dissoc (db/get-user t-conn {:username "newuser"}) :user_id))))
                             (testing "insert another user with same username fails"
                               (is (thrown? SQLException
                                            (db/create-user!
@@ -65,7 +64,7 @@
                               (is (= 1 (db/delete-user! t-conn
                                                         {:username "newuser"})))
                               (is (= nil
-                                     (dissoc (db/get-user t-conn {:username "newuser"}) :id))))))
+                                     (dissoc (db/get-user t-conn {:username "newuser"}) :user_id))))))
 
 (deftest update-user-password
   (jdbc/with-db-transaction [t-conn *db*]

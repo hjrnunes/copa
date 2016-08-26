@@ -8,30 +8,18 @@
   (:import (java.sql SQLException)))
 
 (use-fixtures
-  :each
+  :once
   (fn [f]
     (mount/start
       #'copa.config/env
       #'copa.db.core/*db*)
     (migrations/migrate ["reset"] {:database-url "jdbc:h2:./copa_test"})
-    ;(migrations/migrate ["migrate"] (select-keys env [:database-url]))
+    (db/create-ingredient! {:name "banana"})
     (f)))
 
-;(deftest get-user
-;  (jdbc/with-db-transaction [t-conn *db*]
-;                            (jdbc/db-set-rollback-only! t-conn)
-;                            (testing "get initial admin user"
-;                              (is (= {:username "admin"
-;                                      :password "admin"
-;                                      :admin    true
-;                                      :lang     "en"}
-;                                     (dissoc (db/get-user {:username "admin"}) :id))))))
-;
-;(deftest get-all-users
-;  (jdbc/with-db-transaction [t-conn *db*]
-;                            (jdbc/db-set-rollback-only! t-conn)
-;                            (testing "get all users"
-;                              (is (= 1 (count (db/get-users t-conn)))))))
+(deftest get-all-ingredients
+  (testing "get all users"
+    (is (= 1 (count (db/get-ingredients))))))
 
 (deftest insert-ingredient
   (jdbc/with-db-transaction [t-conn *db*]
@@ -40,7 +28,7 @@
                               (is (= 1 (db/create-ingredient! t-conn
                                                               {:name "garlic"})))
                               (is (= {:name "garlic"}
-                                     (dissoc (db/get-ingredient t-conn {:name "garlic"}) :id))))
+                                     (dissoc (db/get-ingredient t-conn {:name "garlic"}) :ingredient_id))))
                             (testing "insert another ingredient with same name fails"
                               (is (thrown? SQLException
                                            (db/create-ingredient!
@@ -56,5 +44,5 @@
                               (is (= 1 (db/delete-ingredient! t-conn
                                                               {:name "garlic"})))
                               (is (= nil
-                                     (dissoc (db/get-ingredient t-conn {:name "garlic"}) :id))))))
+                                     (dissoc (db/get-ingredient t-conn {:name "garlic"}) :ingredient_id))))))
 

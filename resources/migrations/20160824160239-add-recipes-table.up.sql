@@ -1,10 +1,10 @@
 CREATE TABLE recipes
-(id BIGINT NOT NULL AUTO_INCREMENT,
+(recipe_id BIGINT NOT NULL AUTO_INCREMENT,
  name VARCHAR(300) NOT NULL UNIQUE,
  description VARCHAR(300),
  portions VARCHAR(10),
  source VARCHAR(300),
  preparation CLOB NOT NULL,
- user VARCHAR(20),
- CONSTRAINT pk_recipe_id PRIMARY KEY (id),
- CONSTRAINT fk_user FOREIGN KEY (user) REFERENCES users(id));
+ user VARCHAR(50),
+ CONSTRAINT pk_recipe_id PRIMARY KEY (recipe_id),
+ CONSTRAINT fk_user FOREIGN KEY (user) REFERENCES users(username));
