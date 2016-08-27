@@ -20,6 +20,7 @@
                         "sql/users.sql"
                         "sql/ingredients.sql"
                         "sql/measurements.sql"
-                        "sql/recipes.sql")
+                        "sql/recipes.sql"
+                        "sql/recipe-measurements.sql")
 
 

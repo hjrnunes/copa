@@ -12,7 +12,7 @@
     (mount/start
       #'copa.config/env
       #'copa.db.core/*db*)
-    (migrations/migrate ["reset"] {:database-url "jdbc:h2:./copa_test"})
+    (migrations/migrate ["reset"] {:database-url "jdbc:h2:./copa_test;MVCC=true"})
     (f)))
 
 (deftest insert-measurement
