@@ -7,6 +7,8 @@
             [mount.core :as mount])
   (:import (java.sql SQLException)))
 
+(def passw "bcrypt+sha512$a20e2dd70567d58028a5a108ce54b832$12$00a281eb5acd4dd11c37dffadc5f4aeb78288684029268a9")
+
 (use-fixtures
   :once
   (fn [f]
@@ -21,7 +23,7 @@
                             (jdbc/db-set-rollback-only! t-conn)
                             (testing "get initial admin user"
                               (is (= {:username "admin"
-                                      :password "admin"
+                                      :password passw
                                       :admin    true
                                       :lang     "en"}
                                      (dissoc (db/get-user {:username "admin"}) :user_id))))))

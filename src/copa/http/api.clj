@@ -4,7 +4,7 @@
             [schema.core :as sc]
             [copa.http.schemas :as schemas]
             [copa.middleware :as middleware]
-            [copa.http.service :as s]))
+            [copa.http.old_service :as s]))
 
 (defapi service-routes
   (swagger-routes
@@ -26,9 +26,9 @@
     :middleware [middleware/wrap-restricted]
     :tags ["api"]
 
-    (GET "/settings" []
-      :summary "Get settings"
-      (s/get-settings))
+    ;(GET "/settings" []
+    ;  :summary "Get settings"
+    ;  (s/get-settings))
 
     (GET "/recipes" []
       :summary "Get all recipes"

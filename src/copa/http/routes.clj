@@ -1,10 +1,10 @@
 (ns copa.http.routes
   (:require [copa.layout :as layout]
-            [copa.http.service :as s]
+            [copa.http.old_service :as s]
             [compojure.core :refer [defroutes context GET ANY]]
             [ring.util.http-response :refer [ok]]
             [ring.util.response :as r]
-            [copa.http.service :as s]))
+            [copa.http.old_service :as s]))
 
 (defn index []
   (layout/render "home.html"))

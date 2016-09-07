@@ -17,6 +17,11 @@ SELECT * FROM recipe_measurements
 DELETE FROM recipe_measurements
 WHERE rec_measurement_id = :rec_measurement_id
 
+-- :name delete-recipe-measurements! :! :n
+-- :doc delete all measurements for recipe id
+DELETE FROM recipe_measurements
+WHERE recipe_id = :recipe_id
+
 -- :name create-recipe-measurement! :insert
 -- :doc creates a new recipe measurement record
 INSERT INTO recipe_measurements

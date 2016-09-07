@@ -137,6 +137,13 @@
                    :env            {:dev        true
                                     :port       3000
                                     :nrepl-port 7000}}
-   :project/test  {:resource-paths ["env/dev/resources" "env/test/resources"]}
+   :project/test  {:dependencies   [[prone "1.0.1"]
+                                    [ring/ring-mock "0.3.0"]
+                                    [ring/ring-devel "1.4.0"]
+                                    [pjstadig/humane-test-output "0.7.1"]
+                                    [lein-figwheel "0.5.0-6"]
+                                    [lein-doo "0.1.6"]
+                                    [com.cemerick/piggieback "0.2.2-SNAPSHOT"]]
+                   :resource-paths ["env/dev/resources" "env/test/resources"]}
    :profiles/dev  {}
    :profiles/test {}})

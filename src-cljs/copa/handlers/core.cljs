@@ -71,24 +71,24 @@
     (assoc-in db [:state key] value)))
 
 ;; get settings
-(register-handler
-  :get/settings
-  (fn [db _]
-    (GET (str js/context "/api/settings")
-         {:response-format :json
-          :keywords?       true
-          :handler         #(dispatch [:response/get-settings %1])
-          :error-handler   #(dispatch [:data/error %1])})
-    (dispatch [:loading/start])
-    db))
+;(register-handler
+;  :get/settings
+;  (fn [db _]
+;    (GET (str js/context "/api/settings")
+;         {:response-format :json
+;          :keywords?       true
+;          :handler         #(dispatch [:response/get-settings %1])
+;          :error-handler   #(dispatch [:data/error %1])})
+;    (dispatch [:loading/start])
+;    db))
 
 ;; get settings response
-(register-handler
-  :response/get-settings
-  (fn [db [_ data]]
-    (dispatch [:loading/stop])
-    (-> db
-        (assoc-in [:settings] data))))
+;(register-handler
+;  :response/get-settings
+;  (fn [db [_ data]]
+;    (dispatch [:loading/stop])
+;    (-> db
+;        (assoc-in [:settings] data))))
 
 ;; login user
 (register-handler
@@ -105,7 +105,6 @@
     db))
 
 (defn load-data! []
-  (dispatch [:get/settings])
   (dispatch [:get/recipes])
   (dispatch [:get/ingredients]))
 
