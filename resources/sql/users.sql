@@ -29,3 +29,7 @@ WHERE username = :username
 UPDATE users
 SET lang = :lang
 WHERE username = :username
+
+-- :name clean-users-table :! :n
+-- :doc delete everything for testing
+DELETE * FROM users

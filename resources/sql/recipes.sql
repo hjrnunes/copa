@@ -29,3 +29,6 @@ UPDATE recipes
 SET name = :name, description = :description, portions = :portions, source = :source, preparation = :preparation
 WHERE recipe_id = :recipe_id
 
+-- :name clean-recipes-table :! :n
+-- :doc delete everything for testing
+DELETE FROM recipes

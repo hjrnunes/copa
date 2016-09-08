@@ -28,3 +28,6 @@ INSERT INTO recipe_measurements
 (recipe_id, measurement_id)
 VALUES (:recipe_id, :measurement_id)
 
+-- :name clean-recipes-measurements-table :! :n
+-- :doc delete everything for testing
+DELETE * FROM recipe_measurements

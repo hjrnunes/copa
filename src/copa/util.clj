@@ -11,3 +11,6 @@
        (filter second)
        flatten
        (apply assoc m)))
+
+(defn filter-nil-values [m]
+  (into {} (remove (comp nil? second) m)))

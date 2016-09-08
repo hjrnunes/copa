@@ -18,3 +18,6 @@ INSERT INTO ingredients
 (name)
 VALUES (:name)
 
+-- :name clean-ingredients-table :! :n
+-- :doc delete everything for testing
+DELETE * FROM ingredients

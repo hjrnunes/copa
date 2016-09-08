@@ -26,12 +26,6 @@
                     :preparation "the preparation"
                     :user        "newuser"})
 
-;(deftest get-all-users
-;  (jdbc/with-db-transaction [t-conn *db*]
-;                            (jdbc/db-set-rollback-only! t-conn)
-;                            (testing "get all users"
-;                              (is (= 1 (count (db/get-users t-conn)))))))
-
 (deftest get-recipe
   (jdbc/with-db-transaction [t-conn *db*]
                             (jdbc/db-set-rollback-only! t-conn)

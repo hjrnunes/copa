@@ -4,7 +4,9 @@
             [buddy.hashers :as hashers]
             [ring.util.http-response :refer :all]
             [clj-time.core :as time]
-            [cheshire.core :as json]))
+            [cheshire.core :as json]
+            [clojure.java.jdbc :as jdbc]
+            [copa.util :refer [filter-nil-values]]))
 
 (def token-exp-secs 3600)
 
@@ -55,44 +57,63 @@
 ;; insert
 ;; create/update recipe details
 
-(defn- ensure-ingredient [name]
-  (if-not (db/get-ingredient! {:name name})
-    (db/create-ingredient! {:name name})))
+(defn- ensure-ingredient [conn name]
+  (if-not (db/get-ingredient conn {:name name})
+    (db/create-ingredient! conn {:name name})))
 
-(defn- insert-measurement [recipe-id measurement]
-  (ensure-ingredient (:ingredient measurement))
-  (let [res (db/create-measurement! measurement)
+(defn- insert-measurement [conn recipe-id measurement]
+  (ensure-ingredient conn (:ingredient measurement))
+  (let [res (db/create-measurement! conn measurement)
         mid (get res (keyword "scope_identity()"))]
-    (db/create-recipe-measurement! {:recipe_id      recipe-id
-                                    :measurement_id mid})))
+    (db/create-recipe-measurement! conn {:recipe_id      recipe-id
+                                         :measurement_id mid})))
 
-(defn- insert-measurements [recipe-id measurements]
-  (dorun (map #(insert-measurement recipe-id %) measurements)))
+(defn- insert-measurements [conn recipe-id measurements]
+  (dorun (map #(insert-measurement conn recipe-id %) measurements)))
 
-(defn- drop-measurements [recipe-id]
-  (let [rec-mes (db/get-recipe-measurements-for-recipe {:recipe_id recipe-id})
-        measurement-ids (map :measurement_id rec-mes)]
-    (dorun (map #(db/delete-measurement! {:measurement_id %}) measurement-ids))))
+(defn- get-measurement-ids-for-recipe [conn recipe-id]
+  (let [rec-mes (db/get-recipe-measurements-for-recipe conn {:recipe_id recipe-id})]
+    (map :measurement_id rec-mes)))
 
-(defn- update-measurements [recipe-id measurements]
-  (drop-measurements recipe-id)
-  (insert-measurements recipe-id measurements))
+(defn- get-measurements-for-recipe [conn recipe-id]
+  (let [mids (get-measurement-ids-for-recipe conn recipe-id)]
+    (map filter-nil-values (db/get-measurements-for-ids conn {:measurement_ids mids}))))
 
-(defn- insert-recipe [recipe]
-  (let [res (db/create-recipe! recipe)]
+(defn- drop-measurements [conn recipe-id]
+  (dorun (map #(db/delete-measurement! conn {:measurement_id %}) (get-measurement-ids-for-recipe conn recipe-id))))
+
+(defn- update-measurements [conn recipe-id measurements]
+  (drop-measurements conn recipe-id)
+  (insert-measurements conn recipe-id measurements))
+
+(defn- insert-recipe [conn recipe]
+  (let [res (db/create-recipe! conn recipe)]
     (get res (keyword "scope_identity()"))))
 
-(defn- update-recipe [recipe]
-  (db/update-recipe! recipe))
+(defn- update-recipe [conn recipe]
+  (db/update-recipe! conn recipe))
+
+(defn- get-full-recipe
+  ([conn recipe]
+   (let [measurements (get-measurements-for-recipe conn (:recipe_id recipe))]
+     (filter-nil-values (assoc recipe :measurements measurements))))
+  ([recipe]
+   (let [measurements (get-measurements-for-recipe *db* (:recipe_id recipe))]
+     (filter-nil-values (assoc recipe :measurements measurements)))))
 
 (defn create-recipe [recipe]
   (let [name (:name recipe)
         measurements (:measurements recipe)
         base-recipe (dissoc recipe :measurements)]
-    (jdbc/with-db-transaction (if (:recipe_id recipe)
+    (println recipe)
+    (jdbc/with-db-transaction [t-conn *db*]
+                              (if (:recipe_id recipe)
                                 (do
-                                  (update-recipe base-recipe)
-                                  (update-measurements (:recipe_id recipe) measurements))
-                                (let [rid (insert-recipe base-recipe)]
-                                  (update-measurements rid measurements))))
-    (ok (db/get-recipe-by-name {:name name}))))
+                                  (update-recipe t-conn base-recipe)
+                                  (update-measurements t-conn (:recipe_id recipe) measurements))
+                                (let [rid (insert-recipe t-conn base-recipe)]
+                                  (update-measurements t-conn rid measurements))))
+    (ok (get-full-recipe (db/get-recipe-by-name {:name name})))))
+
+(defn get-all-recipes []
+  (ok (dorun (map get-full-recipe (db/get-recipes)))))
