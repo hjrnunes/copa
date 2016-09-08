@@ -56,14 +56,20 @@
       (is (= 200 (:status response)))
       (is (= sample-recipe-resp
              body))))
+  (testing "create works"
+    (let [response (s/get-all-recipes)
+          body (:body response)]
+      (is (= 200 (:status response)))
+      (is (= [sample-recipe-resp]
+             body)))))
 
-  ;(testing "login fails"
-  ;  (let [response (s/login "admin" "p")
-  ;        body (:body response)]
-  ;    (is (= 400 (:status response)))
-  ;    (is (= {:message "Login failed. Wrong auth details."}
-  ;           body))))
-  )
+;(testing "login fails"
+;  (let [response (s/login "admin" "p")
+;        body (:body response)]
+;    (is (= 400 (:status response)))
+;    (is (= {:message "Login failed. Wrong auth details."}
+;           body))))
+;)
 
 ;(deftest test-get-users
 ;  (testing "get-users returns all users"
