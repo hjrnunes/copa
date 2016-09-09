@@ -53,18 +53,13 @@
 
 ;; ---- recipes --------------------------------------------
 
-;; UPDATE
-;; drop all measurements
-;; insert
-;; create/update recipe details
-
 (defn- ensure-ingredient [name]
   (if-not (db/get-ingredient {:name name})
     (db/create-ingredient! {:name name})))
 
 (defn- insert-measurement [recipe-id measurement]
   (ensure-ingredient (:ingredient measurement))
-  (let [res (db/create-measurement! measurement)
+  (let [res (db/create-measurement! (dissoc measurement :measurement_id ))
         mid (get res (keyword "scope_identity()"))]
     (db/create-recipe-measurement! {:recipe_id      recipe-id
                                     :measurement_id mid})))
@@ -113,3 +108,20 @@
 
 (defn get-all-recipes []
   (ok (doall (map get-full-recipe (db/get-recipes)))))
+
+(defn get-recipe-by-name [name]
+  (ok (get-full-recipe (db/get-recipe-by-name {:name name}))))
+
+(defn delete-recipe-by-id [recipe_id]
+  (with-transaction [*db*]
+                    (drop-measurements recipe_id)
+                    (db/delete-recipe! {:recipe_id recipe_id}))
+  (ok recipe_id))
+
+;; ----- ingredients ---------------------------
+
+(defn get-all-ingredients []
+  (ok (db/get-ingredients)))
+
+(defn get-ingredient [name]
+  (ok (db/get-ingredient {:name name})))

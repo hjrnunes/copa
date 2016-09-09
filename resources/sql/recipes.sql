@@ -8,6 +8,11 @@ WHERE recipe_id = :recipe_id
 SELECT * FROM recipes
 WHERE name = :name
 
+-- :name get-recipes-of-user :? :1
+-- :doc retrieve all a user's recipes.
+SELECT * FROM recipes
+WHERE user = :user
+
 -- :name get-recipes :? :*
 -- :doc retrieve all recipes
 SELECT * FROM recipes
