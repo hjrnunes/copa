@@ -33,7 +33,7 @@
                                     :quantity   1}
                                    {:ingredient "salt"}]})
 
-(def sample-recipe-resp {:recipe_id    1
+(def sample-recipe-resp {:recipe_id    "1"
                          :name         "a recipe"
                          :description  "a description"
                          :portions     "3"

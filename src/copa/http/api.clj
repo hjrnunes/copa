@@ -40,9 +40,9 @@
       (s/create-recipe body))
 
     (DELETE "/recipes" []
-      :body [body {:id sc/Str}]
+      :body [body {:recipe_id sc/Str}]
       :summary "Delete a recipe by id"
-      (s/delete-recipe-by-id (:id body)))
+      (s/delete-recipe-by-id (:recipe_id body)))
 
     (GET "/recipe" []
       :query-params [name :- sc/Str]

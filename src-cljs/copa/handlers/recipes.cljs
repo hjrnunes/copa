@@ -27,7 +27,7 @@
     (-> db
         (assoc-in [:data :recipes] data)
         (assoc-in [:index :recipes] (map-vals first
-                                              (group-by :_id data))))))
+                                              (group-by :recipe_id data))))))
 
 ;; select recipe
 (register-handler
@@ -67,7 +67,7 @@
 (register-handler
   :response/recipe-save
   (fn [db [_ data]]
-    (let [id (:_id data)
+    (let [id (:recipe_id data)
           db (-> db
                  (assoc-in [:index :recipes id] data))]
       (dispatch [:get/ingredients])
@@ -79,7 +79,7 @@
 (register-handler
   :recipe/delete
   (fn [db [_ id]]
-    (let [params {:_id id}]
+    (let [params {:recipe_id id}]
       (DELETE (str js/context "/api/recipes")
               {:response-format :json
                :params          params
@@ -93,7 +93,7 @@
 (register-handler
   :response/recipe-delete
   (fn [db [_ data]]
-    (let [id (:_id data)
+    (let [id (:recipe_id data)
           db (-> db
                  (assoc-in [:index :recipes] (dissoc (get-in db [:index :recipes]) id)))]
       (dispatch [:loading/stop])

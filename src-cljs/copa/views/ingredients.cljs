@@ -30,7 +30,7 @@
 
 (defn ingredient-list-item [ingredient]
   [:div.item
-   {:on-click (handler-fn (dispatch [:push-url-for :ingredient :id (:_id ingredient)]))}
+   {:on-click (handler-fn (dispatch [:push-url-for :ingredient :id (:ingredient_id ingredient)]))}
    [:div.content
     [:div.header
      (capitalize (:name ingredient))]]])
@@ -40,7 +40,7 @@
     (fn []
       [:div.ui.middle.aligned.selection.list
        (for [ingredient @ingredients]
-         ^{:key (:_id ingredient)} [ingredient-list-item ingredient])])))
+         ^{:key (:ingredient_id ingredient)} [ingredient-list-item ingredient])])))
 
 (defn ingredients-section []
   (let []

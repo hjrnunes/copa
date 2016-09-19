@@ -24,14 +24,18 @@ WHERE recipe_id = :recipe_id
 
 -- :name create-recipe! :insert
 -- :doc creates a new recipe record
+/* :require [clojure.string :refer [join]] */
 INSERT INTO recipes
-(name, description, portions, source, preparation, user)
-VALUES (:name, :description, :portions, :source, :preparation, :user)
+--~ (str "(" (join ", " (map name (sort (keys params)))) ")")
+VALUES
+--~ (str "(" (join ", " (sort (keys params))) ")")
 
 -- :name update-recipe! :! :n
 -- :doc update an existing recipe record
+/* :require [clojure.string :refer [join]] */
 UPDATE recipes
-SET name = :name, description = :description, portions = :portions, source = :source, preparation = :preparation
+SET
+--~ (str (join ", " (map #(str (name %) " = " %) (keys params))))
 WHERE recipe_id = :recipe_id
 
 -- :name clean-recipes-table :! :n

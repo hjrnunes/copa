@@ -94,6 +94,9 @@
   (let [measurements (get-measurements-for-recipe (:recipe_id recipe))]
     (filter-nil-values (assoc recipe :measurements measurements))))
 
+(defn- prepare-recipe [recipe]
+  (assoc recipe :recipe_id (str (:recipe_id recipe))))
+
 (defn create-recipe [recipe]
   (let [name (:name recipe)
         measurements (:measurements recipe)
@@ -108,13 +111,14 @@
                             (update-measurements rid measurements))))
       (catch SQLException e
         (process-exception e)))
-    (ok (get-full-recipe (db/get-recipe-by-name {:name name})))))
+    (ok (prepare-recipe (get-full-recipe (db/get-recipe-by-name {:name name}))))))
 
 (defn get-all-recipes []
-  (ok (doall (map get-full-recipe (db/get-recipes)))))
+  (ok (into [] (comp (map get-full-recipe)
+                     (map prepare-recipe)) (db/get-recipes))))
 
 (defn get-recipe-by-name [name]
-  (ok (get-full-recipe (db/get-recipe-by-name {:name name}))))
+  (ok (prepare-recipe (get-full-recipe (db/get-recipe-by-name {:name name})))))
 
 (defn delete-recipe-by-id [recipe_id]
   (with-transaction [*db*]
@@ -124,8 +128,11 @@
 
 ;; ----- ingredients ---------------------------
 
+(defn- prepare-ingredient [ingredient]
+  (assoc ingredient :ingredient_id (str (:ingredient_id ingredient))))
+
 (defn get-all-ingredients []
-  (ok (db/get-ingredients)))
+  (ok (doall (map prepare-ingredient (db/get-ingredients)))))
 
 (defn get-ingredient-by-name [name]
-  (ok (db/get-ingredient {:name name})))
+  (ok (prepare-ingredient (db/get-ingredient {:name name}))))

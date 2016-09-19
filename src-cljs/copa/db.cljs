@@ -3,7 +3,8 @@
             [schema.core :as s :include-macros true]))
 
 (s/defschema BaseEntity
-  {(s/optional-key :_id) s/Int})
+  {(s/optional-key :recipe_id)     s/Int
+   (s/optional-key :ingredient_id) s/Int})
 
 (s/defschema Measurement
   (merge BaseEntity {:ingredient            s/Str
