@@ -1,6 +1,5 @@
 (ns copa.core
   (:require [copa.handler :refer [app]]
-            ;[copa.handler :refer [app init destroy]]
             [copa.config :refer [env]]
             [mount.core :as mount]
             [clojure.tools.cli :as t]

@@ -5,7 +5,8 @@
             [copa.http.service :as s]
             [copa.config :refer [env]]
             [copa.db.core :refer [*db*] :as db]
-            [clojure.pprint :refer [pprint]]))
+            [clojure.pprint :refer [pprint]])
+  (:import (clojure.lang ExceptionInfo)))
 
 ;(def passw "bcrypt+sha512$a20e2dd70567d58028a5a108ce54b832$12$00a281eb5acd4dd11c37dffadc5f4aeb78288684029268a9")
 
@@ -65,6 +66,11 @@
           body (:body response)]
       (is (= 200 (:status response)))
       (is (= sample-recipe-resp body))))
+
+  (testing "create with same name fails with right exception"
+    (is (thrown-with-msg? ExceptionInfo
+                          #"Recipe name already exists"
+                          (s/create-recipe sample-recipe))))
 
   (testing "get all recipes works"
     (let [response (s/get-all-recipes)

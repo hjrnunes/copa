@@ -21,8 +21,8 @@
   (info "Connecting to " uri)
   (mg/connect-via-uri uri))
 
-(defstate mongo
-          :start (init-db uri))
+;(defstate mongo
+;          :start (init-db uri))
 
 (def users-col "users")
 (def recipes-col "recipes")

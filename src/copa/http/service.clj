@@ -7,7 +7,8 @@
             [cheshire.core :as json]
             [clojure.java.jdbc :as jdbc]
             [conman.core :refer [with-transaction]]
-            [copa.util :refer [filter-nil-values]]))
+            [copa.util :refer [filter-nil-values process-exception]])
+  (:import (java.sql SQLException)))
 
 (def token-exp-secs 3600)
 
@@ -59,7 +60,7 @@
 
 (defn- insert-measurement [recipe-id measurement]
   (ensure-ingredient (:ingredient measurement))
-  (let [res (db/create-measurement! (dissoc measurement :measurement_id ))
+  (let [res (db/create-measurement! (dissoc measurement :measurement_id))
         mid (get res (keyword "scope_identity()"))]
     (db/create-recipe-measurement! {:recipe_id      recipe-id
                                     :measurement_id mid})))
@@ -97,13 +98,16 @@
   (let [name (:name recipe)
         measurements (:measurements recipe)
         base-recipe (dissoc recipe :measurements)]
-    (with-transaction [*db*]
-                      (if (:recipe_id recipe)
-                        (do
-                          (update-recipe base-recipe)
-                          (update-measurements (:recipe_id recipe) measurements))
-                        (let [rid (insert-recipe base-recipe)]
-                          (update-measurements rid measurements))))
+    (try
+      (with-transaction [*db*]
+                        (if (:recipe_id recipe)
+                          (do
+                            (update-recipe base-recipe)
+                            (update-measurements (:recipe_id recipe) measurements))
+                          (let [rid (insert-recipe base-recipe)]
+                            (update-measurements rid measurements))))
+      (catch SQLException e
+        (process-exception e)))
     (ok (get-full-recipe (db/get-recipe-by-name {:name name})))))
 
 (defn get-all-recipes []
@@ -123,5 +127,5 @@
 (defn get-all-ingredients []
   (ok (db/get-ingredients)))
 
-(defn get-ingredient [name]
+(defn get-ingredient-by-name [name]
   (ok (db/get-ingredient {:name name})))

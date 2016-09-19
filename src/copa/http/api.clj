@@ -4,7 +4,7 @@
             [schema.core :as sc]
             [copa.http.schemas :as schemas]
             [copa.middleware :as middleware]
-            [copa.http.old_service :as s]))
+            [copa.http.service :as s]))
 
 (defapi service-routes
   (swagger-routes
@@ -40,9 +40,9 @@
       (s/create-recipe body))
 
     (DELETE "/recipes" []
-      :body [body {:_id sc/Str}]
+      :body [body {:id sc/Str}]
       :summary "Delete a recipe by id"
-      (s/delete-recipe-by-id (:_id body)))
+      (s/delete-recipe-by-id (:id body)))
 
     (GET "/recipe" []
       :query-params [name :- sc/Str]
