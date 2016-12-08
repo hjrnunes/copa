@@ -23,6 +23,8 @@ You will need [Leiningen][7] 2.0 or above installed.
 
 [7]: https://github.com/technomancy/leiningen
 
+#TODO SQL: profiles.clj have to have db urls
+
 You will also need an instance of MongoDB running locally. COPA tries to connect to
 
     mongodb://localhost/copa
