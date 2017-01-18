@@ -95,7 +95,7 @@
     (filter-nil-values (assoc recipe :measurements measurements))))
 
 (defn- prepare-recipe [recipe]
-  (assoc recipe :recipe_id (str (:recipe_id recipe))))
+  (update-in recipe [:recipe_id] str))
 
 (defn create-recipe [recipe]
   (let [name (:name recipe)
@@ -129,7 +129,7 @@
 ;; ----- ingredients ---------------------------
 
 (defn- prepare-ingredient [ingredient]
-  (assoc ingredient :ingredient_id (str (:ingredient_id ingredient))))
+  (update-in ingredient [:ingredient_id] str))
 
 (defn get-all-ingredients []
   (ok (doall (map prepare-ingredient (db/get-ingredients)))))

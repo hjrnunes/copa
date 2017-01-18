@@ -81,7 +81,7 @@
        (t lang :user/export-button)]]]]])
 
 (defn user-prefs []
-  (let [user (subscribe [:state :user])
+  (let [user (subscribe [:user])
         lang (subscribe [:lang])]
     (fn []
       [:div.row
@@ -97,8 +97,8 @@
           [export-data @lang]]]]])))
 
 (defn user-details []
-  (let [user (subscribe [:state :user])
-        recipes (subscribe [:user/recipes (:username @user)])
+  (let [user (subscribe [:user])
+        recipes (subscribe [:sorted-user-recipes])
         lang (subscribe [:lang])]
     (fn []
       [:div.row
@@ -164,7 +164,7 @@
        [user-form-template form lang]])))
 
 (defn admin-user-details []
-  (let [selected-user (subscribe [:state/selected-user])]
+  (let [selected-user (subscribe [:selected-user])]
     (fn []
       [:div.column
        [:div.row
@@ -200,8 +200,8 @@
                #(dispatch [:user/delete (:username @selected)])))
 
 (defn users-list-details []
-  (let [users (subscribe [:sorted/users])
-        selected-user (subscribe [:state/selected-user])]
+  (let [users (subscribe [:sorted-users])
+        selected-user (subscribe [:selected-user])]
     (fn []
       [:div.ui.two.column.relaxed.divided.grid
        [:div.four.wide.column
@@ -215,8 +215,8 @@
                  :new-user  user-form})
 
 (defn users-admin-panel []
-  (let [selected-user (subscribe [:state/selected-user])
-        active-users-pane (subscribe [:state :active-users-pane])
+  (let [selected-user (subscribe [:selected-user])
+        active-users-pane (subscribe [:active-users-pane])
         lang (subscribe [:lang])]
     (dispatch [:get/users])
     (fn []
@@ -242,7 +242,7 @@
            [users-list-details])]]])))
 
 (defn user-section []
-  (let [user (subscribe [:state :user])]
+  (let [user (subscribe [:user])]
     (fn []
       [:div.ui.grid
        [user-details]

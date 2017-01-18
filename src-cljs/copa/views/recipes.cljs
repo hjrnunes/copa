@@ -51,7 +51,7 @@
     (t @lang :recipes/edit-md-link)]])
 
 (defn edit-recipe []
-  (let [selected-recipe (subscribe [:state/selected-recipe])
+  (let [selected-recipe (subscribe [:selected-recipe])
         form (r/atom (or @selected-recipe {}))
         lang (subscribe [:lang])]
     (fn []
@@ -190,7 +190,7 @@
             ^{:key idx} [measurement-item measurement])]]]])))
 
 (defn recipe-list-item []
-  (let [selected-recipe (subscribe [:state/selected-recipe])
+  (let [selected-recipe (subscribe [:selected-recipe])
         selected? #(= % (:recipe_id @selected-recipe))]
     (fn [{:keys [recipe_id name description portions preparation categories measurements] :as recipe}]
       [:div.item
@@ -223,7 +223,7 @@
               (set! (.-value (dom/getElement "recsearch")) nil)))
 
 (defn recipe-search [ph-label]
-  (let [recipes (subscribe [:sorted/recipes])
+  (let [recipes (subscribe [:sorted-recipes])
         selected (r/atom nil)]
     (fn []
       [:div.ui.right.align.search.item
@@ -242,8 +242,8 @@
        [:div.results]])))
 
 (defn recipe-list []
-  (let [recipes (subscribe [:sorted/recipes])
-        selected-recipe (subscribe [:state/selected-recipe])
+  (let [recipes (subscribe [:sorted-recipes])
+        selected-recipe (subscribe [:selected-recipe])
         lang (subscribe [:lang])]
     (fn []
       [:div
@@ -269,7 +269,7 @@
                    :edit-recipe edit-recipe})
 
 (defn recipes-section []
-  (let [active-recipe-pane (subscribe [:state :active-recipe-pane])]
+  (let [active-recipe-pane (subscribe [:active-recipe-pane])]
     (fn []
       (if @active-recipe-pane
         [(@active-recipe-pane recipe-panes)]

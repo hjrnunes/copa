@@ -17,4 +17,4 @@
 (defn capitalize [s]
   (let [initial (str/slice s 0 1)
         res (str/slice s 1)]
-    (str (str/capitalize initial) res)))
+    (str (str/capital initial) res)))

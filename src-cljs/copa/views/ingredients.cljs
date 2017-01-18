@@ -8,8 +8,8 @@
             [copa.util :refer [t]]))
 
 (defn ingredient-details []
-  (let [ingredient (subscribe [:state/selected-ingredient])
-        recipes-index (subscribe [:index :recipes])
+  (let [ingredient (subscribe [:selected-ingredient])
+        recipes-index (subscribe [:index/recipes])
         lang (subscribe [:lang])]
     (fn []
       (when @ingredient
@@ -36,7 +36,7 @@
      (capitalize (:name ingredient))]]])
 
 (defn ingredient-list []
-  (let [ingredients (subscribe [:sorted/ingredients])]
+  (let [ingredients (subscribe [:sorted-ingredients])]
     (fn []
       [:div.ui.middle.aligned.selection.list
        (for [ingredient @ingredients]
