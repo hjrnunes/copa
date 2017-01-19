@@ -1,35 +1,35 @@
 (ns copa.handlers.ingredients
   (:require [copa.db :refer [default-value app-schema]]
             [copa.ajax :refer [load-auth-interceptor!]]
-            [re-frame.core :refer [register-handler dispatch path trim-v after]]
+            [re-frame.core :refer [reg-event-fx reg-event-db path trim-v after]]
+            [day8.re-frame.http-fx]
             [schema.core :as s]
             [plumbing.core :refer [map-vals]]
-            [ajax.core :refer [GET POST]]))
+            [ajax.core :refer [json-response-format]]))
 
 ;; get ingredients
-(register-handler
+(reg-event-fx
   :get/ingredients
-  (fn [db _]
-    (GET (str js/context "/api/ingredients")
-         {:response-format :json
-          :keywords?       true
-          :handler         #(dispatch [:response/get-ingredients %1])
-          :error-handler   #(dispatch [:data/error %1])})
-    (dispatch [:loading/start])
-    db))
+  (fn [_ _]
+    {:http-xhrio {:method          :get
+                  :uri             (str js/context "/api/ingredients")
+                  :response-format (json-response-format {:keywords? true}) ;; IMPORTANT!: You must provide this.
+                  :on-success      [:response/get-ingredients]
+                  :on-failure      [:data/error]}
+     :dispatch   [:loading/start]}))
 
 ;; get ingredients response
-(register-handler
+(reg-event-fx
   :response/get-ingredients
-  (fn [db [_ data]]
-    (dispatch [:loading/stop])
-    (-> db
-        (assoc-in [:data :ingredients] data)
-        (assoc-in [:index :ingredients] (map-vals first
-                                                  (group-by :ingredient_id data))))))
+  (fn [{:keys [db]} [_ data]]
+    {:db       (-> db
+                   (assoc-in [:data :ingredients] data)
+                   (assoc-in [:index :ingredients] (map-vals first
+                                                             (group-by :ingredient_id data))))
+     :dispatch [:loading/stop]}))
 
 ;; select ingredient
-(register-handler
+(reg-event-db
   :ingredient/select
   (fn [db [_ selected]]
     (-> db

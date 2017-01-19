@@ -91,8 +91,8 @@
          (:username @user)]]])))
 
 (defn copa-message []
-  (let [message (subscribe [:alert :message])
-        type (subscribe [:alert :type])]
+  (let [message (subscribe [:alert-message])
+        type (subscribe [:alert-type])]
     (fn []
       (when @message
         [:div.ui.two.column.centered.grid

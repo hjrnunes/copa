@@ -4,12 +4,6 @@
 
 ;; -- Subscription handlers and registration  ---------------------------------
 
-;; subscription for the whole db for debug purposes
-;(reg-sub-raw
-;  :db
-;  (fn [db _]
-;    (reaction @db)))
-
 ;; Layer 2
 (reg-sub
   :db
@@ -168,12 +162,3 @@
   :<- [:index/users]
   (fn [index _]
     (sort-by :username (vals index))))
-
-; recipes of user
-;(reg-sub-raw
-;  :user/recipes
-;  (fn [db [_ user]]
-;    (let [index (subscribe [:index/recipes])
-;          recipes (reaction (vals @index))
-;          user-recps (reaction (filter #(= (name user) (:user %))) @recipes)]
-;      (reaction (sort-by :name @user-recps)))))

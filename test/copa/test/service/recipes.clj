@@ -93,7 +93,6 @@
 (deftest test-update-recipe
   (testing "update works"
     (s/create-recipe sample-recipe)
-    (pprint updt-recipe)
     (let [response (s/create-recipe updt-recipe)
           body (:body response)]
       (is (= 200 (:status response)))

@@ -9,8 +9,7 @@
             [plumbing.core :refer [indexed]]
             [json-html.core :refer [edn->hiccup]]
             [copa.views.util :refer [menu-button]]
-            [copa.util :refer [vec-remove t capitalize]]
-            [copa.routes :refer [push-url-for]]))
+            [copa.util :refer [vec-remove t capitalize]]))
 
 (defn add-form-measurement [form]
   (when (get @form :measurement)
@@ -120,7 +119,7 @@
           [:button.ui.button
            {:type     "button"
             :on-click (handler-fn (reset! form {})
-                                  (dispatch [:state/update :active-recipe-pane :recipe-list]))}
+                                  (dispatch [:update/active-recipe-pane :recipe-list]))}
            (t @lang :recipes/edit-button-label-cancel)]
           [:div.or
            {:data-text (t @lang :recipes/edit-button-label-or)}]
@@ -195,8 +194,8 @@
     (fn [{:keys [recipe_id name description portions preparation categories measurements] :as recipe}]
       [:div.item
        (-> {:on-click #(if (selected? recipe_id)
-                        (dispatch [:push-url-for :recipes])
-                        (dispatch [:push-url-for :recipe :id recipe_id]))}
+                         (dispatch [:push-url-for :recipes])
+                         (dispatch [:push-url-for :recipe :id recipe_id]))}
            (merge (when (selected? recipe_id)
                     {:class "active"})))
        [:div.content

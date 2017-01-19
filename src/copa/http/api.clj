@@ -26,10 +26,6 @@
     :middleware [middleware/wrap-restricted]
     :tags ["api"]
 
-    ;(GET "/settings" []
-    ;  :summary "Get settings"
-    ;  (s/get-settings))
-
     (GET "/recipes" []
       :summary "Get all recipes"
       (s/get-all-recipes))
