@@ -1,25 +1,32 @@
 (ns copa.handlers.core
-  (:require [copa.db :refer [default-value app-schema]]
-            [copa.ajax :refer [load-auth-interceptor!]]
-            [re-frame.core :refer [reg-event-db reg-event-fx reg-fx path trim-v after]]
+  (:require [copa.ajax :refer [load-auth-interceptor!]]
+            [re-frame.core :refer [reg-event-db reg-event-fx reg-fx]]
             [day8.re-frame.http-fx]
             [plumbing.core :refer [map-vals]]
             [ajax.core :refer [json-response-format json-request-format]]
             [hodgepodge.core :refer [local-storage]]
+            [copa.db :refer [default-db]]
             [copa.handlers.ingredients]
             [copa.handlers.recipes]
             [copa.handlers.user]
-            [copa.routes :refer [push-url-for]]))
+            [copa.routes :refer [push-url-for]]
+            [copa.util :refer [common-interceptors]]))
 
 ;; -- loading -----------------------------------------------------------
+(reg-event-db
+  :init-db
+  (fn [_ _]
+    default-db))
 
 (reg-event-db
   :loading/start
+  common-interceptors
   (fn [db _]
     (update-in db [:state :loading] (fnil inc 0))))
 
 (reg-event-db
   :loading/stop
+  common-interceptors
   (fn [db _]
     (if (= (get-in db [:state :loading]) 0)
       db
@@ -32,7 +39,8 @@
 
 (reg-event-fx
   :push-url-for
-  (fn [_ [_ handler & params]]
+  common-interceptors
+  (fn [_ [handler & params]]
     {:push-url [handler params]}))
 
 (defn auth-error [db]
@@ -45,7 +53,8 @@
 
 (reg-event-fx
   :data/error
-  (fn [{:keys [db]} [_ data]]
+  common-interceptors
+  (fn [{:keys [db]} [data]]
     (println "Error" data)
     (if (= (:status data) 403)
       {:db       (auth-error db)
@@ -55,44 +64,52 @@
 
 (reg-event-db
   :alert/show
-  (fn [db [_ type message]]
+  common-interceptors
+  (fn [db [type message]]
     (assoc-in db [:state :alert] {:type    type
                                   :message message})))
 
 (reg-event-db
   :alert/hide
+  common-interceptors
   (fn [db _]
     (assoc-in db [:state :alert] {})))
 
 (reg-event-db
   :update/active-main-pane
-  (fn [db [_ value]]
+  common-interceptors
+  (fn [db [value]]
     (assoc-in db [:state :active-main-pane] value)))
 
 (reg-event-db
   :update/active-recipe-pane
-  (fn [db [_ value]]
+  common-interceptors
+  (fn [db [value]]
     (assoc-in db [:state :active-recipe-pane] value)))
 
 (reg-event-db
   :update/active-users-pane
-  (fn [db [_ value]]
+  common-interceptors
+  (fn [db [value]]
     (assoc-in db [:state :active-users-pane] value)))
 
 (reg-event-db
   :update/user
-  (fn [db [_ value]]
+  common-interceptors
+  (fn [db [value]]
     (assoc-in db [:state :user] value)))
 
 (reg-event-db
   :update/force-login
-  (fn [db [_ value]]
+  common-interceptors
+  (fn [db [value]]
     (assoc-in db [:state :force-login] value)))
 
 ;; login user
 (reg-event-fx
   :data/login
-  (fn [_ [_ form]]
+  common-interceptors
+  (fn [_ [form]]
     {:http-xhrio {:method          :post
                   :uri             (str js/context "/auth")
                   :params          {:username (:username form)
@@ -121,7 +138,8 @@
 ;; get auth token response
 (reg-event-fx
   :response/login
-  (fn [{:keys [db]} [_ data]]
+  common-interceptors
+  (fn [{:keys [db]} [data]]
     {:db                    (-> db
                                 (assoc-in [:state :token] (:token data))
                                 (assoc-in [:state :force-login] false)

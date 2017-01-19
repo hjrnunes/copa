@@ -20,7 +20,7 @@
 
 (defn init! []
   (load-interceptors!)
-  (dispatch-sync [:update/force-login true])
+  (dispatch-sync [:init-db])
   (when-let [token (get local-storage :copa-token)]
     (load-auth-interceptor! token)
     (dispatch-sync [:update/force-login false])

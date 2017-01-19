@@ -1,15 +1,14 @@
 (ns copa.handlers.ingredients
-  (:require [copa.db :refer [default-value app-schema]]
-            [copa.ajax :refer [load-auth-interceptor!]]
-            [re-frame.core :refer [reg-event-fx reg-event-db path trim-v after]]
+  (:require [re-frame.core :refer [reg-event-fx reg-event-db]]
             [day8.re-frame.http-fx]
-            [schema.core :as s]
             [plumbing.core :refer [map-vals]]
-            [ajax.core :refer [json-response-format]]))
+            [ajax.core :refer [json-response-format]]
+            [copa.util :refer [common-interceptors]]))
 
 ;; get ingredients
 (reg-event-fx
   :get/ingredients
+  common-interceptors
   (fn [_ _]
     {:http-xhrio {:method          :get
                   :uri             (str js/context "/api/ingredients")
@@ -21,7 +20,8 @@
 ;; get ingredients response
 (reg-event-fx
   :response/get-ingredients
-  (fn [{:keys [db]} [_ data]]
+  common-interceptors
+  (fn [{:keys [db]} [data]]
     {:db       (-> db
                    (assoc-in [:data :ingredients] data)
                    (assoc-in [:index :ingredients] (map-vals first
@@ -31,7 +31,8 @@
 ;; select ingredient
 (reg-event-db
   :ingredient/select
-  (fn [db [_ selected]]
+  common-interceptors
+  (fn [db [selected]]
     (-> db
         (assoc-in [:state :selected-ingredient] selected)
         (assoc-in [:state :active-ingredient-pane] :ingredient-details))))

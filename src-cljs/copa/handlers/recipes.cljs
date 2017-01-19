@@ -1,15 +1,15 @@
 (ns copa.handlers.recipes
-  (:require [copa.db :refer [default-value app-schema]]
-            [copa.ajax :refer [load-auth-interceptor!]]
-            [re-frame.core :refer [reg-event-fx reg-event-db path trim-v after]]
+  (:require [re-frame.core :refer [reg-event-fx reg-event-db]]
             [day8.re-frame.http-fx]
             [plumbing.core :refer [map-vals]]
             [ajax.core :refer [json-request-format json-response-format]]
-            [clojure.string :refer [lower-case]]))
+            [clojure.string :refer [lower-case]]
+            [copa.util :refer [common-interceptors]]))
 
 ;; get recipes
 (reg-event-fx
   :get/recipes
+  common-interceptors
   (fn [_ _]
     {:http-xhrio {:method          :get
                   :uri             (str js/context "/api/recipes")
@@ -22,7 +22,8 @@
 ;; get recipes response
 (reg-event-fx
   :response/get-recipes
-  (fn [{:keys [db]} [_ data]]
+  common-interceptors
+  (fn [{:keys [db]} [data]]
     {:db         (-> db
                      (assoc-in [:data :recipes] data)
                      (assoc-in [:index :recipes] (map-vals first
@@ -33,7 +34,8 @@
 ;; select recipe
 (reg-event-db
   :recipe/select
-  (fn [db [_ selected]]
+  common-interceptors
+  (fn [db [selected]]
     (-> db
         (assoc-in [:state :selected-recipe] selected)
         (assoc-in [:state :active-recipe-pane] :recipe-list))))
@@ -53,7 +55,8 @@
 ;; save recipe
 (reg-event-fx
   :recipe/save
-  (fn [{:keys [db]} [_ form]]
+  common-interceptors
+  (fn [{:keys [db]} [form]]
     (let [recipe (prep-recipe-form db form)]
       {:http-xhrio {:method          :post
                     :uri             (str js/context "/api/recipes")
@@ -67,7 +70,8 @@
 ;; recipe post result
 (reg-event-fx
   :response/recipe-save
-  (fn [{:keys [db]} [_ data]]
+  common-interceptors
+  (fn [{:keys [db]} [data]]
     (let [id (:recipe_id data)]
       {:db         (assoc-in db [:index :recipes id] data)
        :dispatch-n [[:loading/stop]
@@ -77,7 +81,8 @@
 ;; delete recipe
 (reg-event-fx
   :recipe/delete
-  (fn [_ [_ id]]
+  common-interceptors
+  (fn [_ [id]]
     (let [params {:recipe_id id}]
       {:http-xhrio {:method          :delete
                     :uri             (str js/context "/api/recipes")
@@ -91,7 +96,8 @@
 ;; recipe delete result
 (reg-event-fx
   :response/recipe-delete
-  (fn [{:keys [db]} [_ data]]
+  common-interceptors
+  (fn [{:keys [db]} [data]]
     (let [id (:recipe_id data)]
       {:db         (assoc-in db [:index :recipes] (dissoc (get-in db [:index :recipes]) id))
        :dispatch-n [[:loading/stop]

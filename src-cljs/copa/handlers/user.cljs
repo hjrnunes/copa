@@ -1,15 +1,14 @@
 (ns copa.handlers.user
-  (:require [copa.db :refer [default-value app-schema]]
-            [copa.ajax :refer [load-auth-interceptor!]]
-            [re-frame.core :refer [reg-event-fx reg-event-db path trim-v after]]
+  (:require [re-frame.core :refer [reg-event-fx reg-event-db]]
             [day8.re-frame.http-fx]
             [plumbing.core :refer [map-vals]]
-            [hodgepodge.core :refer [local-storage]]
-            [ajax.core :refer [json-request-format json-response-format]]))
+            [ajax.core :refer [json-request-format json-response-format]]
+            [copa.util :refer [common-interceptors]]))
 
 ;; get users
 (reg-event-fx
   :get/users
+  common-interceptors
   (fn [_ _]
     {:http-xhrio {:method          :get
                   :uri             (str js/context "/api/admin/users")
@@ -21,7 +20,8 @@
 ;; get users response
 (reg-event-fx
   :response/get-users
-  (fn [{:keys [db]} [_ data]]
+  common-interceptors
+  (fn [{:keys [db]} [data]]
     {:db       (assoc-in db [:index :users] (map-vals first
                                                       (group-by :username data)))
      :dispatch [:loading/stop]}))
@@ -29,14 +29,16 @@
 ;; select user
 (reg-event-db
   :user/select
-  (fn [db [_ selected]]
+  common-interceptors
+  (fn [db [selected]]
     (-> db
         (assoc-in [:state :selected-user] selected))))
 
 ;; save user
 (reg-event-fx
   :user/save
-  (fn [_ [_ form]]
+  common-interceptors
+  (fn [_ [form]]
     {:http-xhrio {:method          :post
                   :uri             (str js/context "/api/admin/users")
                   :params          form
@@ -49,7 +51,8 @@
 ;; user post result
 (reg-event-fx
   :response/user-save
-  (fn [{:keys [db]} [_ data]]
+  common-interceptors
+  (fn [{:keys [db]} [data]]
     (let [username (:username data)]
       {:db         (assoc-in db [:index :users username] data)
        :dispatch-n [[:loading/stop]
@@ -58,7 +61,8 @@
 ;; delete user
 (reg-event-fx
   :user/delete
-  (fn [_ [_ username]]
+  common-interceptors
+  (fn [_ [username]]
     (let [params {:username username}]
       {:http-xhrio {:method          :delete
                     :uri             (str js/context "/api/admin/users")
@@ -72,7 +76,8 @@
 ;; user delete result
 (reg-event-fx
   :response/user-delete
-  (fn [{:keys [db]} [_ data]]
+  common-interceptors
+  (fn [{:keys [db]} [data]]
     (let [username (:username data)]
       {:db         (assoc-in db [:index :users] (dissoc (get-in db [:index :users]) username))
        :dispatch-n [[:loading/stop]
@@ -81,7 +86,8 @@
 ;; update language pref
 (reg-event-fx
   :user/update-lang
-  (fn [_ [_ username lang]]
+  common-interceptors
+  (fn [_ [username lang]]
     (let [params {:lang     (name lang)
                   :username username}]
       {:http-xhrio {:method          :post
@@ -97,7 +103,8 @@
 ;; user update lang result
 (reg-event-fx
   :response/user-update-lang
-  (fn [{:keys [db]} [_ data]]
+  common-interceptors
+  (fn [{:keys [db]} [data]]
     (let [username (:username data)]
       {:db         (-> db
                        (assoc-in [:index :users username] data)
@@ -108,7 +115,8 @@
 ;; update password
 (reg-event-fx
   :user/update-password
-  (fn [_ [_ username current new confirm]]
+  common-interceptors
+  (fn [_ [username current new confirm]]
     (let [params {:username username
                   :current  current
                   :new      new
@@ -125,6 +133,7 @@
 ;; update password result
 (reg-event-fx
   :response/user-update-password
-  (fn [{:keys [db]} [_ data]]
+  common-interceptors
+  (fn [{:keys [db]} [data]]
     (let [username (:username data)]
       {:dispatch [:loading/stop]})))
