@@ -139,7 +139,7 @@
   :<- [:index/users]
   :<- [:user]
   (fn [[index user] _]
-    (filter #(= (name user) (:user %)) (vals index))))
+    (filter #(= (name (:username user)) (:user %)) (vals index))))
 
 ; sorted recipes of user
 (reg-sub

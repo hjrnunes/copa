@@ -3,6 +3,7 @@ CREATE TABLE recipes
  name VARCHAR(300) NOT NULL UNIQUE,
  description VARCHAR(300),
  portions VARCHAR(10),
+ duration VARCHAR(300),
  source VARCHAR(300),
  preparation VARCHAR NOT NULL,
  user VARCHAR(50),
