@@ -127,6 +127,5 @@
           [copa-message]
           (if @active-main-pane
             [(@active-main-pane main-panes)]
-            [recipes-section])
-          ]]
+            [recipes-section])]]
         [login]))))

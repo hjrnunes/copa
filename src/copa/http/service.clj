@@ -126,10 +126,16 @@
                     (db/delete-recipe! {:recipe_id recipe_id}))
   (ok recipe_id))
 
+(defn get-recipes-for-ingredient-names [ingredients]
+  (doall (map prepare-recipe (db/get-recipes-for-ingredient-name {:ingredients ingredients}))))
+
 ;; ----- ingredients ---------------------------
 
 (defn- prepare-ingredient [ingredient]
-  (update-in ingredient [:ingredient_id] str))
+  (let [recipes (get-recipes-for-ingredient-names [(:name ingredient)])]
+    (-> ingredient
+        (update-in [:ingredient_id] str)
+        (assoc :recipes (map :recipe_id recipes)))))
 
 (defn get-all-ingredients []
   (ok (doall (map prepare-ingredient (db/get-ingredients)))))

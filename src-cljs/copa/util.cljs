@@ -3,7 +3,7 @@
             [copa.lang.pt :as lang-pt]
             [copa.lang.en :as lang-en]
             [copa.db]
-            [re-frame.core :refer [trim-v after]]
+            [re-frame.core :refer [trim-v after subscribe]]
             [cljs.spec :as s]))
 
 (defn vec-remove
@@ -14,7 +14,9 @@
 (def langs {:pt lang-pt/lang
             :en lang-en/lang})
 
-(defn t [lang s]
+(defn t
+  "get the localized string for the given language"
+  [lang s]
   (get-in langs [lang s]))
 
 (defn capitalize [s]

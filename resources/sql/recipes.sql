@@ -41,3 +41,11 @@ WHERE recipe_id = :recipe_id
 -- :name clean-recipes-table :! :n
 -- :doc delete everything for testing
 DELETE FROM recipes
+
+-- :name get-recipes-for-ingredient-name :? :*
+-- :doc get recipes which contain
+SELECT recipes.* FROM recipes
+JOIN recipe_measurements ON recipes.recipe_id = recipe_measurements.recipe_id
+JOIN measurements ON recipe_measurements.measurement_id = measurements.measurement_id
+JOIN ingredients ON measurements.ingredient = ingredients.name
+WHERE ingredients.name IN (:v*:ingredients)
