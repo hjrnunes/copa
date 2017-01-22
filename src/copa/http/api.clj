@@ -26,19 +26,25 @@
     :middleware [middleware/wrap-restricted]
     :tags ["api"]
 
-    (GET "/recipes" []
-      :summary "Get all recipes"
-      (s/get-all-recipes))
+    (context "/recipes" []
+      (GET "/" []
+        :summary "Get all recipes"
+        (s/get-all-recipes))
 
-    (POST "/recipes" []
-      :body [body schemas/Recipe]
+      (POST "/" []
+        :body [body schemas/Recipe]
+        :summary "Create new recipe"
+        (s/create-recipe body))
+
+      (DELETE "/" []
+        :body [body {:recipe_id sc/Str}]
+        :summary "Delete a recipe by id"
+        (s/delete-recipe-by-id (:recipe_id body))))
+
+    (POST "/find" []
+      :body [body {:ingredients [sc/Str]}]
       :summary "Create new recipe"
-      (s/create-recipe body))
-
-    (DELETE "/recipes" []
-      :body [body {:recipe_id sc/Str}]
-      :summary "Delete a recipe by id"
-      (s/delete-recipe-by-id (:recipe_id body)))
+      (s/get-recipes-containing (:ingredients body)))
 
     (GET "/recipe" []
       :query-params [name :- sc/Str]
@@ -73,16 +79,17 @@
       :middleware [middleware/wrap-admin]
       :tags ["admin"]
 
-      (GET "/users" []
-        :summary "Get all users"
-        (s/get-users))
+      (context "/users" []
+        (GET "/" []
+          :summary "Get all users"
+          (s/get-users))
 
-      (POST "/users" []
-        :body [body schemas/User]
-        :summary "Create new user"
-        (s/create-user body))
+        (POST "/" []
+          :body [body schemas/User]
+          :summary "Create new user"
+          (s/create-user body))
 
-      (DELETE "/users" []
-        :body [body {:username sc/Str}]
-        :summary "Delete a user by username"
-        (s/delete-user (:username body))))))
+        (DELETE "/" []
+          :body [body {:username sc/Str}]
+          :summary "Delete a user by username"
+          (s/delete-user (:username body)))))))

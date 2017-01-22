@@ -4,8 +4,6 @@
             [buddy.hashers :as hashers]
             [ring.util.http-response :refer :all]
             [clj-time.core :as time]
-            [cheshire.core :as json]
-            [clojure.java.jdbc :as jdbc]
             [conman.core :refer [with-transaction]]
             [copa.util :refer [filter-nil-values process-exception]])
   (:import (java.sql SQLException)))
@@ -126,8 +124,11 @@
                     (db/delete-recipe! {:recipe_id recipe_id}))
   (ok recipe_id))
 
-(defn get-recipes-for-ingredient-names [ingredients]
+(defn- get-recipes-for-ingredient-names [ingredients]
   (doall (map prepare-recipe (db/get-recipes-for-ingredient-name {:ingredients ingredients}))))
+
+(defn get-recipes-containing [ingredients]
+  (ok (doall (map prepare-recipe (db/get-recipes-containing {:ingredients ingredients})))))
 
 ;; ----- ingredients ---------------------------
 

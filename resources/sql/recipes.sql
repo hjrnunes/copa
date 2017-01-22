@@ -49,3 +49,15 @@ JOIN recipe_measurements ON recipes.recipe_id = recipe_measurements.recipe_id
 JOIN measurements ON recipe_measurements.measurement_id = measurements.measurement_id
 JOIN ingredients ON measurements.ingredient = ingredients.name
 WHERE ingredients.name IN (:v*:ingredients)
+
+-- :name get-recipes-containing :? :*
+-- :doc get ids of recipes that contain all the ingredients passed
+SELECT recipe_id
+FROM (
+  SELECT recipe_id, ingredients.name FROM recipe_measurements
+  JOIN measurements ON recipe_measurements.measurement_id = measurements.measurement_id
+  JOIN ingredients ON measurements.ingredient = ingredients.name
+)
+WHERE name IN (:v*:ingredients)
+GROUP BY recipe_id
+--~ (str "HAVING COUNT(name) = " (count (:ingredients params)))
