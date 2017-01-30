@@ -127,8 +127,8 @@
 (defn- get-recipes-for-ingredient-names [ingredients]
   (doall (map prepare-recipe (db/get-recipes-for-ingredient-name {:ingredients ingredients}))))
 
-(defn get-recipes-containing [ingredients]
-  (ok (doall (map prepare-recipe (db/get-recipes-containing {:ingredients ingredients})))))
+(defn get-recipes-matching [ingredients]
+  (ok (doall (map prepare-recipe (db/get-recipes-matching {:ingredients ingredients})))))
 
 ;; ----- ingredients ---------------------------
 

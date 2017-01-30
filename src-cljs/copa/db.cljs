@@ -57,11 +57,12 @@
 (s/def ::force-login boolean?)
 (s/def ::loading int?)
 (s/def ::selected-recipe (s/nilable ::recipe_id))
-(s/def ::selected-recipe (s/nilable ::user))
+(s/def ::selected-user (s/nilable ::user))
+(s/def ::selected-ingredients-ids (s/coll-of string?))
 (s/def ::token (s/nilable string?))
 
 (s/def ::state (s/keys :req-un [::force-login]
-                       :opt-un [:state/user ::active-main-pane ::active-recipe-pane ::loading ::selected-recipe ::token ::selected-recipe]))
+                       :opt-un [:state/user ::active-main-pane ::active-recipe-pane ::loading ::selected-recipe ::token ::selected-recipe ::selected-user ::selected-ingredients-ids]))
 
 (s/def ::db (s/keys :req-un [::data ::index ::state]))
 
@@ -69,4 +70,5 @@
 (def default-db
   {:data  {:recipes {} :ingredients {}}
    :index {:recipes {} :ingredients {}}
-   :state {:force-login true}})
+   :state {:force-login              true
+           :selected-ingredients-ids #{}}})

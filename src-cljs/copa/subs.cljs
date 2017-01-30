@@ -78,6 +78,11 @@
     (get-in db [:state :selected-ingredient])))
 
 (reg-sub
+  :selected-ingredients-ids
+  (fn [db _]
+    (get-in db [:state :selected-ingredients-ids])))
+
+(reg-sub
   :selected-user-id
   (fn [db _]
     (get-in db [:state :selected-user])))
@@ -86,6 +91,11 @@
   :ingredients
   (fn [db _]
     (get-in db [:data :ingredients])))
+
+(reg-sub
+  :matched-recipes-ids
+  (fn [db _]
+    (get-in db [:state :matched-recipes-ids])))
 
 ;; Layer 3
 
@@ -119,6 +129,15 @@
   (fn [[selected index] _]
     (get index selected)))
 
+; selected ingredients for matcher
+(reg-sub
+  :selected-ingredients
+  :<- [:selected-ingredients-ids]
+  :<- [:index/ingredients]
+  (fn [[selected index] _]
+    (vec (for [id selected]
+           (get index id)))))
+
 ; selected user in admin users menu
 (reg-sub
   :selected-user
@@ -126,6 +145,15 @@
   :<- [:index/users]
   (fn [[selected index] _]
     (get index selected)))
+
+; matched recipes
+(reg-sub
+  :matched-recipes
+  :<- [:matched-recipes-ids]
+  :<- [:index/recipes]
+  (fn [[selected index] _]
+    (vec (for [id selected]
+           (get index id)))))
 
 ; recipes of user
 (reg-sub

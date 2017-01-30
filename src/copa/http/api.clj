@@ -41,10 +41,10 @@
         :summary "Delete a recipe by id"
         (s/delete-recipe-by-id (:recipe_id body))))
 
-    (POST "/find" []
+    (POST "/match" []
       :body [body {:ingredients [sc/Str]}]
       :summary "Create new recipe"
-      (s/get-recipes-containing (:ingredients body)))
+      (s/get-recipes-matching (:ingredients body)))
 
     (GET "/recipe" []
       :query-params [name :- sc/Str]

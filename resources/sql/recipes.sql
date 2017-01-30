@@ -50,8 +50,8 @@ JOIN measurements ON recipe_measurements.measurement_id = measurements.measureme
 JOIN ingredients ON measurements.ingredient = ingredients.name
 WHERE ingredients.name IN (:v*:ingredients)
 
--- :name get-recipes-containing :? :*
--- :doc get ids of recipes that contain all the ingredients passed
+-- :name get-recipes-matching :? :*
+-- :doc get ids of recipes that match all the ingredients passed
 SELECT recipe_id
 FROM (
   SELECT recipe_id, ingredients.name FROM recipe_measurements
