@@ -43,7 +43,7 @@
 
 (defn login []
   (let [form (r/atom {})
-        alert (subscribe [:state :alert])
+        alert (subscribe [:alert])
         lang (subscribe [:lang])]
     (fn []
       [:div.ui.middle.aligned.center.aligned.grid
@@ -68,9 +68,9 @@
    label])
 
 (defn copa-menu []
-  (let [user (subscribe [:state :user])
+  (let [user (subscribe [:user])
         lang (subscribe [:lang])
-        loading (subscribe [:loading])]
+        loading (subscribe [:loading?])]
     (fn [active-main-pane]
       [:div.ui.stackable.container.secondary.menu
        [:div.item
@@ -91,8 +91,8 @@
          (:username @user)]]])))
 
 (defn copa-message []
-  (let [message (subscribe [:alert :message])
-        type (subscribe [:alert :type])]
+  (let [message (subscribe [:alert-message])
+        type (subscribe [:alert-type])]
     (fn []
       (when @message
         [:div.ui.two.column.centered.grid
@@ -117,8 +117,8 @@
                  :db-state    db-state})
 
 (defn copa-app []
-  (let [active-main-pane (subscribe [:state :active-main-pane])
-        force-login (subscribe [:state :force-login])]
+  (let [active-main-pane (subscribe [:active-main-pane])
+        force-login (subscribe [:force-login])]
     (fn []
       (if-not @force-login
         [:div
@@ -127,6 +127,5 @@
           [copa-message]
           (if @active-main-pane
             [(@active-main-pane main-panes)]
-            [recipes-section])
-          ]]
+            [recipes-section])]]
         [login]))))

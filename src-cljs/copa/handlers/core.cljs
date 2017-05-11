@@ -1,34 +1,47 @@
 (ns copa.handlers.core
-  (:require [copa.db :refer [default-value app-schema]]
-            [copa.ajax :refer [load-auth-interceptor!]]
-            [re-frame.core :refer [register-handler dispatch path trim-v after]]
+  (:require [copa.ajax :refer [load-auth-interceptor!]]
+            [re-frame.core :refer [reg-event-db reg-event-fx reg-fx]]
+            [day8.re-frame.http-fx]
             [plumbing.core :refer [map-vals]]
-            [ajax.core :refer [GET POST]]
+            [ajax.core :refer [json-response-format json-request-format]]
             [hodgepodge.core :refer [local-storage]]
+            [copa.db :refer [default-db]]
             [copa.handlers.ingredients]
             [copa.handlers.recipes]
             [copa.handlers.user]
-            [copa.routes :refer [push-url-for]]))
+            [copa.routes :refer [push-url-for]]
+            [copa.util :refer [common-interceptors]]))
 
 ;; -- loading -----------------------------------------------------------
+(reg-event-db
+  :init-db
+  (fn [_ _]
+    default-db))
 
-(register-handler
+(reg-event-db
   :loading/start
+  common-interceptors
   (fn [db _]
     (update-in db [:state :loading] (fnil inc 0))))
 
-(register-handler
+(reg-event-db
   :loading/stop
+  common-interceptors
   (fn [db _]
     (if (= (get-in db [:state :loading]) 0)
       db
       (update-in db [:state :loading] (fnil dec 0)))))
 
-(register-handler
+(reg-fx
+  :push-url
+  (fn [[handler params]]
+    (apply push-url-for handler params)))
+
+(reg-event-fx
   :push-url-for
-  (fn [db [_ handler & params]]
-    (apply push-url-for handler params)
-    db))
+  common-interceptors
+  (fn [_ [handler & params]]
+    {:push-url [handler params]}))
 
 (defn auth-error [db]
   (println "Authentication Error: token expired")
@@ -38,87 +51,102 @@
       (assoc-in [:state :token] nil)
       (assoc-in [:state :force-login] true)))
 
-;; load data error
-(register-handler
+(reg-event-fx
   :data/error
-  (fn [db [_ data]]
-    (dispatch [:loading/stop])
+  common-interceptors
+  (fn [{:keys [db]} [data]]
     (println "Error" data)
     (if (= (:status data) 403)
-      (auth-error db)
-      (do
-        (dispatch [:alert/show :negative (or (get-in data [:response :message]) (:status-text data))])
-        db))))
+      {:db       (auth-error db)
+       :dispatch [:loading/stop]}
+      {:dispatch-n [[:loading/stop]
+                    [:alert/show :negative (or (get-in data [:response :message]) (:status-text data))]]})))
 
-
-;; -- alert -----------------------------------------------------------
-
-(register-handler
+(reg-event-db
   :alert/show
-  (fn [db [_ type message]]
+  common-interceptors
+  (fn [db [type message]]
     (assoc-in db [:state :alert] {:type    type
                                   :message message})))
 
-(register-handler
+(reg-event-db
   :alert/hide
+  common-interceptors
   (fn [db _]
     (assoc-in db [:state :alert] {})))
 
-;; generic update state handler
-(register-handler
-  :state/update
-  (fn [db [_ key value]]
-    (assoc-in db [:state key] value)))
+(reg-event-db
+  :update/active-main-pane
+  common-interceptors
+  (fn [db [value]]
+    (assoc-in db [:state :active-main-pane] value)))
 
-;; get settings
-(register-handler
-  :get/settings
-  (fn [db _]
-    (GET (str js/context "/api/settings")
-         {:response-format :json
-          :keywords?       true
-          :handler         #(dispatch [:response/get-settings %1])
-          :error-handler   #(dispatch [:data/error %1])})
-    (dispatch [:loading/start])
-    db))
+(reg-event-db
+  :update/active-recipe-pane
+  common-interceptors
+  (fn [db [value]]
+    (assoc-in db [:state :active-recipe-pane] value)))
 
-;; get settings response
-(register-handler
-  :response/get-settings
-  (fn [db [_ data]]
-    (dispatch [:loading/stop])
-    (-> db
-        (assoc-in [:settings] data))))
+(reg-event-db
+  :update/active-users-pane
+  common-interceptors
+  (fn [db [value]]
+    (assoc-in db [:state :active-users-pane] value)))
+
+(reg-event-db
+  :update/user
+  common-interceptors
+  (fn [db [value]]
+    (assoc-in db [:state :user] value)))
+
+(reg-event-db
+  :update/force-login
+  common-interceptors
+  (fn [db [value]]
+    (assoc-in db [:state :force-login] value)))
 
 ;; login user
-(register-handler
+(reg-event-fx
   :data/login
-  (fn [db [_ form]]
-    (POST (str js/context "/auth")
-          {:params          {:username (:username form)
-                             :password (:password form)}
-           :response-format :json
-           :keywords?       true
-           :handler         #(dispatch [:response/login %1])
-           :error-handler   #(dispatch [:data/error %1])})
-    (dispatch [:loading/start])
-    db))
+  common-interceptors
+  (fn [_ [form]]
+    {:http-xhrio {:method          :post
+                  :uri             (str js/context "/auth")
+                  :params          {:username (:username form)
+                                    :password (:password form)}
+                  :format          (json-request-format)
+                  :response-format (json-response-format {:keywords? true})
+                  :on-success      [:response/login]
+                  :on-failure      [:data/error]}
+     :dispatch   [:loading/start]}))
 
-(defn load-data! []
-  (dispatch [:get/settings])
-  (dispatch [:get/recipes])
-  (dispatch [:get/ingredients]))
+(reg-fx
+  :load-auth-interceptor
+  (fn [token]
+    (load-auth-interceptor! token)))
+
+(reg-fx
+  :store-token
+  (fn [token]
+    (assoc! local-storage :copa-token token)))
+
+(reg-fx
+  :store-user
+  (fn [user]
+    (assoc! local-storage :copa-user user)))
 
 ;; get auth token response
-(register-handler
+(reg-event-fx
   :response/login
-  (fn [db [_ data]]
-    (load-auth-interceptor! (:token data))
-    (load-data!)
-    (assoc! local-storage :copa-token (:token data))
-    (assoc! local-storage :copa-user (:user data))
-    (dispatch [:loading/stop])
-    (-> db
-        (assoc-in [:state :token] (:token data))
-        (assoc-in [:state :force-login] false)
-        (assoc-in [:state :user] (:user data)))))
+  common-interceptors
+  (fn [{:keys [db]} [data]]
+    {:db                    (-> db
+                                (assoc-in [:state :token] (:token data))
+                                (assoc-in [:state :force-login] false)
+                                (assoc-in [:state :user] (:user data)))
+     :load-auth-interceptor (:token data)
+     :store-token           (:token data)
+     :store-user            (:user data)
+     :dispatch-n            [[:loading/stop]
+                             [:get/recipes]
+                             [:get/ingredients]]}))

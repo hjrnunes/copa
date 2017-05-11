@@ -20,11 +20,11 @@
 
 (defn init! []
   (load-interceptors!)
-  (dispatch-sync [:state/update :force-login true])
+  (dispatch-sync [:init-db])
   (when-let [token (get local-storage :copa-token)]
     (load-auth-interceptor! token)
-    (dispatch-sync [:state/update :force-login false])
-    (dispatch-sync [:state/update :user (get local-storage :copa-user)])
+    (dispatch-sync [:update/force-login false])
+    (dispatch-sync [:update/user (get local-storage :copa-user)])
     (load-data))
   (reagent/render [copa-app]
                   (.getElementById js/document "app")))

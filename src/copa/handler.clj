@@ -7,32 +7,15 @@
             [taoensso.timbre :as timbre]
             [compojure.route :as route]
             [config.core :refer [env]]
-            [copa.config :refer [defaults]]
+            [copa.env :refer [defaults]]
             [mount.core :as mount]
-            [copa.db.core]))
+            [copa.db.mongo]))
 
 (timbre/refer-timbre)
 
-(defn init
-  "init will be called once when
-   app is deployed as a servlet on
-   an app server such as Tomcat
-   put any initialization code here"
-  []
-  (info "INIT")
-  ;(logger/init env)
-  (doseq [component (:started (mount/start))]
-    (info component "started"))
-  ((:init defaults)))
-
-(defn destroy
-  "destroy will be called when your application
-   shuts down, put any clean up code here"
-  []
-  (info "copa is shutting down...")
-  (doseq [component (:stopped (mount/stop))]
-    (info component "stopped"))
-  (info "shutdown complete!"))
+(mount/defstate init-app
+                :start ((or (:init defaults) identity))
+                :stop  ((or (:stop defaults) identity)))
 
 (def app-routes
   (routes

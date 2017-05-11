@@ -1,14 +1,18 @@
 # COPA - Culinary Operating Procedure Adviser
 
-COPA is a Clojure/Clojurescript recipe manager. It is a bit rough around the edges, and it's purpose is mainly for me to learn Clojurescript and related frontend technologies. But it's a fairly complete example of a Clojure/Clojurescript SPA with an API backend so it might be useful for beginners. Plus, accepts Markdown for the recipe preparation!
+COPA is a Clojure/Clojurescript recipe manager. It is a bit rough around the edges, and it's purpose is mainly for me to learn Clojurescript and related frontend technologies. But, it's a fairly complete example of a Clojure/Clojurescript SPA with an API backend so it might be useful for beginners.
 
-Started with a [Luminus][1] template.
+Possibly interesting features to more advanced coders are Markdown support for the recipes and frontend localization in Clojurescript (only English and Portuguese, but trivial to add more).
 
-It's Clojure on the backend with a Swagger API via [compojure-api][2].
+COPA is based on a [Luminus][1] template.
 
-Frontend is Clojurescript with [reagent][3] and [re-frame][4]. At one point it also included [re-com][5], but I since moved to Semantic-UI.
+It's Clojure on the backend with a Swagger API via [compojure-api][2]. Database access via [HugSQL][9] on an H2 database.
 
-Authentication is JWS via [buddy][6].
+Frontend is Clojurescript with [reagent][3] and [re-frame][4]. At one point it also included [re-com][5], but it's now Semantic-UI.
+
+URL based navigation with [pushy][7] and [bidi][8].
+
+Authentication is JWT via [buddy][6].
 
 [1]: http://www.luminusweb.net
 [2]: https://github.com/metosin/compojure-api
@@ -16,29 +20,39 @@ Authentication is JWS via [buddy][6].
 [4]: https://github.com/Day8/re-frame
 [5]: https://github.com/Day8/re-com
 [6]: https://github.com/funcool/buddy
+[7]: https://github.com/funcool/buddy
+[8]: https://github.com/funcool/buddy
+[9]: https://github.com/funcool/buddy
+
+#todo fix links
 
 ## Prerequisites
 
-You will need [Leiningen][7] 2.0 or above installed.
+You will need [Leiningen][10] 2.0 or above installed.
 
-[7]: https://github.com/technomancy/leiningen
+[10]: https://github.com/technomancy/leiningen
 
-You will also need an instance of MongoDB running locally. COPA tries to connect to
+## Initalization
 
-    mongodb://localhost/copa
+You'll need to run 
+    
+    lein migratus
+    
+to execute the migrations that initialize the H2 database on the backend. 
 
-You'll need to manually create the first admin user. On the mongo shell do:
+The H2 database location can be configured in ```profiles.clj``` like this:
+ 
+ ```clojure
+ {:profiles/dev  {:env {:database-url "jdbc:h2:./copa;MVCC=true"}}
+  :profiles/test {:env {:database-url "jdbc:h2:./copa_test;MVCC=true"}}}
+ ```
 
-    use copa
-    db.users.insert({"username": "your_username", "password": "your_encrypted_password", "admin": true})
+There should be a default user with which you can login initially: 
 
-You'll need to encrypt the password as Copa encrypts with buddy's default bcrypt+sha512. One way of easily do that is, in your REPL:
+```username: admin```
 
-```clojure
-(require '[buddy.hashers :as h])
-(h/encrypt "your password")
-=>"bcrypt+sha512$50262d113ba346aa7c3fdd2f3ab0d16c$12$82d784d46bbcba663344865a98129cb30f46bcb5a3912e30"
-```
+```password: admin```
+
 
 ## Running
 
@@ -68,7 +82,7 @@ COPA will start on localhost:3000
 
 The MIT License (MIT)
 
-Copyright © 2016 Henrique Nunes
+Copyright © 2017 Henrique Nunes
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of
 this software and associated documentation files (the "Software"), to deal in

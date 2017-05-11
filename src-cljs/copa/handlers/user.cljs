@@ -1,138 +1,139 @@
 (ns copa.handlers.user
-  (:require [copa.db :refer [default-value app-schema]]
-            [copa.ajax :refer [load-auth-interceptor!]]
-            [re-frame.core :refer [register-handler dispatch path trim-v after]]
+  (:require [re-frame.core :refer [reg-event-fx reg-event-db]]
+            [day8.re-frame.http-fx]
             [plumbing.core :refer [map-vals]]
-            [hodgepodge.core :refer [local-storage]]
-            [ajax.core :refer [GET POST DELETE]]))
+            [ajax.core :refer [json-request-format json-response-format]]
+            [copa.util :refer [common-interceptors]]))
 
 ;; get users
-(register-handler
+(reg-event-fx
   :get/users
-  (fn [db _]
-    (GET (str js/context "/api/admin/users")
-         {:response-format :json
-          :keywords?       true
-          :handler         #(dispatch [:response/get-users %1])
-          :error-handler   #(dispatch [:data/error %1])})
-    (dispatch [:loading/start])
-    db))
+  common-interceptors
+  (fn [_ _]
+    {:http-xhrio {:method          :get
+                  :uri             (str js/context "/api/admin/users")
+                  :response-format (json-response-format {:keywords? true})
+                  :on-success      [:response/get-users]
+                  :on-failure      [:data/error]}
+     :dispatch   [:loading/start]}))
 
 ;; get users response
-(register-handler
+(reg-event-fx
   :response/get-users
-  (fn [db [_ data]]
-    (dispatch [:loading/stop])
-    (-> db
-        (assoc-in [:index :users] (map-vals first
-                                            (group-by :username data))))))
+  common-interceptors
+  (fn [{:keys [db]} [data]]
+    {:db       (assoc-in db [:index :users] (map-vals first
+                                                      (group-by :username data)))
+     :dispatch [:loading/stop]}))
 
 ;; select user
-(register-handler
+(reg-event-db
   :user/select
-  (fn [db [_ selected]]
+  common-interceptors
+  (fn [db [selected]]
     (-> db
         (assoc-in [:state :selected-user] selected))))
 
 ;; save user
-(register-handler
+(reg-event-fx
   :user/save
-  (fn [db [_ form]]
-    (let []
-      (POST (str js/context "/api/admin/users")
-            {:response-format :json
-             :params          form
-             :keywords?       true
-             :handler         #(dispatch [:response/user-save %1])
-             :error-handler   #(dispatch [:data/error %1])})
-      (dispatch [:loading/start])
-      db)))
+  common-interceptors
+  (fn [_ [form]]
+    {:http-xhrio {:method          :post
+                  :uri             (str js/context "/api/admin/users")
+                  :params          form
+                  :format          (json-request-format)
+                  :response-format (json-response-format {:keywords? true})
+                  :on-success      [:response/user-save]
+                  :on-failure      [:data/error]}
+     :dispatch   [:loading/start]}))
 
 ;; user post result
-(register-handler
+(reg-event-fx
   :response/user-save
-  (fn [db [_ data]]
-    (let [username (:username data)
-          db (-> db
-                 ;(update-in [:data :recipes] conj data)
-                 (assoc-in [:index :users username] data))]
-      (dispatch [:loading/stop])
-      (dispatch [:user/select username])
-      db)))
+  common-interceptors
+  (fn [{:keys [db]} [data]]
+    (let [username (:username data)]
+      {:db         (assoc-in db [:index :users username] data)
+       :dispatch-n [[:loading/stop]
+                    [:user/select username]]})))
 
 ;; delete user
-(register-handler
+(reg-event-fx
   :user/delete
-  (fn [db [_ username]]
+  common-interceptors
+  (fn [_ [username]]
     (let [params {:username username}]
-      (DELETE (str js/context "/api/admin/users")
-              {:response-format :json
-               :params          params
-               :keywords?       true
-               :handler         #(dispatch [:response/user-delete %1])
-               :error-handler   #(dispatch [:data/error %1])})
-      (dispatch [:loading/start])
-      db)))
+      {:http-xhrio {:method          :delete
+                    :uri             (str js/context "/api/admin/users")
+                    :params          params
+                    :format          (json-request-format)
+                    :response-format (json-response-format {:keywords? true})
+                    :on-success      [:response/user-delete]
+                    :on-failure      [:data/error]}
+       :dispatch   [:loading/start]})))
 
 ;; user delete result
-(register-handler
+(reg-event-fx
   :response/user-delete
-  (fn [db [_ data]]
-    (let [username (:username data)
-          db (-> db
-                 (assoc-in [:index :users] (dissoc (get-in db [:index :users]) username)))]
-      (dispatch [:loading/stop])
-      (dispatch [:user/select nil])
-      db)))
+  common-interceptors
+  (fn [{:keys [db]} [data]]
+    (let [username (:username data)]
+      {:db         (assoc-in db [:index :users] (dissoc (get-in db [:index :users]) username))
+       :dispatch-n [[:loading/stop]
+                    [:user/select nil]]})))
 
 ;; update language pref
-(register-handler
+(reg-event-fx
   :user/update-lang
-  (fn [db [_ username lang]]
+  common-interceptors
+  (fn [_ [username lang]]
     (let [params {:lang     (name lang)
                   :username username}]
-      (POST (str js/context "/api/user/lang")
-            {:response-format :json
-             :params          params
-             :keywords?       true
-             :handler         #(dispatch [:response/user-update-lang %1])
-             :error-handler   #(dispatch [:data/error %1])})
-      (dispatch [:loading/start])
-      db)))
+      {:http-xhrio {:method          :post
+                    :uri             (str js/context "/api/user/lang")
+                    :params          params
+                    :format          (json-request-format)
+                    :response-format (json-response-format {:keywords? true})
+                    :on-success      [:response/user-update-lang]
+                    :on-failure      [:data/error]}
+       :dispatch   [:loading/start]})))
 
-;; user delete result
-(register-handler
+
+;; user update lang result
+(reg-event-fx
   :response/user-update-lang
-  (fn [db [_ data]]
-    (let [username (:username data)
-          db (-> db
-                 (assoc-in [:index :users username] data)
-                 (assoc-in [:state :user] data))]
-      (assoc! local-storage :copa-user data)
-      (dispatch [:loading/stop])
-      db)))
+  common-interceptors
+  (fn [{:keys [db]} [data]]
+    (let [username (:username data)]
+      {:db         (-> db
+                       (assoc-in [:index :users username] data)
+                       (assoc-in [:state :user] data))
+       :store-user data
+       :dispatch   [:loading/stop]})))
 
 ;; update password
-(register-handler
+(reg-event-fx
   :user/update-password
-  (fn [db [_ username current new confirm]]
+  common-interceptors
+  (fn [_ [username current new confirm]]
     (let [params {:username username
                   :current  current
                   :new      new
                   :confirm  confirm}]
-      (POST (str js/context "/api/user/password")
-            {:response-format :json
-             :params          params
-             :keywords?       true
-             :handler         #(dispatch [:response/user-update-password %1])
-             :error-handler   #(dispatch [:data/error %1])})
-      (dispatch [:loading/start])
-      db)))
+      {:http-xhrio {:method          :post
+                    :uri             (str js/context "/api/user/password")
+                    :params          params
+                    :format          (json-request-format)
+                    :response-format (json-response-format {:keywords? true})
+                    :on-success      [:response/user-update-password]
+                    :on-failure      [:data/error]}
+       :dispatch   [:loading/start]})))
 
 ;; update password result
-(register-handler
+(reg-event-fx
   :response/user-update-password
-  (fn [db [_ data]]
+  common-interceptors
+  (fn [{:keys [db]} [data]]
     (let [username (:username data)]
-      (dispatch [:loading/stop])
-      db)))
+      {:dispatch [:loading/stop]})))

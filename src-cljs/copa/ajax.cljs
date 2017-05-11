@@ -2,22 +2,9 @@
   (:require [ajax.core :as ajax]
             [cuerdas.core :as str]))
 
-;(defn should-apply-csrf-token [request]
-;  (and (not (= "GET" (:method request)))
-;       (or (str/starts-with? (:uri request) "/api")
-;           (str/starts-with? (:uri request) "/auth")
-;           (str/starts-with? (:uri request) "/install"))))
-
 (defn default-headers [request]
   (-> request
-      (update :uri #(str js/context %))
-      ;(update
-      ;  :headers
-      ;  #(merge
-      ;    %
-      ;    (when (should-apply-csrf-token request)
-      ;      {"x-csrf-token" js/csrfToken})))
-      ))
+      (update :uri #(str js/context %))))
 
 (defn load-interceptors! []
   (swap! ajax/default-interceptors

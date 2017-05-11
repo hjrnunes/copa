@@ -34,6 +34,9 @@
    :recipes/edit-md-tt                 "This field accepts Markdown syntax. See the link for details."
    :recipes/edit-md-link               "Styling with Markdown is supported"
 
+   :ingredients/menu-search-ph         "Search ingredient..."
+   :ingredients/matched-none           "No recipes matched :("
+   :ingredients/matched                "matched"
    :ingredients/is-in-recipes          "Goes in the following recipes:"
 
    :user/recipes                       "Recipes"

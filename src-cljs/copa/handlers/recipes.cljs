@@ -1,38 +1,41 @@
 (ns copa.handlers.recipes
-  (:require [copa.db :refer [default-value app-schema]]
-            [copa.ajax :refer [load-auth-interceptor!]]
-            [re-frame.core :refer [register-handler dispatch path trim-v after]]
+  (:require [re-frame.core :refer [reg-event-fx reg-event-db]]
+            [day8.re-frame.http-fx]
             [plumbing.core :refer [map-vals]]
-            [ajax.core :refer [GET POST DELETE]]
-            [clojure.string :refer [lower-case]]))
+            [ajax.core :refer [json-request-format json-response-format]]
+            [clojure.string :refer [lower-case]]
+            [copa.util :refer [common-interceptors]]))
 
 ;; get recipes
-(register-handler
+(reg-event-fx
   :get/recipes
-  (fn [db _]
-    (GET (str js/context "/api/recipes")
-         {:response-format :json
-          :keywords?       true
-          :handler         #(dispatch [:response/get-recipes %1])
-          :error-handler   #(dispatch [:data/error %1])})
-    (dispatch [:loading/start])
-    db))
+  common-interceptors
+  (fn [_ _]
+    {:http-xhrio {:method          :get
+                  :uri             (str js/context "/api/recipes")
+                  :response-format (json-response-format {:keywords? true})
+                  :on-success      [:response/get-recipes]
+                  :on-failure      [:data/error]
+                  }
+     :dispatch   [:loading/start]}))
 
 ;; get recipes response
-(register-handler
+(reg-event-fx
   :response/get-recipes
-  (fn [db [_ data]]
-    (dispatch [:loading/stop])
-    (dispatch [:get/ingredients])
-    (-> db
-        (assoc-in [:data :recipes] data)
-        (assoc-in [:index :recipes] (map-vals first
-                                              (group-by :_id data))))))
+  common-interceptors
+  (fn [{:keys [db]} [data]]
+    {:db         (-> db
+                     (assoc-in [:data :recipes] data)
+                     (assoc-in [:index :recipes] (map-vals first
+                                                           (group-by :recipe_id data))))
+     :dispatch-n [[:loading/stop]
+                  [:get/ingredients]]}))
 
 ;; select recipe
-(register-handler
+(reg-event-db
   :recipe/select
-  (fn [db [_ selected]]
+  common-interceptors
+  (fn [db [selected]]
     (-> db
         (assoc-in [:state :selected-recipe] selected)
         (assoc-in [:state :active-recipe-pane] :recipe-list))))
@@ -50,52 +53,52 @@
                                          [:unit unit])])))))
 
 ;; save recipe
-(register-handler
+(reg-event-fx
   :recipe/save
-  (fn [db [_ form]]
+  common-interceptors
+  (fn [{:keys [db]} [form]]
     (let [recipe (prep-recipe-form db form)]
-      (POST (str js/context "/api/recipes")
-            {:response-format :json
-             :params          recipe
-             :keywords?       true
-             :handler         #(dispatch [:response/recipe-save %1])
-             :error-handler   #(dispatch [:data/error %1])})
-      (dispatch [:loading/start])
-      db)))
+      {:http-xhrio {:method          :post
+                    :uri             (str js/context "/api/recipes")
+                    :params          recipe
+                    :format          (json-request-format)
+                    :response-format (json-response-format {:keywords? true})
+                    :on-success      [:response/recipe-save]
+                    :on-failure      [:data/error]}
+       :dispatch   [:loading/start]})))
 
 ;; recipe post result
-(register-handler
+(reg-event-fx
   :response/recipe-save
-  (fn [db [_ data]]
-    (let [id (:_id data)
-          db (-> db
-                 (assoc-in [:index :recipes id] data))]
-      (dispatch [:get/ingredients])
-      (dispatch [:loading/stop])
-      (dispatch [:push-url-for :recipe :id id])
-      db)))
+  common-interceptors
+  (fn [{:keys [db]} [data]]
+    (let [id (:recipe_id data)]
+      {:db         (assoc-in db [:index :recipes id] data)
+       :dispatch-n [[:loading/stop]
+                    [:get/ingredients]
+                    [:push-url-for :recipe :id id]]})))
 
 ;; delete recipe
-(register-handler
+(reg-event-fx
   :recipe/delete
-  (fn [db [_ id]]
-    (let [params {:_id id}]
-      (DELETE (str js/context "/api/recipes")
-              {:response-format :json
-               :params          params
-               :keywords?       true
-               :handler         #(dispatch [:response/recipe-delete %1])
-               :error-handler   #(dispatch [:data/error %1])})
-      (dispatch [:loading/start])
-      db)))
+  common-interceptors
+  (fn [_ [id]]
+    (let [params {:recipe_id id}]
+      {:http-xhrio {:method          :delete
+                    :uri             (str js/context "/api/recipes")
+                    :params          params
+                    :format          (json-request-format)
+                    :response-format (json-response-format {:keywords? true})
+                    :on-success      [:response/recipe-delete]
+                    :on-failure      [:data/error]}
+       :dispatch   [:loading/start]})))
 
 ;; recipe delete result
-(register-handler
+(reg-event-fx
   :response/recipe-delete
-  (fn [db [_ data]]
-    (let [id (:_id data)
-          db (-> db
-                 (assoc-in [:index :recipes] (dissoc (get-in db [:index :recipes]) id)))]
-      (dispatch [:loading/stop])
-      (dispatch [:recipe/select nil])
-      db)))
+  common-interceptors
+  (fn [{:keys [db]} [data]]
+    (let [id (:recipe_id data)]
+      {:db         (assoc-in db [:index :recipes] (dissoc (get-in db [:index :recipes]) id))
+       :dispatch-n [[:loading/stop]
+                    [:recipe/select nil]]})))

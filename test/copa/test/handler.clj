@@ -1,7 +1,8 @@
 (ns copa.test.handler
   (:require [clojure.test :refer :all]
             [ring.mock.request :refer :all]
-            [copa.handler :refer :all]))
+            [copa.handler :refer [app]]
+            ))
 
 (deftest test-app
   (testing "main route"

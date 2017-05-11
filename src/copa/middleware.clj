@@ -12,7 +12,7 @@
             [buddy.auth.accessrules :refer [restrict]]
             [buddy.auth :refer [authenticated?]]
             [copa.layout :refer [*identity*]]
-            [copa.config :refer [defaults]]
+            [copa.env :refer [defaults]]
             [copa.auth :refer [jws-backend]])
   (:import [javax.servlet ServletContext]))
 

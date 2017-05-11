@@ -9,8 +9,7 @@
             [plumbing.core :refer [indexed]]
             [json-html.core :refer [edn->hiccup]]
             [copa.views.util :refer [menu-button]]
-            [copa.util :refer [vec-remove t capitalize]]
-            [copa.routes :refer [push-url-for]]))
+            [copa.util :refer [vec-remove t capitalize]]))
 
 (defn add-form-measurement [form]
   (when (get @form :measurement)
@@ -22,7 +21,7 @@
 
 (defn recipe-form-measurent-item []
   (let [mouse-over? (r/atom false)]
-    (fn [form key {:keys [_id ingredient quantity unit]}]
+    (fn [form key {:keys [recipe_id ingredient quantity unit]}]
       [:div.item
        {:on-mouse-over (handler-fn (reset! mouse-over? true))
         :on-mouse-out  (handler-fn (reset! mouse-over? false))}
@@ -51,7 +50,7 @@
     (t @lang :recipes/edit-md-link)]])
 
 (defn edit-recipe []
-  (let [selected-recipe (subscribe [:state/selected-recipe])
+  (let [selected-recipe (subscribe [:selected-recipe])
         form (r/atom (or @selected-recipe {}))
         lang (subscribe [:lang])]
     (fn []
@@ -120,7 +119,7 @@
           [:button.ui.button
            {:type     "button"
             :on-click (handler-fn (reset! form {})
-                                  (dispatch [:state/update :active-recipe-pane :recipe-list]))}
+                                  (dispatch [:update/active-recipe-pane :recipe-list]))}
            (t @lang :recipes/edit-button-label-cancel)]
           [:div.or
            {:data-text (t @lang :recipes/edit-button-label-or)}]
@@ -132,7 +131,7 @@
 
 (defn measurement-item []
   (let []
-    (fn [{:keys [_id ingredient quantity unit] :as measurement}]
+    (fn [{:keys [ingredient quantity unit] :as measurement}]
       [:div.item
        (when quantity
          [:div.right.floated.content
@@ -152,7 +151,7 @@
 ;; recipe details ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (defn recipe-details []
   (let [lang (subscribe [:lang])]
-    (fn [{:keys [_id name description source duration portions preparation user categories measurements]}]
+    (fn [{:keys [name description source duration portions preparation user categories measurements]}]
       [:div.ui.two.column.relaxed.divided.grid
        [:div.row
         [:div.twelve.wide.column
@@ -190,14 +189,14 @@
             ^{:key idx} [measurement-item measurement])]]]])))
 
 (defn recipe-list-item []
-  (let [selected-recipe (subscribe [:state/selected-recipe])
-        selected? #(= % (:_id @selected-recipe))]
-    (fn [{:keys [_id name description portions preparation categories measurements] :as recipe}]
+  (let [selected-recipe (subscribe [:selected-recipe])
+        selected? #(= % (:recipe_id @selected-recipe))]
+    (fn [{:keys [recipe_id name description portions preparation categories measurements] :as recipe}]
       [:div.item
-       (-> {:on-click #(if (selected? _id)
-                        (dispatch [:push-url-for :recipes])
-                        (dispatch [:push-url-for :recipe :id _id]))}
-           (merge (when (selected? _id)
+       (-> {:on-click #(if (selected? recipe_id)
+                         (dispatch [:push-url-for :recipes])
+                         (dispatch [:push-url-for :recipe :id recipe_id]))}
+           (merge (when (selected? recipe_id)
                     {:class "active"})))
        [:div.content
         (capitalize name)]])))
@@ -209,13 +208,13 @@
 
 (defn edit-recipe-button [button-label selected]
   (menu-button :i.edit.icon "yellow" button-label
-               #(dispatch [:push-url-for :recipe-edit :id (:_id @selected)])))
+               #(dispatch [:push-url-for :recipe-edit :id (:recipe_id @selected)])))
 
 (defn delete-recipe-button [button-label selected]
   (menu-button :i.trash.icon "red" button-label
                (handler-fn
                  (dispatch [:push-url-for :recipes])
-                 (dispatch [:recipe/delete (:_id @selected)]))))
+                 (dispatch [:recipe/delete (:recipe_id @selected)]))))
 
 (defn recipe-search-dispatch [selected]
   (handler-fn (when selected
@@ -223,7 +222,7 @@
               (set! (.-value (dom/getElement "recsearch")) nil)))
 
 (defn recipe-search [ph-label]
-  (let [recipes (subscribe [:sorted/recipes])
+  (let [recipes (subscribe [:sorted-recipes])
         selected (r/atom nil)]
     (fn []
       [:div.ui.right.align.search.item
@@ -236,14 +235,14 @@
                                                                        :fields       {"description" "description"
                                                                                       "title"       "name"}
                                                                        :onSelect     (fn [result _]
-                                                                                       (reset! selected (:_id (js->clj result :keywordize-keys true))))}))))}]
+                                                                                       (reset! selected (:recipe_id (js->clj result :keywordize-keys true))))}))))}]
         [:i.search.link.icon
          {:on-click (recipe-search-dispatch @selected)}]]
        [:div.results]])))
 
 (defn recipe-list []
-  (let [recipes (subscribe [:sorted/recipes])
-        selected-recipe (subscribe [:state/selected-recipe])
+  (let [recipes (subscribe [:sorted-recipes])
+        selected-recipe (subscribe [:selected-recipe])
         lang (subscribe [:lang])]
     (fn []
       [:div
@@ -260,7 +259,7 @@
          [:div.four.wide.column
           [:div.ui.middle.aligned.selection.list
            (for [recipe @recipes]
-             ^{:key (:_id recipe)} [recipe-list-item recipe])]]
+             ^{:key (:recipe_id recipe)} [recipe-list-item recipe])]]
          [:div.twelve.wide.column
           (when @selected-recipe
             [recipe-details @selected-recipe])]]]])))
@@ -269,7 +268,7 @@
                    :edit-recipe edit-recipe})
 
 (defn recipes-section []
-  (let [active-recipe-pane (subscribe [:state :active-recipe-pane])]
+  (let [active-recipe-pane (subscribe [:active-recipe-pane])]
     (fn []
       (if @active-recipe-pane
         [(@active-recipe-pane recipe-panes)]

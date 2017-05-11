@@ -34,6 +34,9 @@
    :recipes/edit-md-tt                 "Este campo aceita formatação com Markdown. Ver ligação para ajuda."
    :recipes/edit-md-link               "Pode usar Markdown"
 
+   :ingredients/menu-search-ph         "Procurar ingrediente..."
+   :ingredients/matched-none           "Nada :("
+   :ingredients/matched                "encontradas"
    :ingredients/is-in-recipes          "Entra nas seguintes receitas:"
 
    :user/recipes                       "Receitas"

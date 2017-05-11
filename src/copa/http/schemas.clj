@@ -4,7 +4,7 @@
             [ring.swagger.schema :as rs :refer [describe]]))
 
 (s/defschema BaseEntity
-  {(s/optional-key :_id) (describe s/Str "Database id")})
+  {(s/optional-key :recipe_id) (describe s/Str "Database id")})
 
 (s/defschema Measurement
   (merge BaseEntity {:ingredient                (describe s/Str "Measurement ingredient")

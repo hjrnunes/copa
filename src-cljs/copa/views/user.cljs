@@ -9,7 +9,8 @@
             [json-html.core :refer [edn->hiccup]]
             [copa.routes :refer [url-for]]
             [copa.views.util :refer [menu-button]]
-            [copa.util :refer [vec-remove t]]))
+            [copa.util :refer [vec-remove t]]
+            [cljs.pprint :refer [pprint]]))
 
 (defn language-pref [user lang]
   (let [sel-lang (r/atom nil)]
@@ -81,7 +82,7 @@
        (t lang :user/export-button)]]]]])
 
 (defn user-prefs []
-  (let [user (subscribe [:state :user])
+  (let [user (subscribe [:user])
         lang (subscribe [:lang])]
     (fn []
       [:div.row
@@ -97,8 +98,8 @@
           [export-data @lang]]]]])))
 
 (defn user-details []
-  (let [user (subscribe [:state :user])
-        recipes (subscribe [:user/recipes (:username @user)])
+  (let [user (subscribe [:user])
+        recipes (subscribe [:sorted-user-recipes])
         lang (subscribe [:lang])]
     (fn []
       [:div.row
@@ -146,14 +147,14 @@
         [:button.ui.button
          {:type     "button"
           :on-click (handler-fn (reset! form {:admin false})
-                                (dispatch [:state/update :active-users-pane :user-list]))}
+                                (dispatch [:update/active-users-pane :user-list]))}
          (t @lang :admin/new-user-button-label-cancel)]
         [:div.or
          {:data-text (t @lang :admin/new-user-button-label-or)}]
         [:button.ui.positive.button
          {:type     "button"
           :on-click (handler-fn (dispatch [:user/save @form])
-                                (dispatch [:state/update :active-users-pane :user-list]))}
+                                (dispatch [:update/active-users-pane :user-list]))}
          (t @lang :admin/new-user-button-label-save)]]]]]]])
 
 (defn user-form []
@@ -164,7 +165,7 @@
        [user-form-template form lang]])))
 
 (defn admin-user-details []
-  (let [selected-user (subscribe [:state/selected-user])]
+  (let [selected-user (subscribe [:selected-user])]
     (fn []
       [:div.column
        [:div.row
@@ -181,7 +182,7 @@
   [:div.item
    {:on-click (handler-fn
                 (dispatch [:user/select (:username user)])
-                (dispatch [:state/update :active-users-pane :user-list]))}
+                (dispatch [:update/active-users-pane :user-list]))}
    [:div.content
     [:div.header
      (:username user)]]])
@@ -189,19 +190,19 @@
 (defn add-user-button [button-label]
   (menu-button :i.plus.icon "olive" button-label
                (handler-fn
-                 (dispatch [:state/update :active-users-pane :new-user]))))
+                 (dispatch [:update/active-users-pane :new-user]))))
 
 (defn edit-user-button [button-label]
   (menu-button :i.edit.icon "yellow" button-label
-               #(dispatch [:state/update :active-user-pane :edit-user])))
+               #(dispatch [:update/active-users-pane :edit-user])))
 
 (defn delete-user-button [button-label selected]
   (menu-button :i.trash.icon "red" button-label
                #(dispatch [:user/delete (:username @selected)])))
 
 (defn users-list-details []
-  (let [users (subscribe [:sorted/users])
-        selected-user (subscribe [:state/selected-user])]
+  (let [users (subscribe [:sorted-users])
+        selected-user (subscribe [:selected-user])]
     (fn []
       [:div.ui.two.column.relaxed.divided.grid
        [:div.four.wide.column
@@ -215,8 +216,8 @@
                  :new-user  user-form})
 
 (defn users-admin-panel []
-  (let [selected-user (subscribe [:state/selected-user])
-        active-users-pane (subscribe [:state :active-users-pane])
+  (let [selected-user (subscribe [:selected-user])
+        active-users-pane (subscribe [:active-users-pane])
         lang (subscribe [:lang])]
     (dispatch [:get/users])
     (fn []
@@ -242,7 +243,7 @@
            [users-list-details])]]])))
 
 (defn user-section []
-  (let [user (subscribe [:state :user])]
+  (let [user (subscribe [:user])]
     (fn []
       [:div.ui.grid
        [user-details]

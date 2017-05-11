@@ -25,31 +25,31 @@
 
 (defn dispatch-recipe-new [route-params]
   (dispatch [:recipe/select nil])
-  (dispatch [:state/update :active-main-pane :recipes])
-  (dispatch [:state/update :active-recipe-pane :edit-recipe]))
+  (dispatch [:update/active-main-pane :recipes])
+  (dispatch [:update/active-recipe-pane :edit-recipe]))
 
 (defn dispatch-recipe-edit [route-params]
   (dispatch [:recipe/select nil])
-  (dispatch [:state/update :active-main-pane :recipes])
+  (dispatch [:update/active-main-pane :recipes])
   (dispatch [:recipe/select (:id route-params)])
-  (dispatch [:state/update :active-recipe-pane :edit-recipe]))
+  (dispatch [:update/active-recipe-pane :edit-recipe]))
 
 (defn dispatch-recipe [route-params]
   (dispatch [:recipe/select nil])
-  (dispatch [:state/update :active-main-pane :recipes])
+  (dispatch [:update/active-main-pane :recipes])
   (if route-params
     (dispatch [:recipe/select (:id route-params)])))
 
 (defn dispatch-ingredients [route-params]
-  (dispatch [:state/update :active-main-pane :ingredients])
+  (dispatch [:update/active-main-pane :ingredients])
   (if route-params
     (dispatch [:ingredient/select (:id route-params)])))
 
 (defn dispatch-user [route-params]
-  (dispatch [:state/update :active-main-pane :user]))
+  (dispatch [:update/active-main-pane :user]))
 
 (defn dispatch-state [route-params]
-  (dispatch [:state/update :active-main-pane :db-state]))
+  (dispatch [:update/active-main-pane :db-state]))
 
 (defn- dispatch-route [{:keys [handler route-params]}]
   (let [handler-fn (handler {:recipes     dispatch-recipe
