@@ -158,7 +158,8 @@
          (t @lang :admin/new-user-button-label-save)]]]]]]])
 
 (defn user-form []
-  (let [form (r/atom {:admin false})
+  (let [selected-user (subscribe [:selected-user])
+        form (r/atom (or @selected-user {:admin false}))
         lang (subscribe [:lang])]
     (fn []
       [:div.twelve.wide.column
@@ -213,7 +214,8 @@
          [admin-user-details])])))
 
 (def user-panes {:user-list users-list-details
-                 :new-user  user-form})
+                 :new-user  user-form
+                 :edit-user user-form})
 
 (defn users-admin-panel []
   (let [selected-user (subscribe [:selected-user])
