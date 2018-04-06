@@ -1,6 +1,6 @@
 (ns copa.db
   (:require [cljs.reader]
-            [cljs.spec :as s]))
+            [cljs.spec.alpha :as s]))
 
 
 (s/def ::measurement_id (s/or :int int?

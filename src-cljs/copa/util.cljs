@@ -4,7 +4,7 @@
             [copa.lang.en :as lang-en]
             [copa.db]
             [re-frame.core :refer [trim-v after subscribe]]
-            [cljs.spec :as s]))
+            [cljs.spec.alpha :as s]))
 
 (defn vec-remove
   "remove elem in coll"
