@@ -1,0 +1,24 @@
+{
+  "name": "copa",
+  "version": "0.2.0",
+  "description": "copa",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "shadow-cljs": "^2.8.39",
+    "source-map-support": "0.5.11"
+  },
+  "dependencies": {
+    "@material-ui/core": "^4.2.0",
+    "@material-ui/icons": "^4.2.1",
+    "@material-ui/styles": "^4.2.0",
+    "create-react-class": "^15.6.3",
+    "react": "^16.8.6",
+    "react-dom": "^16.8.6"
+  }
+}

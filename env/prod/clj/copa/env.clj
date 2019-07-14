@@ -1,11 +1,11 @@
 (ns copa.env
-  (:require [taoensso.timbre :as timbre]))
-
-(timbre/refer-timbre)
+  (:require [clojure.tools.logging :as log]))
 
 (def defaults
-  {:init       (fn []
-                 (info "\n-=[copa started successfully]=-"))
-   :stop       (fn []
-                 (info "\n-=[copa has shut down successfully]=-"))
+  {:init
+   (fn []
+     (log/info "\n-=[copa started successfully]=-"))
+   :stop
+   (fn []
+     (log/info "\n-=[copa has shut down successfully]=-"))
    :middleware identity})

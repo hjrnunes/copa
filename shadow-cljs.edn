@@ -1,0 +1,31 @@
+{:lein         false
+ :cache-root   ".shadow-cljs"
+ :source-paths ["src/cljs" "test/cljs"]
+ :dependencies [[kee-frame "0.3.2"]
+                [re-frame "0.10.6"]
+                [day8.re-frame/http-fx "0.1.6"]
+                [reagent "0.8.1"]
+                [reagent-forms "0.5.40"]
+                [breaking-point "0.1.2"]
+
+                [com.andrewmcveigh/cljs-time "0.5.2"]
+                [cljs-ajax "0.8.0"]
+                [metosin/reitit "0.3.1"]
+                [luminus-transit "0.1.1"]
+
+                [markdown-clj "1.0.5"]
+
+                [binaryage/devtools "0.9.10"]
+                [expound "0.7.2"]
+                [re-frisk "0.5.4"]
+                ]
+
+ :builds       {:app {:target     :browser
+                      :output-dir "resources/public/js"
+                      :asset-path "/js"
+                      :modules    {:app {:entries [copa.app]}}
+                      :dev        {:closure-defines {copa.core/DEBUG true}}
+                      :devtools   {:after-load copa.core/mount-components
+                                   :preloads   [
+                                                ;day8.re-frame-10x.preload
+                                                re-frisk.preload]}}}}

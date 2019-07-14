@@ -1,8 +1,7 @@
-FROM java:8-alpine
-MAINTAINER Henrique Nunes <hjrnunes@gmail.com>
+FROM openjdk:8-alpine
 
-ADD target/copa.jar copa.jar
+COPY target/uberjar/copa.jar /copa/app.jar
 
 EXPOSE 3000
 
-CMD ["java", "-jar", "copa.jar"]
+CMD ["java", "-jar", "/copa/app.jar"]
