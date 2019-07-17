@@ -14,15 +14,15 @@
 
     ["@material-ui/core/List" :default List]
 
+    ["@material-ui/core/ListItem" :default ListItem]
+    ["@material-ui/core/ListItemText" :default ListItemText]
+
     ["@material-ui/core/Tabs" :default Tabs]
     ["@material-ui/core/Tab" :default Tab]
 
-    ["@material-ui/core/BottomNavigation" :default BottomNavigation]
-    ["@material-ui/core/BottomNavigationAction" :default BottomNavigationAction]
-
     ["@material-ui/icons/Menu" :default MenuIcon]
-
-    ["@material-ui/styles" :refer (makeStyles)]))
+    ["@material-ui/icons/ArrowBack" :default ArrowBack]
+    ))
 
 
 (defn nav-link [title page]
@@ -56,29 +56,52 @@
 ;   (when-let [docs @(rf/subscribe [:docs])]
 ;     [:div {:dangerouslySetInnerHTML {:__html (md->html docs)}}])])
 
-(def txt "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.")
+
+(defn list-item [{:keys [recipe/id recipe/name]}]
+  [:> ListItem {:button  true
+                :key     id
+                :onClick #(rf/dispatch [:nav/route-name-params :route/recipe {:id id}])}
+   [:> ListItemText {:primary name}]])
+
+(defn recipe-list []
+  (let [recipes (rf/subscribe [:recipe/names])]
+    (fn []
+      [:> List {:component "nav"}
+       (for [recipe @recipes
+             :let [{:keys [recipe/id]} recipe]]
+         ^{:key id} [list-item recipe])])))
 
 (defn recipe-view []
-  (let []
+  (let [pane (r/atom :prep)
+        recipe (rf/subscribe [:recipe/selected])]
     (fn []
-      [:div {:style {:grid-row           2
-                     :display            "grid"
-                     :grid-template-rows "auto 1fr"
-                     :height             "100%"}}
-       [:> Tabs {:value   0
-                 :variant "fullWidth"
-                 :style   {:grid-row 1}
-                 }
-        [:> Tab {:label "A"}
-         ]
-        [:> Tab {:label "B"}]]
-       [:> Container {:style {:grid-row 2}}
-        [:> Typography {:variant "body1"}
-         txt]]
-       ])))
+      (let [{:keys [recipe/name recipe/preparation]} @recipe]
+        [:div {:style {:grid-row           2
+                       :display            "grid"
+                       :grid-template-rows "auto 1fr"
+                       :height             "100%"}}
+         [:> Tabs {:value    @pane
+                   :variant  "fullWidth"
+                   :style    {:grid-row 1}
+                   :onChange (fn [evt val] (reset! pane (keyword val)))}
+          [:> Tab {:label "Preparação" :value :prep}]
+          [:> Tab {:label "Ingredientes" :value :ings}]]
+
+         [:> Container {:style {:grid-row 2}}
+          (case @pane
+            :prep [:div
+                   [:> Typography {:variant "h4"}
+                    name]
+                   [:> Typography {:variant "body1"}
+                    preparation]]
+            :ings [:div
+                   [:> Typography {:variant "h4"}
+                    "Ingredientes"]
+                   [:> Typography {:variant "body1"}
+                    preparation]])]]))))
 
 (defn app-bar []
-  (let []
+  (let [show-back? (rf/subscribe [:ui/show-back-btn?])]
     (fn []
       [:> AppBar
        {:style    {:grid-row 1}
@@ -88,36 +111,36 @@
          {:edge       "start"
           :color      "inherit"
           :aria-label "Menu"}
-         [:> MenuIcon]]]
+         [:> MenuIcon]]
+        (when @show-back?
+          [:> IconButton
+           {:edge       "start"
+            :color      "inherit"
+            :aria-label "Menu"
+            :onClick    #(rf/dispatch [:nav/route-name :route/home])}
+           [:> ArrowBack]])]
        ])))
 
-(defn home-page []
-  [:div {:style {:height "100%"}}
-   [:> CssBaseline]
-
-   [:div {:style {
-                  :display            "grid"
-                  :grid-template-rows "auto 1fr"
-                  :height             "100%"}}
-
-    [app-bar]
-
-    ;[recipe-view]
-
-    [:div {:style {:grid-row           2
-                   ;:display            "grid"
-                   ;:grid-template-rows "auto 1fr"
-                   :height             "100%"}}
-      [:> List]
-     ]
-
-    ]])
+;(defn root-component []
+;  [:div {:style {:height "100%"}}
+;   ;[navbar]
+;   [kf/switch-route (fn [route] (get-in route [:data :name]))
+;    :route/home home-page
+;    :route/recipe
+;    nil [:div ""]]])
 
 
 (defn root-component []
   [:div {:style {:height "100%"}}
-   ;[navbar]
-   [kf/switch-route (fn [route] (get-in route [:data :name]))
-    :home home-page
-    :about about-page
-    nil [:div ""]]])
+   [:> CssBaseline]
+   [:div {:style {
+                  :display            "grid"
+                  :grid-template-rows "auto 1fr"
+                  :height             "100%"}}
+    [app-bar]
+
+    [kf/switch-route (fn [route] (get-in route [:data :name]))
+     :route/home recipe-list
+     :route/recipe recipe-view
+     nil [:div ""]]
+    ]])
