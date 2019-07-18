@@ -9,6 +9,7 @@
     ["@material-ui/core/Toolbar" :default Toolbar]
     ["@material-ui/core/IconButton" :default IconButton]
     ["@material-ui/core/Typography" :default Typography]
+    ["@material-ui/core/Divider" :default Divider]
 
     ["@material-ui/core/Container" :default Container]
 
@@ -16,6 +17,7 @@
 
     ["@material-ui/core/ListItem" :default ListItem]
     ["@material-ui/core/ListItemText" :default ListItemText]
+    ["@material-ui/core/ListItemSecondaryAction" :default ListItemSecondaryAction]
 
     ["@material-ui/core/Tabs" :default Tabs]
     ["@material-ui/core/Tab" :default Tab]
@@ -71,34 +73,74 @@
              :let [{:keys [recipe/id]} recipe]]
          ^{:key id} [list-item recipe])])))
 
+(defn recipe-header [{:keys [recipe/name recipe/description]}]
+  [:div {:style {:padding-top "1em"}}
+   [:> Typography {:component "h2" :variant "h5"}
+    name
+    ]
+   [:> Typography {:variant      "subtitle2"
+                   :color        "textSecondary"
+                   :gutterBottom true}
+    description]])
+
+(defn preparation-pane
+  [{:keys [recipe/preparation] :as recipe}]
+  [:div {:style {:display            "grid"
+                 :grid-template-rows "auto 1fr"
+                 :height             "100%"}}
+   [:div {:style {:grid-row 1}}
+    [recipe-header recipe]
+    [:> Divider]]
+   [:div {:style {:grid-row 2}
+          :dangerouslySetInnerHTML
+                 {:__html (md->html preparation)}}]])
+
+(defn measurement-line
+  [{:keys [measure/ingredient measure/quantity measure/unit]}]
+  [:> ListItem {:dense   true
+                :divider true}
+   [:> ListItemText
+    [:> Typography {:variant "body1"}
+     ingredient]]
+   [:> ListItemSecondaryAction
+    [:> ListItemText
+     [:> Typography {:variant "subtitle2"
+                     :color   "textSecondary"}
+      (str quantity " " unit)]]]
+   ])
+
+(defn measurements-pane
+  [{:keys [recipe/measurements] :as recipe}]
+  [:div {:style {:display            "grid"
+                 :grid-template-rows "auto 1fr"
+                 :height             "100%"}}
+   [:div {:style {:grid-row 1}}
+    [recipe-header recipe]
+    [:> List
+     (for [measure measurements
+           :let [{:keys [measure/id]} measure]]
+       ^{:key id} [measurement-line measure])
+     ]]])
+
 (defn recipe-view []
   (let [pane (r/atom :prep)
         recipe (rf/subscribe [:recipe/selected])]
     (fn []
-      (let [{:keys [recipe/name recipe/preparation]} @recipe]
-        [:div {:style {:grid-row           2
-                       :display            "grid"
-                       :grid-template-rows "auto 1fr"
-                       :height             "100%"}}
-         [:> Tabs {:value    @pane
-                   :variant  "fullWidth"
-                   :style    {:grid-row 1}
-                   :onChange (fn [evt val] (reset! pane (keyword val)))}
-          [:> Tab {:label "Preparação" :value :prep}]
-          [:> Tab {:label "Ingredientes" :value :ings}]]
+      [:div {:style {:grid-row           2
+                     :display            "grid"
+                     :grid-template-rows "1fr auto"
+                     :height             "100%"}}
+       [:> Container {:style {:grid-row 1}}
+        (case @pane
+          :prep [preparation-pane @recipe]
+          :ings [measurements-pane @recipe])]
 
-         [:> Container {:style {:grid-row 2}}
-          (case @pane
-            :prep [:div
-                   [:> Typography {:variant "h4"}
-                    name]
-                   [:> Typography {:variant "body1"}
-                    preparation]]
-            :ings [:div
-                   [:> Typography {:variant "h4"}
-                    "Ingredientes"]
-                   [:> Typography {:variant "body1"}
-                    preparation]])]]))))
+       [:> Tabs {:value    @pane
+                 :variant  "fullWidth"
+                 :style    {:grid-row 2}
+                 :onChange (fn [evt val] (reset! pane (keyword val)))}
+        [:> Tab {:label "Preparação" :value :prep}]
+        [:> Tab {:label "Ingredientes" :value :ings}]]])))
 
 (defn app-bar []
   (let [show-back? (rf/subscribe [:ui/show-back-btn?])]

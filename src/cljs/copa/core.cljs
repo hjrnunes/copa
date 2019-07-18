@@ -119,7 +119,12 @@
                                           #:measure{:id         2,
                                                     :quantity   1.0,
                                                     :unit       "colheres",
-                                                    :ingredient "café"}]}
+                                                    :ingredient "café"}
+                                          #:measure{:id         3,
+                                                    :quantity   1.0,
+                                                    :ingredient "marmelo"}
+                                          #:measure{:id         4,
+                                                    :ingredient "laranja"}]}
               "2" #:recipe{:id           2,
                            :name         "Penne alla senese 2",
                            :description  "Penne com salsicha, nozes e natas",
