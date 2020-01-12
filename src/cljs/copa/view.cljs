@@ -4,10 +4,12 @@
     [markdown.core :refer [md->html]]
     [reagent.core :as r]
     [re-frame.core :as rf]
+    [fork.core :as fork]
     ["@material-ui/core/CssBaseline" :default CssBaseline]
     ["@material-ui/core/AppBar" :default AppBar]
     ["@material-ui/core/Toolbar" :default Toolbar]
     ["@material-ui/core/IconButton" :default IconButton]
+    ["@material-ui/core/Fab" :default Fab]
     ["@material-ui/core/Typography" :default Typography]
     ["@material-ui/core/Divider" :default Divider]
 
@@ -22,42 +24,15 @@
     ["@material-ui/core/Tabs" :default Tabs]
     ["@material-ui/core/Tab" :default Tab]
 
+    ["@material-ui/core/TextField" :default TextField]
+    ["@material-ui/core/TextareaAutosize" :default TextareaAutosize]
+
     ["@material-ui/icons/Menu" :default MenuIcon]
     ["@material-ui/icons/ArrowBack" :default ArrowBack]
+    ["@material-ui/icons/Edit" :default Edit]
+    ["@material-ui/icons/Done" :default Done]
+    ["@material-ui/icons/Clear" :default Clear]
     ))
-
-
-(defn nav-link [title page]
-  [:a.navbar-item
-   {:href  (kf/path-for [page])
-    :class (when (= page @(rf/subscribe [:nav/page])) "is-active")}
-   title])
-
-(defn navbar []
-  (r/with-let [expanded? (r/atom false)]
-    [:nav.navbar.is-info>div.container
-     [:div.navbar-brand
-      [:a.navbar-item {:href "/" :style {:font-weight :bold}} "copa"]
-      [:span.navbar-burger.burger
-       {:data-target :nav-menu
-        :on-click    #(swap! expanded? not)
-        :class       (when @expanded? :is-active)}
-       [:span] [:span] [:span]]]
-     [:div#nav-menu.navbar-menu
-      {:class (when @expanded? :is-active)}
-      [:div.navbar-start
-       [nav-link "Home" :home]
-       [nav-link "About" :about]]]]))
-
-(defn about-page []
-  [:section.section>div.container>div.content
-   [:img {:src "/img/warning_clojure.png"}]])
-
-;(defn home-page []
-;  [:section.section>div.container>div.content
-;   (when-let [docs @(rf/subscribe [:docs])]
-;     [:div {:dangerouslySetInnerHTML {:__html (md->html docs)}}])])
-
 
 (defn list-item [{:keys [recipe/id recipe/name]}]
   [:> ListItem {:button  true
@@ -83,7 +58,7 @@
                    :gutterBottom true}
     description]])
 
-(defn preparation-pane
+(defn preparation-display
   [{:keys [recipe/preparation] :as recipe}]
   [:div {:style {:display            "grid"
                  :grid-template-rows "auto 1fr"
@@ -94,6 +69,85 @@
    [:div {:style {:grid-row 2}
           :dangerouslySetInnerHTML
                  {:__html (md->html preparation)}}]])
+
+(defn preparation-form
+  [{:keys [values
+           form-id
+           handle-change
+           handle-blur
+           touched
+           submitting?
+           handle-submit]}]
+  (js/console.log "touce" touched)
+  [:div {:style {:display            "grid"
+                 :grid-template-rows "auto 1fr"
+                 :height             "100%"}}
+   [:form
+    {:id        form-id
+     :on-submit handle-submit}
+    [:div {:style {:grid-row 1}}
+     [:div {:style {:padding-top "1em"}}
+      [:> TextField {:name      "name"
+                     :label     "name"
+                     :fullWidth true
+                     :margin    "dense"
+                     :value     (values "name" "")
+                     :onChange  handle-change
+                     :onBlur    handle-blur}]
+      [:> TextField {:name      "description"
+                     :label     "description"
+                     :fullWidth true
+                     :margin    "dense"
+                     :value     (values "description" "")
+                     :onChange  handle-change
+                     :onBlur    handle-blur}]]
+     [:> Divider {:style {:margin-top "2em"}}]]
+    [:div {:style {:grid-row 2}}
+     [:> TextField {:name      "preparation"
+                    :label     "preparation"
+                    :fullWidth true
+                    :margin    "normal"
+                    :multiline true
+                    :value     (values "preparation" "")
+                    :rowsMax   js/Number.POSITIVE_INFINITY
+                    :onChange  handle-change
+                    :onBlur    handle-blur}]
+     [:div
+      {:style {:margin-top      "1em"
+               :display         "flex"
+               :justify-content "center"}}
+      [:> IconButton
+       {:color      "primary"
+        :aria-label "Done"
+        :type       "submit"
+        :disabled   (or submitting? (empty? touched))
+        :onClick    #(rf/dispatch [:recipe/edit])}
+       [:> Done]]
+      [:> IconButton
+       {:color      "secondary"
+        :aria-label "Cancel"
+        :onClick    #(rf/dispatch [:recipe/edit-cancel])}
+       [:> Clear]]
+      ]]]
+   ]
+  )
+
+(defn preparation-pane
+  [{:keys [recipe/id recipe/name recipe/description recipe/preparation] :as recipe}]
+  (let [editing? (rf/subscribe [:ui/editing?])]
+    (if @editing?
+      [fork/form {:path              :recipe-form
+                  :form-id           "preparation"
+                  :prevent-default?  true
+                  :clean-on-unmount? true
+                  :on-submit         #(rf/dispatch [:recipe/submit %])
+                  :initial-values    {"id"          id
+                                      "name"        name
+                                      "description" description
+                                      "preparation" preparation}}
+       preparation-form]
+      [preparation-display recipe]))
+  )
 
 (defn measurement-line
   [{:keys [measure/ingredient measure/quantity measure/unit]}]
@@ -122,9 +176,11 @@
        ^{:key id} [measurement-line measure])
      ]]])
 
+
 (defn recipe-view []
   (let [pane (r/atom :prep)
-        recipe (rf/subscribe [:recipe/selected])]
+        recipe (rf/subscribe [:recipe/selected])
+        editing? (rf/subscribe [:ui/editing?])]
     (fn []
       [:div {:style {:grid-row           2
                      :display            "grid"
@@ -135,15 +191,18 @@
           :prep [preparation-pane @recipe]
           :ings [measurements-pane @recipe])]
 
-       [:> Tabs {:value    @pane
-                 :variant  "fullWidth"
-                 :style    {:grid-row 2}
-                 :onChange (fn [evt val] (reset! pane (keyword val)))}
-        [:> Tab {:label "Preparação" :value :prep}]
-        [:> Tab {:label "Ingredientes" :value :ings}]]])))
+       (when-not @editing?
+         [:> Tabs {:value    @pane
+                   :variant  "fullWidth"
+                   :style    {:grid-row 2}
+                   :onChange (fn [evt val] (reset! pane (keyword val)))}
+          [:> Tab {:label "Preparação" :value :prep}]
+          [:> Tab {:label "Ingredientes" :value :ings}]])])))
+
 
 (defn app-bar []
-  (let [show-back? (rf/subscribe [:ui/show-back-btn?])]
+  (let [show-back-btn? (rf/subscribe [:ui/show-back-btn?])
+        show-edit-btn? (rf/subscribe [:ui/show-edit-btn?])]
     (fn []
       [:> AppBar
        {:style    {:grid-row 1}
@@ -154,23 +213,24 @@
           :color      "inherit"
           :aria-label "Menu"}
          [:> MenuIcon]]
-        (when @show-back?
+
+        (when @show-back-btn?
           [:> IconButton
            {:edge       "start"
             :color      "inherit"
             :aria-label "Menu"
             :onClick    #(rf/dispatch [:nav/route-name :route/home])}
-           [:> ArrowBack]])]
+           [:> ArrowBack]])
+
+        (when @show-edit-btn?
+          [:> IconButton
+           {:style      {:margin-left "auto"}
+            :color      "inherit"
+            :aria-label "Edit"
+            :onClick    #(rf/dispatch [:recipe/edit])}
+           [:> Edit]])
+        ]
        ])))
-
-;(defn root-component []
-;  [:div {:style {:height "100%"}}
-;   ;[navbar]
-;   [kf/switch-route (fn [route] (get-in route [:data :name]))
-;    :route/home home-page
-;    :route/recipe
-;    nil [:div ""]]])
-
 
 (defn root-component []
   [:div {:style {:height "100%"}}

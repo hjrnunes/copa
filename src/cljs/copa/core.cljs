@@ -5,20 +5,28 @@
     [ajax.core :as http]
     [copa.ajax :as ajax]
     [copa.routing :as routing]
-    [copa.view :as view]))
+    [copa.view :as view]
+    [fork.core :as fork]
+    [compound2.core :as c]))
+
+(rf/reg-sub
+  :recipes
+  (fn [db _]
+    (:recipes db)))
 
 ;; Recipes by id
 (rf/reg-sub
   :recipe/by-id
-  (fn [db _]
-    (:recipe/by-id db)))
+  :<- [:recipes]
+  (fn [recipes _]
+    (:recipe/by-id recipes)))
 
 ;; Recipes sequence
 (rf/reg-sub
   :data/recipes
-  :<- [:recipe/by-id]
+  :<- [:recipes]
   (fn [by-id _]
-    (vals by-id)))
+    (c/items by-id)))
 
 ;; Recipe names
 (rf/reg-sub
@@ -41,12 +49,54 @@
   (fn [[recipes id] _]
     (get recipes id)))
 
+;; Selected recipe id
+(rf/reg-sub
+  :ui/editing?
+  (fn [db _]
+    (:ui/editing? db)))
+
 ;; show back button?
 (rf/reg-sub
   :ui/show-back-btn?
   :<- [:route/name]
-  (fn [route-name _]
-    (some #{:route/recipe} [route-name])))
+  :<- [:ui/editing?]
+  (fn [[route-name editing?] _]
+    (and (some #{:route/recipe} [route-name])
+         (not editing?))))
+
+;; show edit button?
+(rf/reg-sub
+  :ui/show-edit-btn?
+  :<- [:ui/show-back-btn?]
+  :<- [:ui/editing?]
+  (fn [[show-back-btn? editing?] _]
+    (and show-back-btn?
+         (not editing?))))
+
+(kf/reg-event-db
+  :recipe/edit
+  (fn [db _]
+    (assoc db :ui/editing? true)))
+
+(kf/reg-event-db
+  :recipe/edit-cancel
+  (fn [db _]
+    (assoc db :ui/editing? false)))
+
+(defn to-recipe [m]
+  (into {}
+        (for [[k v] m]
+          [(keyword "recipe" k) v])))
+
+(rf/reg-event-fx
+  :recipe/submit
+  [(fork/on-submit :recipe-form)]
+  (fn [{db :db} [_ {:keys [values]}]]
+    {:db (-> (fork/set-submitting db :form false)
+             (assoc :ui/editing? false)
+             (assoc :recipes (c/add-items
+                               (:recipes db)
+                               [(to-recipe values)])))}))
 
 ;(rf/reg-sub
 ;  :view/dropdowns
@@ -106,41 +156,44 @@
 ;; -------------------------
 ;; Initialize app
 
-(def recipes {"1" #:recipe{:id           1,
-                           :name         "Penne alla senese",
-                           :description  "Penne com salsicha, nozes e natas",
-                           :preparation  "*notas ingredientes*\n\n- *salsichas*: desfeitas sem pele\n- *nozes*: sem casca, picadas finas",
-                           :user         "admin",
-                           :measurements [#:measure{:id         1,
-                                                    :quantity   20.0,
-                                                    :unit       "g",
-                                                    :ingredient "manteiga"
-                                                    },
-                                          #:measure{:id         2,
-                                                    :quantity   1.0,
-                                                    :unit       "colheres",
-                                                    :ingredient "café"}
-                                          #:measure{:id         3,
-                                                    :quantity   1.0,
-                                                    :ingredient "marmelo"}
-                                          #:measure{:id         4,
-                                                    :ingredient "laranja"}]}
-              "2" #:recipe{:id           2,
-                           :name         "Penne alla senese 2",
-                           :description  "Penne com salsicha, nozes e natas",
-                           :preparation  "*notas ingredientes*\n\n- *salsichas*: desfeitas sem pele\n- *nozes*: sem casca, picadas finas",
-                           :user         "admin",
-                           :measurements [#:measure{:id         1,
-                                                    :quantity   20.0,
-                                                    :unit       "g",
-                                                    :ingredient "manteiga"
-                                                    },
-                                          #:measure{:id         2,
-                                                    :quantity   1.0,
-                                                    :unit       "colheres",
-                                                    :ingredient "café"}]}})
-
-(def initial-db {:recipe/by-id recipes})
+(def initial-db {:recipes     (-> (c/compound [{:id          :recipe/by-id
+                                                :kfn         :recipe/id
+                                                :on-conflict (fn [a b] (merge a b))}])
+                                  (c/add-items [#:recipe{:id           "1",
+                                                         :name         "Penne alla senese",
+                                                         :description  "Penne com salsicha, nozes e natas",
+                                                         :preparation  "*notas ingredientes*\n\n- *salsichas*: desfeitas sem pele\n- *nozes*: sem casca, picadas finas",
+                                                         :user         "admin",
+                                                         :measurements [#:measure{:id         "1",
+                                                                                  :quantity   20.0,
+                                                                                  :unit       "g",
+                                                                                  :ingredient "manteiga"
+                                                                                  },
+                                                                        #:measure{:id         "2",
+                                                                                  :quantity   1.0,
+                                                                                  :unit       "colheres",
+                                                                                  :ingredient "café"}
+                                                                        #:measure{:id         "3",
+                                                                                  :quantity   1.0,
+                                                                                  :ingredient "marmelo"}
+                                                                        #:measure{:id         "4",
+                                                                                  :ingredient "laranja"}]}
+                                                #:recipe{:id           "2",
+                                                         :name         "Penne alla senese 2",
+                                                         :description  "Penne com salsicha, nozes e natas",
+                                                         :preparation  "*notas ingredientes*\n\n- *salsichas*: desfeitas sem pele\n- *nozes*: sem casca, picadas finas",
+                                                         :user         "admin",
+                                                         :measurements [#:measure{:id         "1",
+                                                                                  :quantity   20.0,
+                                                                                  :unit       "g",
+                                                                                  :ingredient "manteiga"
+                                                                                  },
+                                                                        #:measure{:id         "2",
+                                                                                  :quantity   1.0,
+                                                                                  :unit       "colheres",
+                                                                                  :ingredient "café"}]}
+                                                ]))
+                 :ui/editing? false})
 
 (defn ^:dev/after-load mount-components
   ([] (mount-components true))

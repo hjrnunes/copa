@@ -59,7 +59,10 @@
                  [cljs-ajax "0.8.0"]
                  [ring-webjars "0.2.0"]
                  [reagent-forms "0.5.40"]
-                 [breaking-point "0.1.2"]]
+                 [breaking-point "0.1.2"]
+                 [fork "1.2.3"]
+                 [riverford/compound "2020.01.09"]
+                 ]
 
   :min-lein-version "2.0.0"
 
