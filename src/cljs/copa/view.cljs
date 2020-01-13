@@ -27,11 +27,19 @@
     ["@material-ui/core/TextField" :default TextField]
     ["@material-ui/core/TextareaAutosize" :default TextareaAutosize]
 
+    ["@material-ui/core/Dialog" :default Dialog]
+    ["@material-ui/core/DialogTitle" :default DialogTitle]
+    ["@material-ui/core/DialogContent" :default DialogContent]
+    ["@material-ui/core/DialogActions" :default DialogActions]
+
     ["@material-ui/icons/Menu" :default MenuIcon]
     ["@material-ui/icons/ArrowBack" :default ArrowBack]
     ["@material-ui/icons/Edit" :default Edit]
     ["@material-ui/icons/Done" :default Done]
     ["@material-ui/icons/Clear" :default Clear]
+    ["@material-ui/icons/Add" :default Add]
+
+    ["@material-ui/core/Fab" :default Fab]
     ))
 
 (defn list-item [{:keys [recipe/id recipe/name]}]
@@ -78,7 +86,6 @@
            touched
            submitting?
            handle-submit]}]
-  (js/console.log "touce" touched)
   [:div {:style {:display            "grid"
                  :grid-template-rows "auto 1fr"
                  :height             "100%"}}
@@ -116,19 +123,18 @@
       {:style {:margin-top      "1em"
                :display         "flex"
                :justify-content "center"}}
-      [:> IconButton
-       {:color      "primary"
-        :aria-label "Done"
-        :type       "submit"
-        :disabled   (or submitting? (empty? touched))
-        :onClick    #(rf/dispatch [:recipe/edit])}
+      [:> Fab {:size       "medium"
+               :color      "primary"
+               :aria-label "Done"
+               :type       "submit"
+               :disabled   (or submitting? (empty? touched))
+               :style      {:margin-right "0.2em"}}
        [:> Done]]
-      [:> IconButton
-       {:color      "secondary"
-        :aria-label "Cancel"
-        :onClick    #(rf/dispatch [:recipe/edit-cancel])}
-       [:> Clear]]
-      ]]]
+      [:> Fab {:size       "medium"
+               :color      "secondary"
+               :aria-label "Cancel"
+               :onClick    #(rf/dispatch [:recipe/edit-cancel])}
+       [:> Clear]]]]]
    ]
   )
 
@@ -140,7 +146,7 @@
                   :form-id           "preparation"
                   :prevent-default?  true
                   :clean-on-unmount? true
-                  :on-submit         #(rf/dispatch [:recipe/submit %])
+                  :on-submit         #(rf/dispatch [:measurement/submit %])
                   :initial-values    {"id"          id
                                       "name"        name
                                       "description" description
@@ -151,30 +157,117 @@
 
 (defn measurement-line
   [{:keys [measure/ingredient measure/quantity measure/unit]}]
-  [:> ListItem {:dense   true
-                :divider true}
-   [:> ListItemText
-    [:> Typography {:variant "body1"}
-     ingredient]]
-   [:> ListItemSecondaryAction
-    [:> ListItemText
-     [:> Typography {:variant "subtitle2"
-                     :color   "textSecondary"}
-      (str quantity " " unit)]]]
-   ])
+  (let [editing? (rf/subscribe [:ui/editing?])]
+    [:> ListItem {:dense   true
+                  :divider true}
+     [:> ListItemText
+      [:> Typography {:variant "body1"}
+       ingredient]]
+     [:> ListItemSecondaryAction
+
+      (if @editing?
+
+        [:> IconButton
+         {:color      "secondary"
+          :aria-label "Cancel"
+          :onClick    #(rf/dispatch [:recipe/edit-cancel])}
+         [:> Clear]]
+
+        [:> ListItemText
+         [:> Typography {:variant "subtitle2"
+                         :color   "textSecondary"}
+          (str quantity " " unit)]])]
+     ]))
+
+(defn measurement-form
+  [{:keys [values
+           form-id
+           handle-change
+           handle-blur
+           touched
+           submitting?
+           handle-submit]}]
+  [:form
+   {:id        form-id
+    :on-submit handle-submit}
+   [:div
+    [:> DialogContent
+     [:> TextField {:name      "quantity"
+                    :label     "quantity"
+                    :margin    "dense"
+                    :fullWidth true
+                    :onChange  handle-change
+                    :onBlur    handle-blur}]
+     [:> TextField {:name      "unit"
+                    :label     "unit"
+                    :margin    "dense"
+                    :fullWidth true
+                    :onChange  handle-change
+                    :onBlur    handle-blur}]
+     [:> TextField {:name      "ingredient"
+                    :label     "ingredient"
+                    :margin    "dense"
+                    :fullWidth true
+                    :onChange  handle-change
+                    :onBlur    handle-blur}]]
+    [:> DialogActions
+     [:> IconButton
+      {:color      "primary"
+       :aria-label "Done"
+       :type       "submit"
+       :disabled   (or submitting? (empty? touched))}
+      [:> Done]]
+     [:> IconButton
+      {:color      "secondary"
+       :aria-label "Cancel"
+       :onClick    #(rf/dispatch [:measurement/edit-cancel])}
+      [:> Clear]]
+     ]]]
+  )
+
+(defn add-measurement-dialog [recipe]
+  (let [dialog? (rf/subscribe [:ui/measurement-dialog?])]
+    [:> Dialog {:open @dialog?}
+     ;[:> DialogTitle "Add measurement"]
+     [fork/form {:path              :measurement-form
+                 :form-id           "measurement"
+                 :prevent-default?  true
+                 :clean-on-unmount? true
+                 :on-submit         #(rf/dispatch [:measurement/submit %])
+                 :initial-values    {"id" (:recipe/id recipe)}}
+      measurement-form]])
+  )
 
 (defn measurements-pane
   [{:keys [recipe/measurements] :as recipe}]
-  [:div {:style {:display            "grid"
-                 :grid-template-rows "auto 1fr"
-                 :height             "100%"}}
-   [:div {:style {:grid-row 1}}
-    [recipe-header recipe]
-    [:> List
-     (for [measure measurements
-           :let [{:keys [measure/id]} measure]]
-       ^{:key id} [measurement-line measure])
-     ]]])
+  (let [editing? (rf/subscribe [:ui/editing?])]
+    [:div {:style {:display            "grid"
+                   :grid-template-rows "auto 1fr"
+                   :height             "100%"}}
+     [:div {:style {:grid-row 1}}
+      [recipe-header recipe]
+      [:> List
+       (for [measure measurements
+             :let [{:keys [measure/id]} measure]]
+         ^{:key id} [measurement-line measure])
+       ]
+      [:div {:style {:display         "flex"
+                     :justify-content "flex-end"
+                     :margin-top      "1em"
+                     :padding-right   "1.2em"}}
+       [:div
+        [:> Fab {:size    "medium"
+                 :color   "primary"
+                 :onClick #(rf/dispatch [:measurement/edit])}
+         [:> Add]]
+        [add-measurement-dialog recipe]]
+       (if @editing?
+         [:> Fab {:style   {:margin-left "0.5em"}
+                  :size    "medium"
+                  :onClick #(rf/dispatch [:recipe/edit-cancel])}
+          [:> Done]]
+         )]
+      ]]))
 
 
 (defn recipe-view []

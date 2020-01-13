@@ -49,7 +49,8 @@
   (fn [[recipes id] _]
     (get recipes id)))
 
-;; Selected recipe id
+;;;;;;; editing
+
 (rf/reg-sub
   :ui/editing?
   (fn [db _]
@@ -83,6 +84,7 @@
   (fn [db _]
     (assoc db :ui/editing? false)))
 
+
 (defn to-recipe [m]
   (into {}
         (for [[k v] m]
@@ -92,11 +94,49 @@
   :recipe/submit
   [(fork/on-submit :recipe-form)]
   (fn [{db :db} [_ {:keys [values]}]]
-    {:db (-> (fork/set-submitting db :form false)
+    {:db (-> (fork/set-submitting db :recipe-form false)
              (assoc :ui/editing? false)
              (assoc :recipes (c/add-items
                                (:recipes db)
                                [(to-recipe values)])))}))
+
+
+;;;;;;; measurement dialog
+
+(rf/reg-sub
+  :ui/measurement-dialog?
+  (fn [db _]
+    (:ui/measurement-dialog? db false)))
+
+(kf/reg-event-db
+  :measurement/edit
+  (fn [db _]
+    (-> db
+        (assoc :ui/measurement-dialog? true)
+        (assoc :ui/editing? true))))
+
+(kf/reg-event-db
+  :measurement/edit-cancel
+  (fn [db _]
+    (-> db
+        (assoc :ui/measurement-dialog? false)
+        (assoc :ui/editing? false))))
+
+(defn to-measurement [m]
+  (into {}
+        (for [[k v] m]
+          [(keyword "measure" k) v])))
+
+(rf/reg-event-fx
+  :measurement/submit
+  [(fork/on-submit :measurement-form)]
+  (fn [{db :db} [_ {:keys [values]}]]
+    (let [recipe (get-in db [:recipes :recipe/by-id (get values "id")])
+          measurement (-> (dissoc values "id") (to-measurement) (assoc :measure/id (str (inc (count (:recipe/measurements recipe))))))]
+      {:db (-> (fork/set-submitting db :measurement-form false)
+               (assoc :recipes (c/add-items
+                                 (:recipes db)
+                                 [(update recipe :recipe/measurements conj measurement)])))})))
 
 ;(rf/reg-sub
 ;  :view/dropdowns
