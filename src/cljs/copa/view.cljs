@@ -142,11 +142,11 @@
   [{:keys [recipe/id recipe/name recipe/description recipe/preparation] :as recipe}]
   (let [editing? (rf/subscribe [:ui/editing?])]
     (if @editing?
-      [fork/form {:path              :recipe-form
+      [fork/form {:path              :preparation-form
                   :form-id           "preparation"
                   :prevent-default?  true
                   :clean-on-unmount? true
-                  :on-submit         #(rf/dispatch [:measurement/submit %])
+                  :on-submit         #(rf/dispatch [:preparation/submit %])
                   :initial-values    {"id"          id
                                       "name"        name
                                       "description" description
@@ -234,7 +234,7 @@
                  :prevent-default?  true
                  :clean-on-unmount? true
                  :on-submit         #(rf/dispatch [:measurement/submit %])
-                 :initial-values    {"id" (:recipe/id recipe)}}
+                 :initial-values    {"recipe-id" (:recipe/id recipe)}}
       measurement-form]])
   )
 

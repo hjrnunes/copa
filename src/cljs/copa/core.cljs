@@ -6,34 +6,34 @@
     [copa.ajax :as ajax]
     [copa.routing :as routing]
     [copa.view :as view]
+    [copa.db :as db]
     [fork.core :as fork]
-    [compound2.core :as c]))
+    [re-posh.core :as rp]
+    ))
 
-(rf/reg-sub
-  :recipes
-  (fn [db _]
-    (:recipes db)))
+(rp/reg-event-ds
+  ::init-db
+  (fn [_ _]
+    db/initial-db))
 
-;; Recipes by id
-(rf/reg-sub
-  :recipe/by-id
-  :<- [:recipes]
-  (fn [recipes _]
-    (:recipe/by-id recipes)))
-
-;; Recipes sequence
-(rf/reg-sub
-  :data/recipes
-  :<- [:recipes]
-  (fn [by-id _]
-    (c/items by-id)))
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 ;; Recipe names
-(rf/reg-sub
+(rp/reg-sub
+  :recipe/ids
+  (fn [_ _]
+    {:type  :query
+     :query '[:find [?id ...]
+              :where [?id :recipe/id _]]}))
+
+(rp/reg-sub
   :recipe/names
-  :<- [:data/recipes]
-  (fn [recipes _]
-    (map #(select-keys % [:recipe/id :recipe/name]) recipes)))
+  :<- [:recipe/ids]
+  (fn [recipe-ids _]
+    {:type    :pull-many
+     :pattern '[:recipe/id :recipe/name]
+     :ids     recipe-ids}))
+;;;;;;;;;;;;;;;;
 
 ;; Selected recipe id
 (rf/reg-sub
@@ -41,13 +41,13 @@
   (fn [db _]
     (:recipe/selected db)))
 
-;; Selected recipe
-(rf/reg-sub
+(rp/reg-sub
   :recipe/selected
-  :<- [:recipe/by-id]
   :<- [:recipe/selected-id]
-  (fn [[recipes id] _]
-    (get recipes id)))
+  (fn [recipe-id _]
+    {:type    :pull
+     :pattern '[*]
+     :id      [:recipe/id recipe-id]}))
 
 ;;;;;;; editing
 
@@ -84,22 +84,22 @@
   (fn [db _]
     (assoc db :ui/editing? false)))
 
-
-(defn to-recipe [m]
-  (into {}
-        (for [[k v] m]
-          [(keyword "recipe" k) v])))
+(defn to-recipe-ent [{:strs [id name description preparation]}]
+  {:db/id              [:recipe/id id]
+   :recipe/name        name
+   :recipe/description description
+   :recipe/preparation preparation})
 
 (rf/reg-event-fx
-  :recipe/submit
-  [(fork/on-submit :recipe-form)]
-  (fn [{db :db} [_ {:keys [values]}]]
-    {:db (-> (fork/set-submitting db :recipe-form false)
-             (assoc :ui/editing? false)
-             (assoc :recipes (c/add-items
-                               (:recipes db)
-                               [(to-recipe values)])))}))
-
+  :preparation/submit
+  [(rp/inject-cofx :ds)
+   (fork/on-submit :preparation-form)]
+  (fn [{:keys [ds db]} [_ {:keys [values]}]]
+    {
+     :transact [(to-recipe-ent values)]
+     :db       (-> (fork/set-submitting db :preparation-form false)
+                   (assoc :ui/editing? false))
+     }))
 
 ;;;;;;; measurement dialog
 
@@ -122,21 +122,26 @@
         (assoc :ui/measurement-dialog? false)
         (assoc :ui/editing? false))))
 
-(defn to-measurement [m]
-  (into {}
-        (for [[k v] m]
-          [(keyword "measure" k) v])))
+
+(defn to-measurement-ent [{:strs [recipe-id ingredient quantity unit]}]
+  {:db/id               [:recipe/id recipe-id]
+   :recipe/measurements [(cond-> {}
+                                 ingredient
+                                 (assoc :measure/ingredient ingredient)
+                                 quantity
+                                 (assoc :measure/quantity quantity)
+                                 unit
+                                 (assoc :measure/unit unit))]})
 
 (rf/reg-event-fx
   :measurement/submit
-  [(fork/on-submit :measurement-form)]
-  (fn [{db :db} [_ {:keys [values]}]]
-    (let [recipe (get-in db [:recipes :recipe/by-id (get values "id")])
-          measurement (-> (dissoc values "id") (to-measurement) (assoc :measure/id (str (inc (count (:recipe/measurements recipe))))))]
-      {:db (-> (fork/set-submitting db :measurement-form false)
-               (assoc :recipes (c/add-items
-                                 (:recipes db)
-                                 [(update recipe :recipe/measurements conj measurement)])))})))
+  [(rp/inject-cofx :ds)
+   (fork/on-submit :measurement-form)]
+  (fn [{:keys [ds db]} [_ {:keys [values]}]]
+    {:transact [(to-measurement-ent values)]
+     :db       (-> (fork/set-submitting db :preparation-form false)
+                   (assoc :ui/editing? false)
+                   (assoc :ui/measurement-dialog? false))}))
 
 ;(rf/reg-sub
 ;  :view/dropdowns
@@ -196,53 +201,15 @@
 ;; -------------------------
 ;; Initialize app
 
-(def initial-db {:recipes     (-> (c/compound [{:id          :recipe/by-id
-                                                :kfn         :recipe/id
-                                                :on-conflict (fn [a b] (merge a b))}])
-                                  (c/add-items [#:recipe{:id           "1",
-                                                         :name         "Penne alla senese",
-                                                         :description  "Penne com salsicha, nozes e natas",
-                                                         :preparation  "*notas ingredientes*\n\n- *salsichas*: desfeitas sem pele\n- *nozes*: sem casca, picadas finas",
-                                                         :user         "admin",
-                                                         :measurements [#:measure{:id         "1",
-                                                                                  :quantity   20.0,
-                                                                                  :unit       "g",
-                                                                                  :ingredient "manteiga"
-                                                                                  },
-                                                                        #:measure{:id         "2",
-                                                                                  :quantity   1.0,
-                                                                                  :unit       "colheres",
-                                                                                  :ingredient "café"}
-                                                                        #:measure{:id         "3",
-                                                                                  :quantity   1.0,
-                                                                                  :ingredient "marmelo"}
-                                                                        #:measure{:id         "4",
-                                                                                  :ingredient "laranja"}]}
-                                                #:recipe{:id           "2",
-                                                         :name         "Penne alla senese 2",
-                                                         :description  "Penne com salsicha, nozes e natas",
-                                                         :preparation  "*notas ingredientes*\n\n- *salsichas*: desfeitas sem pele\n- *nozes*: sem casca, picadas finas",
-                                                         :user         "admin",
-                                                         :measurements [#:measure{:id         "1",
-                                                                                  :quantity   20.0,
-                                                                                  :unit       "g",
-                                                                                  :ingredient "manteiga"
-                                                                                  },
-                                                                        #:measure{:id         "2",
-                                                                                  :quantity   1.0,
-                                                                                  :unit       "colheres",
-                                                                                  :ingredient "café"}]}
-                                                ]))
-                 :ui/editing? false})
-
 (defn ^:dev/after-load mount-components
   ([] (mount-components true))
   ([debug?]
    (rf/clear-subscription-cache!)
+   (rp/dispatch-sync [::init-db])
    (kf/start! {:debug?         (boolean debug?)
                :routes         routing/routes
                :hash-routing?  true
-               :initial-db     initial-db
+               :initial-db     {:ui/editing? false}
                :root-component [view/root-component]})))
 
 (defn init! [debug?]

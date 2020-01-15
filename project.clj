@@ -55,13 +55,14 @@
                  [kee-frame "0.3.3"]
                  [re-frame "0.10.7"]
                  [day8.re-frame/http-fx "0.1.6"]
-                 [reagent "0.8.1"]
+                 [reagent "0.9.0-rc4"]
                  [cljs-ajax "0.8.0"]
                  [ring-webjars "0.2.0"]
                  [reagent-forms "0.5.40"]
                  [breaking-point "0.1.2"]
                  [fork "1.2.3"]
-                 [riverford/compound "2020.01.09"]
+                 [datascript "0.18.7"]
+                 [re-posh "0.3.1"]
                  ]
 
   :min-lein-version "2.0.0"
