@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <configuration scan="true" scanPeriod="10 seconds">
-    <statusListener class="ch.qos.logback.core.status.NopStatusListener" />
+    <statusListener class="ch.qos.logback.core.status.NopStatusListener"/>
     <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
         <!-- encoders are assigned the type
              ch.qos.logback.classic.encoder.PatternLayoutEncoder by default -->
@@ -24,12 +24,15 @@
             <pattern>%date{ISO8601} [%thread] %-5level %logger{36} - %msg %n</pattern>
         </encoder>
     </appender>
-    <logger name="org.apache.http" level="warn" />
-    <logger name="org.xnio.nio" level="warn" />
-    <logger name="com.zaxxer.hikari" level="warn" />
-    <logger name="org.eclipse.jetty" level="warn" />
+    <logger name="org.apache.http" level="warn"/>
+    <logger name="org.xnio.nio" level="warn"/>
+    <logger name="com.zaxxer.hikari" level="warn"/>
+    <logger name="org.eclipse.jetty" level="warn"/>
+    <logger name="io.undertow.request" level="warn"/>
+    <logger name="io.undertow.websockets.core.request" level="warn"/>
+    <logger name="crux.memory" level="warn"/>
     <root level="DEBUG">
-        <appender-ref ref="STDOUT" />
-        <appender-ref ref="FILE" />
+        <appender-ref ref="STDOUT"/>
+        <appender-ref ref="FILE"/>
     </root>
 </configuration>

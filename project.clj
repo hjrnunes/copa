@@ -17,7 +17,7 @@
                  [org.xerial/sqlite-jdbc "3.25.2"]
                  [conman "0.8.3"]
 
-                 [luminus-jetty "0.1.7"]
+                 [luminus-immutant "0.2.5"]
                  [luminus-migrations "0.6.5"]
                  [luminus-transit "0.1.1"]
                  [luminus/ring-ttl-session "0.3.3"]
@@ -39,13 +39,20 @@
 
                  [org.clojure/clojure "1.10.1"]
                  [org.clojure/clojurescript "1.10.520" :scope "provided"]
-                 [org.clojure/core.async "0.4.500"]
+                 [org.clojure/core.async "0.7.559"]
                  [org.clojure/google-closure-library "0.0-20190213-2033d5d9" :scope "provided"]
                  [org.clojure/tools.cli "0.4.2"]
                  [org.clojure/tools.logging "0.4.1"]
 
                  [com.google.javascript/closure-compiler-unshaded "v20190618" :scope "provided"]
                  [thheller/shadow-cljs "2.8.39" :scope "provided"]
+
+                 [com.taoensso/sente "1.15.0"]
+                 [com.taoensso/timbre "4.10.0"]
+
+                 [juxt/crux-core "20.01-1.6.2-alpha"]
+                 [juxt/crux-lmdb "20.01-1.6.2-alpha"]
+
 
                  ;[org.webjars.npm/bulma "0.7.5"]
                  ;[org.webjars.npm/material-icons "0.3.0"]
@@ -112,7 +119,8 @@
                                               [prone "1.6.4"]
                                               [re-frisk "0.5.4.1"]
                                               [ring/ring-devel "1.7.1"]
-                                              [ring/ring-mock "0.4.0"]]
+                                              [ring/ring-mock "0.4.0"]
+                                              [fsmviz "0.1.3"]]
                              :plugins        [[com.jakemccrary/lein-test-refresh "0.24.1"]]
 
 

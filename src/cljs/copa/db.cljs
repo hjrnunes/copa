@@ -46,4 +46,15 @@
                                                  :db/isComponent true
                                                  :db/cardinality :db.cardinality/many}}))
 
+(defonce tx-log (atom {}))
+
+(ds/listen! conn :history
+            (fn [tx-report]
+              (let [{:keys [db-before db-after tempids]} tx-report]
+                (when (and db-before db-after)
+                  (swap! tx-log (fn [h]
+                                  (assoc h (:current-tx tempids) (select-keys tx-report [:tx-data :db-before]))
+                                  ))))))
+
+
 (rp/connect! conn)

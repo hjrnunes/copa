@@ -7,16 +7,27 @@
     [copa.routing :as routing]
     [copa.view :as view]
     [copa.db :as db]
+    [copa.ws :as ws]
+    [copa.sync :as sync]
     [fork.core :as fork]
     [re-posh.core :as rp]
-    ))
+    )
+  )
 
-(rp/reg-event-ds
-  ::init-db
-  (fn [_ _]
-    db/initial-db))
+(def fsm {:list                {:select-recipe :preparation}
+          :preparation         {:back             :list
+                                :show-ingredients :ingredients
+                                :edit             :editing-preparation}
+          :ingredients         {:back :list
+                                :edit :editing-ingredients
+                                :add  :ingredient-modal}
+          :editing-ingredients {:delete-ingredient :editing-ingredients
+                                :edit-ingredient   :ingredient-modal
+                                :done              :ingredients}
+          ;:ingredient-modal    {}
+          ;:editing-preparation {}
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+          })
 
 ;; Recipe names
 (rp/reg-sub
@@ -205,12 +216,13 @@
   ([] (mount-components true))
   ([debug?]
    (rf/clear-subscription-cache!)
-   (rp/dispatch-sync [::init-db])
    (kf/start! {:debug?         (boolean debug?)
                :routes         routing/routes
                :hash-routing?  true
                :initial-db     {:ui/editing? false}
-               :root-component [view/root-component]})))
+               :root-component [view/root-component]})
+   (ws/start-router!)
+   ))
 
 (defn init! [debug?]
   (ajax/load-interceptors!)
