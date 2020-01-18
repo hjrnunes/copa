@@ -14,20 +14,52 @@
     )
   )
 
-(def fsm {:list                {:select-recipe :preparation}
-          :preparation         {:back             :list
-                                :show-ingredients :ingredients
-                                :edit             :editing-preparation}
-          :ingredients         {:back :list
-                                :edit :editing-ingredients
-                                :add  :ingredient-modal}
-          :editing-ingredients {:delete-ingredient :editing-ingredients
-                                :edit-ingredient   :ingredient-modal
-                                :done              :ingredients}
-          ;:ingredient-modal    {}
-          ;:editing-preparation {}
+(def ui-main-fsm {nil                  {:init          :recipe-list
+                                        :select-recipe :recipe-preparation}
 
-          })
+                  :recipe-list         {:select-recipe :recipe-preparation}
+
+
+                  :recipe-preparation  {:back             :recipe-list
+                                        :show-ingredients :recipe-ingredients
+                                        :edit             :editing-preparation}
+
+                  :recipe-ingredients  {:back :recipe-list
+                                        :edit :editing-ingredients
+                                        :add  :ingredient-modal}
+
+                  :editing-ingredients {:delete-ingredient :editing-ingredients
+                                        :edit-ingredient   :ingredient-modal
+                                        :done              :ingredients}
+                  ;:ingredient-modal    {}
+                  ;:editing-preparation {}
+
+                  })
+
+(rf/reg-sub
+  :state
+  (fn [db _] (get db ::state)))
+
+
+(defn next-state
+  [fsm current-state transition]
+  (get-in fsm [current-state transition]))
+
+(defn update-next-state
+  [db event]
+  (if-let [new-state (next-state ui-main-fsm (::state db) event)]
+    (assoc db ::state new-state)
+    db))
+
+(defn handle-next-state
+  [db [event _]]
+  (update-next-state db event))
+
+
+(rf/reg-event-db :init [] handle-next-state)
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 ;; Recipe names
 (rp/reg-sub
@@ -167,39 +199,18 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(rf/reg-event-fx
-  ::load-about-page
-  (constantly nil))
-
-(kf/reg-controller
-  ::about-controller
-  {:params (constantly true)
-   :start  [::load-about-page]})
-
-(rf/reg-sub
-  :docs
-  (fn [db _]
-    (:docs db)))
-
-(kf/reg-chain
-  ::load-home-page
-  (fn [_ _]
-    {:http-xhrio {:method          :get
-                  :uri             "/docs"
-                  :response-format (http/raw-response-format)
-                  :on-failure      [:common/set-error]}})
-  (fn [{:keys [db]} [_ docs]]
-    {:db (assoc db :docs docs)}))
-
 (kf/reg-controller
   ::home-controller
   {:params (constantly true)
-   :start  [::load-home-page]})
+   :start  [:init]})
 
-(kf/reg-event-db
-  :recipe/select
-  (fn [db [id]]
-    (assoc db :recipe/selected id)))
+(rf/reg-event-fx
+  :select-recipe
+  []
+  (fn [{:keys [db]} [event id]]
+    {:db (-> db
+             (assoc :recipe/selected id)
+             (update-next-state event))}))
 
 (kf/reg-controller
   ::recipe-controller
@@ -207,7 +218,7 @@
              (when (-> data :name (= :route/recipe))
                path-params))
    :start  (fn [_ params]
-             [:recipe/select (:id params)])})
+             [:select-recipe (:id params)])})
 
 ;; -------------------------
 ;; Initialize app
@@ -219,7 +230,8 @@
    (kf/start! {:debug?         (boolean debug?)
                :routes         routing/routes
                :hash-routing?  true
-               :initial-db     {:ui/editing? false}
+               :initial-db     {:state       nil
+                                :ui/editing? false}
                :root-component [view/root-component]})
    (ws/start-router!)
    ))
