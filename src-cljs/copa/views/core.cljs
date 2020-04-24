@@ -46,8 +46,7 @@
         alert (subscribe [:alert])
         lang (subscribe [:lang])]
     (fn []
-      [:div.ui.middle.aligned.center.aligned.grid
-       {:style {:height "100%"}}
+      [:div#login-grid.ui.middle.aligned.center.aligned.grid
        [:div.column
         {:style {:max-width "450px"}}
         [:h2.ui.olive.header
