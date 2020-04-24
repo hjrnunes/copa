@@ -5,4 +5,4 @@ ADD target/copa.jar copa.jar
 
 EXPOSE 3000
 
-CMD ["java", "-jar", "copa.jar"]
+CMD ["java", "-Xmx128m", "-jar", "copa.jar"]
